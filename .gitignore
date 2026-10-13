@@ -1,0 +1,13 @@
+# Build output
+bin/
+obj/
+
+# User-specific files
+.vs/
+*.user
+*.suo
+
+# Local secrets
+.env
+.env.*
+!.env.example

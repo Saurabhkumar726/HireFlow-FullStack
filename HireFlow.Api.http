@@ -1,0 +1,74 @@
+@HireFlow.Api_HostAddress = http://localhost:5116
+
+### Get all jobs
+GET {{HireFlow.Api_HostAddress}}/api/jobs
+Accept: application/json
+
+###
+
+### Create a job
+POST {{HireFlow.Api_HostAddress}}/api/jobs
+Content-Type: application/json
+
+{
+  "title": "Full Stack Developer",
+  "company": "HireFlow Technologies",
+  "location": "Remote",
+  "description": "Build and maintain web applications.",
+  "jobType": "Full-time",
+  "salary": 60000
+}
+
+###
+
+### Get job by ID
+GET {{HireFlow.Api_HostAddress}}/api/jobs/1
+Accept: application/json
+
+###
+
+### Update job
+PUT {{HireFlow.Api_HostAddress}}/api/jobs/1
+Content-Type: application/json
+
+{
+  "title": "Senior Full Stack Developer",
+  "company": "HireFlow Technologies",
+  "location": "Remote",
+  "description": "Develop and maintain scalable web applications.",
+  "jobType": "Full-time",
+  "salary": 80000
+}
+
+###
+
+### Get all applications
+GET {{HireFlow.Api_HostAddress}}/api/JobApplications
+Accept: application/json
+
+###
+
+### Create an application
+POST {{HireFlow.Api_HostAddress}}/api/JobApplications
+Content-Type: application/json
+
+{
+  "jobId": 2,
+  "applicantName": "Rahul Sharma",
+  "applicantEmail": "rahul@example.com",
+  "resumeUrl": "https://example.com/resume.pdf",
+  "coverLetter": "I am interested in this position.",
+  "status": "Pending"
+}
+
+###
+
+### Get applications for a job
+GET {{HireFlow.Api_HostAddress}}/api/JobApplications/job/2
+Accept: application/json
+
+### Update application status
+PUT {{HireFlow.Api_HostAddress}}/api/JobApplications/1/status
+Content-Type: application/json
+
+"Shortlisted"
