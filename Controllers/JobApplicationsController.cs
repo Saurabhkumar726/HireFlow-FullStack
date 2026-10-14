@@ -46,6 +46,7 @@ namespace HireFlow.Api.Controllers
                 }
 
                 return await _context.JobApplications
+                    .Include(a => a.Job)
                     .Where(a => a.Job != null &&
                                 a.Job.CreatedByUserId == userId)
                     .OrderByDescending(a => a.AppliedAt)
@@ -58,6 +59,7 @@ namespace HireFlow.Api.Controllers
             }
 
             return await _context.JobApplications
+                .Include(a => a.Job)
                 .Where(a => a.UserId == userId)
                 .OrderByDescending(a => a.AppliedAt)
                 .ToListAsync();
@@ -176,6 +178,11 @@ namespace HireFlow.Api.Controllers
             _context.JobApplications.Add(application);
             await _context.SaveChangesAsync();
 
+            // Reload the application with its associated job.
+            await _context.Entry(application)
+                .Reference(a => a.Job)
+                .LoadAsync();
+
             return CreatedAtAction(
                 nameof(GetApplication),
                 new { id = application.Id },
@@ -209,6 +216,7 @@ namespace HireFlow.Api.Controllers
             }
 
             return await _context.JobApplications
+                .Include(a => a.Job)
                 .Where(a => a.JobId == jobId)
                 .OrderByDescending(a => a.AppliedAt)
                 .ToListAsync();

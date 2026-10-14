@@ -1,5 +1,5 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using HireFlow.Api.Authentication;
 
 namespace HireFlow.Api.Models
@@ -36,8 +36,12 @@ namespace HireFlow.Api.Models
         // HR user who created this job
         public string? CreatedByUserId { get; set; }
 
+        // Avoid serializing the full HR user object
+        [JsonIgnore]
         public ApplicationUser? CreatedByUser { get; set; }
 
+        // Avoid circular references between Job and JobApplication
+        [JsonIgnore]
         public List<JobApplication> Applications { get; set; } = new();
     }
 }
