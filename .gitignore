@@ -11,3 +11,6 @@ obj/
 .env
 .env.*
 !.env.example
+
+# Uploaded user files — never commit
+Uploads/
