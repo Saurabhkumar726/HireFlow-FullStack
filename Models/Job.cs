@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+using System.ComponentModel.DataAnnotations;
+using HireFlow.Api.Authentication;
 
 namespace HireFlow.Api.Models
 {
@@ -30,6 +32,11 @@ namespace HireFlow.Api.Models
         public decimal Salary { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // HR user who created this job
+        public string? CreatedByUserId { get; set; }
+
+        public ApplicationUser? CreatedByUser { get; set; }
 
         public List<JobApplication> Applications { get; set; } = new();
     }

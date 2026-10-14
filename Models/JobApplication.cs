@@ -6,6 +6,8 @@
 
         public int JobId { get; set; }
 
+        public string? UserId { get; set; }
+
         public string ApplicantName { get; set; } = string.Empty;
 
         public string ApplicantEmail { get; set; } = string.Empty;
@@ -17,5 +19,7 @@
         public string Status { get; set; } = "Pending";
 
         public DateTime AppliedAt { get; set; } = DateTime.UtcNow;
+
+        public Job? Job { get; set; }
     }
 }
