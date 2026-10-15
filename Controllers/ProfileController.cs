@@ -38,8 +38,7 @@ namespace HireFlow.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProfile()
         {
-            var userId = User.FindFirstValue(
-                ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userId))
                 return Unauthorized();
@@ -48,10 +47,7 @@ namespace HireFlow.Api.Controllers
 
             if (user == null)
             {
-                return NotFound(new
-                {
-                    message = "User profile not found."
-                });
+                return NotFound(new { message = "User profile not found." });
             }
 
             return Ok(new
@@ -62,7 +58,9 @@ namespace HireFlow.Api.Controllers
                 user.PhoneNumber,
                 user.ProfilePictureUrl,
                 user.ResumeUrl,
-                user.CreatedAt
+                user.CreatedAt,
+                user.ProfileLastUpdatedAt,
+                user.ResumeLastUpdatedAt
             });
         }
 
@@ -71,8 +69,7 @@ namespace HireFlow.Api.Controllers
         public async Task<IActionResult> UpdateProfile(
             [FromBody] UpdateProfileRequest request)
         {
-            var userId = User.FindFirstValue(
-                ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userId))
                 return Unauthorized();
@@ -81,14 +78,12 @@ namespace HireFlow.Api.Controllers
 
             if (user == null)
             {
-                return NotFound(new
-                {
-                    message = "User profile not found."
-                });
+                return NotFound(new { message = "User profile not found." });
             }
 
             user.FullName = request.FullName.Trim();
             user.PhoneNumber = request.PhoneNumber?.Trim();
+            user.ProfileLastUpdatedAt = DateTime.UtcNow;
 
             var result = await _userManager.UpdateAsync(user);
 
@@ -97,8 +92,7 @@ namespace HireFlow.Api.Controllers
                 return BadRequest(new
                 {
                     message = "Unable to update profile.",
-                    errors = result.Errors.Select(
-                        error => error.Description)
+                    errors = result.Errors.Select(error => error.Description)
                 });
             }
 
@@ -109,7 +103,9 @@ namespace HireFlow.Api.Controllers
                 user.Email,
                 user.PhoneNumber,
                 user.ProfilePictureUrl,
-                user.ResumeUrl
+                user.ResumeUrl,
+                user.ProfileLastUpdatedAt,
+                user.ResumeLastUpdatedAt
             });
         }
 
@@ -122,18 +118,12 @@ namespace HireFlow.Api.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest(new
-                {
-                    message = "Please select a profile picture."
-                });
+                return BadRequest(new { message = "Please select a profile picture." });
             }
 
             if (file.Length > MaxPictureSize)
             {
-                return BadRequest(new
-                {
-                    message = "Profile picture cannot exceed 2 MB."
-                });
+                return BadRequest(new { message = "Profile picture cannot exceed 2 MB." });
             }
 
             var extension = Path.GetExtension(file.FileName);
@@ -147,8 +137,7 @@ namespace HireFlow.Api.Controllers
                 });
             }
 
-            var userId = User.FindFirstValue(
-                ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userId))
                 return Unauthorized();
@@ -157,10 +146,7 @@ namespace HireFlow.Api.Controllers
 
             if (user == null)
             {
-                return NotFound(new
-                {
-                    message = "Student account not found."
-                });
+                return NotFound(new { message = "Student account not found." });
             }
 
             var uploadDirectory = Path.Combine(
@@ -170,12 +156,8 @@ namespace HireFlow.Api.Controllers
 
             Directory.CreateDirectory(uploadDirectory);
 
-            var storedFileName =
-                $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-
-            var filePath = Path.Combine(
-                uploadDirectory,
-                storedFileName);
+            var storedFileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
+            var filePath = Path.Combine(uploadDirectory, storedFileName);
 
             await using (var stream = new FileStream(
                 filePath,
@@ -196,6 +178,7 @@ namespace HireFlow.Api.Controllers
 
             var previousPictureUrl = user.ProfilePictureUrl;
             user.ProfilePictureUrl = relativePath;
+            user.ProfileLastUpdatedAt = DateTime.UtcNow;
 
             var updateResult = await _userManager.UpdateAsync(user);
 
@@ -206,46 +189,111 @@ namespace HireFlow.Api.Controllers
                 return BadRequest(new
                 {
                     message = "Picture was uploaded, but the profile could not be updated.",
-                    errors = updateResult.Errors.Select(
-                        error => error.Description)
+                    errors = updateResult.Errors.Select(error => error.Description)
                 });
             }
 
-            // Delete the previous picture only from our own upload folder.
-            if (!string.IsNullOrWhiteSpace(previousPictureUrl))
-            {
-                var normalizedPreviousPath =
-                    previousPictureUrl.Replace('\\', '/');
-
-                var expectedPrefix = "Uploads/ProfilePictures/";
-
-                if (normalizedPreviousPath.StartsWith(
-                        expectedPrefix,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    var previousFileName =
-                        Path.GetFileName(normalizedPreviousPath);
-
-                    var previousPath = Path.Combine(
-                        uploadDirectory,
-                        previousFileName);
-
-                    if (!string.Equals(
-                            filePath,
-                            previousPath,
-                            StringComparison.OrdinalIgnoreCase) &&
-                        System.IO.File.Exists(previousPath))
-                    {
-                        System.IO.File.Delete(previousPath);
-                    }
-                }
-            }
+            DeleteOwnedUpload(previousPictureUrl, uploadDirectory, "Uploads/ProfilePictures/");
 
             return Ok(new
             {
                 message = "Profile picture uploaded successfully.",
-                profilePictureUrl = user.ProfilePictureUrl
+                profilePictureUrl = user.ProfilePictureUrl,
+                user.ProfileLastUpdatedAt,
+                user.ResumeLastUpdatedAt
             });
+        }
+
+        // DELETE: api/Profile/picture
+        [HttpDelete("picture")]
+        public async Task<IActionResult> DeletePicture()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return NotFound(new { message = "Student account not found." });
+
+            var previousPictureUrl = user.ProfilePictureUrl;
+
+            if (string.IsNullOrWhiteSpace(previousPictureUrl))
+            {
+                return Ok(new
+                {
+                    message = "No profile picture is currently saved.",
+                    profilePictureUrl = (string?)null
+                });
+            }
+
+            // Clear the database first so the UI and profile record remain consistent.
+            user.ProfilePictureUrl = null;
+            user.ProfileLastUpdatedAt = DateTime.UtcNow;
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                return BadRequest(new
+                {
+                    message = "Unable to remove the profile picture from your profile.",
+                    errors = updateResult.Errors.Select(error => error.Description)
+                });
+            }
+
+            var uploadDirectory = Path.Combine(
+                _environment.ContentRootPath,
+                "Uploads",
+                "ProfilePictures");
+
+            DeleteOwnedUpload(previousPictureUrl, uploadDirectory, "Uploads/ProfilePictures/");
+
+            return Ok(new
+            {
+                message = "Profile picture deleted successfully.",
+                profilePictureUrl = (string?)null,
+                user.ProfileLastUpdatedAt,
+                user.ResumeLastUpdatedAt
+            });
+        }
+
+        private static void DeleteOwnedUpload(
+            string? storedUrl,
+            string uploadDirectory,
+            string expectedRelativePrefix)
+        {
+            if (string.IsNullOrWhiteSpace(storedUrl))
+                return;
+
+            // Only delete files whose stored relative URL belongs to this upload folder.
+            var normalized = storedUrl.Replace('\\', '/');
+            var markerIndex = normalized.IndexOf(
+                expectedRelativePrefix,
+                StringComparison.OrdinalIgnoreCase);
+
+            if (markerIndex < 0)
+                return;
+
+            var remainder = normalized[(markerIndex + expectedRelativePrefix.Length)..];
+            var fileName = Path.GetFileName(remainder);
+
+            if (string.IsNullOrWhiteSpace(fileName) ||
+                fileName != remainder ||
+                fileName is "." or "..")
+                return;
+
+            var root = Path.GetFullPath(uploadDirectory);
+            var fullPath = Path.GetFullPath(Path.Combine(root, fileName));
+
+            if (!fullPath.StartsWith(
+                    root + Path.DirectorySeparatorChar,
+                    StringComparison.OrdinalIgnoreCase))
+                return;
+
+            if (System.IO.File.Exists(fullPath))
+                System.IO.File.Delete(fullPath);
         }
     }
 }

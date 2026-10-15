@@ -5,6 +5,7 @@ using HireFlow.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
@@ -115,6 +116,8 @@ builder.Services
     });
 
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -190,6 +193,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowHireFlowFrontend");
+
+// Serve profile photos saved under the project's Uploads folder.
+// The folder path must match the relative paths returned by ProfileController.
+var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "Uploads");
+Directory.CreateDirectory(uploadsPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/Uploads"
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

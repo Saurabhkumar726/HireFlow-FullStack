@@ -1,25 +1,25 @@
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 
-namespace HireFlow.Api.Authentication
+namespace HireFlow.Api.Authentication;
+
+public class ApplicationUser : IdentityUser
 {
-    public class ApplicationUser : IdentityUser
-    {
-        [StringLength(100)]
-        public string? FullName { get; set; }
+    public string FullName { get; set; } = string.Empty;
 
-        public string AccountRole { get; set; } = "Student";
+    public string AccountRole { get; set; } = "Student";
 
-        public bool IsActive { get; set; } = true;
+    public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Student profile picture path or URL
-        [StringLength(500)]
-        public string? ProfilePictureUrl { get; set; }
+    public string? ProfilePictureUrl { get; set; }
 
-        // Student resume path or URL
-        [StringLength(500)]
-        public string? ResumeUrl { get; set; }
-    }
+    public string? ResumeUrl { get; set; }
+
+    public string? GoogleSubject { get; set; }
+
+    // UTC timestamps tracked independently for profile and resume changes.
+    public DateTime? ProfileLastUpdatedAt { get; set; } = DateTime.UtcNow;
+
+    public DateTime? ResumeLastUpdatedAt { get; set; }
 }

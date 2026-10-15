@@ -1,8 +1,10 @@
-
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import Footer from './components/Footer'
 import JobDetails from './components/JobDetails'
+import Login from './components/Login'
+import StudentDashboard from './components/StudentDashboard'
+import { useAuth } from './context/useAuth'
 
 const API_URL = 'http://localhost:5116/api'
 
@@ -40,6 +42,10 @@ function App() {
         resumeUrl: '',
         coverLetter: '',
     })
+
+    const [showLogin, setShowLogin] = useState(false)
+    const [pendingJob, setPendingJob] = useState(null)
+    const { user, token, isAuthenticated, logout } = useAuth()
 
     async function loadJobs() {
         setLoading(true)
@@ -139,15 +145,53 @@ function App() {
     }
 
     function openApplication(job) {
+        // Applying is available only to signed-in Student accounts.
+        if (!isAuthenticated || user?.role !== 'Student') {
+            if (isAuthenticated && user?.role !== 'Student') {
+                setApplicationMessage('Only Student accounts can apply for jobs.')
+                return
+            }
+
+            setPendingJob(job)
+            setShowLogin(true)
+            return
+        }
+
+        setPendingJob(null)
         setSelectedJob(job)
         setApplicationMessage('')
         setForm({
-            applicantName: '',
-            applicantEmail: '',
-            resumeUrl: '',
+            applicantName: user?.fullName || '',
+            applicantEmail: user?.email || '',
+            resumeUrl: user?.resumeUrl || '',
             coverLetter: '',
         })
     }
+
+    useEffect(() => {
+        if (!isAuthenticated || user?.role !== 'Student' || !pendingJob) return
+
+        let cancelled = false
+        const scheduleId = window.setTimeout(() => {
+            if (cancelled) return
+
+            setSelectedJob(pendingJob)
+            setApplicationMessage('')
+            setForm({
+                applicantName: user?.fullName || '',
+                applicantEmail: user?.email || '',
+                resumeUrl: user?.resumeUrl || '',
+                coverLetter: '',
+            })
+            setPendingJob(null)
+            setShowLogin(false)
+        }, 0)
+
+        return () => {
+            cancelled = true
+            window.clearTimeout(scheduleId)
+        }
+    }, [isAuthenticated, user, pendingJob])
 
     async function submitApplication(event) {
         event.preventDefault()
@@ -157,9 +201,16 @@ function App() {
         setApplicationMessage('')
 
         try {
+            if (!token || user?.role !== 'Student') {
+                throw new Error('Please sign in with a Student account before applying.')
+            }
+
             const response = await fetch(`${API_URL}/JobApplications`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify({
                     jobId: selectedJob.id,
                     applicantName: form.applicantName.trim(),
@@ -225,10 +276,60 @@ function App() {
                     <a href="#jobs" onClick={() => setMobileMenu(false)}>Find jobs</a>
                     <a href="#categories" onClick={() => setMobileMenu(false)}>Categories</a>
                     <a href="#about" onClick={() => setMobileMenu(false)}>About</a>
-                    <a className="nav-signin" href="#jobs" onClick={() => setMobileMenu(false)}>Explore jobs</a>
+                    {isAuthenticated ? (
+                        <>
+                            <button
+                                type="button"
+                                className="nav-signin"
+                                onClick={() => {
+                                    setMobileMenu(false)
+                                    if (user?.role === 'Student') {
+                                        document.getElementById('student-dashboard')
+                                            ?.scrollIntoView({ behavior: 'smooth' })
+                                    } else {
+                                        document.getElementById('jobs')
+                                            ?.scrollIntoView({ behavior: 'smooth' })
+                                    }
+                                }}
+                            >
+                                {user?.fullName || 'Dashboard'}
+                            </button>
+
+                            <button
+                                type="button"
+                                className="nav-cta"
+                                onClick={() => {
+                                    logout()
+                                    setMobileMenu(false)
+                                }}
+                            >
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            type="button"
+                            className="nav-signin"
+                            onClick={() => {
+                                setShowLogin(true)
+                                setMobileMenu(false)
+                            }}
+                        >
+                            Sign in
+                        </button>
+                    )}
                     <a className="nav-cta" href="#jobs" onClick={() => setMobileMenu(false)}>Get started <span>↗</span></a>
                 </nav>
             </header>
+
+            {isAuthenticated && user?.role === 'Student' ? (
+                <StudentDashboard />
+            ) : (
+                <>
+                    {/* Keep your existing homepage and job details here */}
+                </>
+            )}
+
 
             {detailJob ? (
                 <JobDetails
@@ -587,8 +688,8 @@ function App() {
                                     </label>
                                     <label>
                                         Resume URL
-                                        <input type="url" required maxLength={2048} value={form.resumeUrl} onChange={(event) => setForm({ ...form, resumeUrl: event.target.value })} placeholder="https://your-resume-link.com" />
-                                        <small>Paste a shareable link to your resume.</small>
+                                        <input type="text" required maxLength={2048} value={form.resumeUrl} onChange={(event) => setForm({ ...form, resumeUrl: event.target.value })} placeholder="/Uploads/resumes/your-resume.pdf or a shareable URL" />
+                                        <small>Upload your resume in My Resume first, or paste a shareable resume link.</small>
                                     </label>
                                     <label>
                                         Cover letter <span className="optional-label">Optional</span>
@@ -606,6 +707,13 @@ function App() {
                         )}
                     </div>
                 </div>
+            )}
+
+            {showLogin && (
+                <Login
+                    onClose={() => setShowLogin(false)}
+                    onSuccess={() => setShowLogin(false)}
+                />
             )}
         </div>
     )

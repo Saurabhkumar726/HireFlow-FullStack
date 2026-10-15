@@ -18,9 +18,18 @@ namespace HireFlow.Api.Data
 
         public DbSet<JobApplication> JobApplications { get; set; }
 
+        public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Google account identifier: unique when present.
+            // Multiple users can have a NULL GoogleSubject.
+            modelBuilder.Entity<ApplicationUser>()
+                .HasIndex(user => user.GoogleSubject)
+                .IsUnique()
+                .HasFilter("[GoogleSubject] IS NOT NULL");
 
             // Configure job salary precision
             modelBuilder.Entity<Job>()
@@ -47,6 +56,10 @@ namespace HireFlow.Api.Data
                 .WithMany()
                 .HasForeignKey(job => job.CreatedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Password reset OTP index
+            modelBuilder.Entity<PasswordResetOtp>()
+                .HasIndex(otp => new { otp.UserId, otp.CreatedAt });
         }
     }
 }
