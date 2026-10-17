@@ -1,10 +1,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import './StudentDashboard.css'
+import CandidateProfileSections from './CandidateProfileSections'
 import { useAuth } from '../context/useAuth'
+import ConfirmDialog from './ConfirmDialog'
 
 const API_URL = 'http://localhost:5116/api'
 const API_ORIGIN = 'http://localhost:5116'
+
 
 function apiImageUrl(value) {
     if (!value || typeof value !== 'string') return ''
@@ -17,6 +20,18 @@ const tabs = [
     { id: 'profile', label: 'My Profile', icon: '♙' },
     { id: 'resume', label: 'My Resume', icon: '▤' },
     { id: 'applications', label: 'My Applications', icon: '▣' },
+]
+
+const profileSectionLinks = [
+    { id: 'candidate-resume-headline', label: 'Resume headline', icon: '↗' },
+    { id: 'candidate-profile-summary', label: 'Profile summary', icon: '☷' },
+    { id: 'candidate-career-profile', label: 'Career profile', icon: '◎' },
+    { id: 'candidate-employments', label: 'Employment', icon: '▣' },
+    { id: 'candidate-education', label: 'Education', icon: '▤' },
+    { id: 'candidate-projects', label: 'Projects', icon: '⌘' },
+    { id: 'candidate-key-skills', label: 'Key skills', icon: '✦' },
+    { id: 'candidate-it-skills', label: 'IT skills', icon: '⌘' },
+    { id: 'candidate-accomplishments', label: 'Accomplishments', icon: '★' },
 ]
 
 function getErrorMessage(data, fallback) {
@@ -327,6 +342,8 @@ export default function StudentDashboard() {
     const [uploadingPicture, setUploadingPicture] = useState(false)
     const [deletingPicture, setDeletingPicture] = useState(false)
     const [deletingResume, setDeletingResume] = useState(false)
+    const [confirmDeleteType, setConfirmDeleteType] = useState(null)
+    const [confirmDeleteLoading, setConfirmDeleteLoading] = useState(false)
     const [cropFile, setCropFile] = useState(null)
     const [cropSource, setCropSource] = useState('')
     const [pageError, setPageError] = useState('')
@@ -500,7 +517,7 @@ export default function StudentDashboard() {
             setProfile((current) => ({
                 ...current,
                 profilePictureUrl: pictureUrl,
-                resumeLastUpdatedAt: data.resumeLastUpdatedAt ?? new Date().toISOString(),
+                profileLastUpdatedAt: data.profileLastUpdatedAt ?? new Date().toISOString(),
             }))
             updateUser({ profilePictureUrl: pictureUrl })
             setCropFile(null)
@@ -513,29 +530,69 @@ export default function StudentDashboard() {
         }
     }
 
-    async function deleteProfilePicture() {
+    function deleteProfilePicture() {
         if (!profile.profilePictureUrl || deletingPicture || uploadingPicture) return
-        if (!window.confirm('Delete your profile picture? This cannot be undone.')) return
+        setConfirmDeleteType('picture')
+    }
 
-        setDeletingPicture(true)
-        setPictureMessage('')
+    async function confirmDashboardDelete() {
+        if (!confirmDeleteType || confirmDeleteLoading) return
 
-        try {
-            const data = await apiRequest('/Profile/picture', token, {
-                method: 'DELETE',
-            })
+        const type = confirmDeleteType
+        setConfirmDeleteLoading(true)
 
-            setProfile((current) => ({
-                ...current,
-                profilePictureUrl: data.profilePictureUrl ?? null,
-                resumeLastUpdatedAt: data.resumeLastUpdatedAt ?? new Date().toISOString(),
-            }))
-            updateUser({ profilePictureUrl: data.profilePictureUrl ?? null })
-            setPictureMessage('Profile picture deleted.')
-        } catch (error) {
-            setPictureMessage(error.message || 'Profile picture could not be deleted.')
-        } finally {
-            setDeletingPicture(false)
+        if (type === 'picture') {
+            setDeletingPicture(true)
+            setPictureMessage('')
+
+            try {
+                const data = await apiRequest('/Profile/picture', token, {
+                    method: 'DELETE',
+                })
+
+                setProfile((current) => ({
+                    ...current,
+                    profilePictureUrl: data.profilePictureUrl ?? null,
+                    profileLastUpdatedAt: data.profileLastUpdatedAt ?? new Date().toISOString(),
+                }))
+                updateUser({ profilePictureUrl: data.profilePictureUrl ?? null })
+                setPictureMessage('Profile picture deleted.')
+                setConfirmDeleteType(null)
+            } catch (error) {
+                setPictureMessage(error.message || 'Profile picture could not be deleted.')
+                setConfirmDeleteType(null)
+            } finally {
+                setDeletingPicture(false)
+                setConfirmDeleteLoading(false)
+            }
+
+            return
+        }
+
+        if (type === 'resume') {
+            setDeletingResume(true)
+            setResumeMessage('')
+
+            try {
+                const data = await apiRequest('/Resume', token, {
+                    method: 'DELETE',
+                })
+
+                setProfile((current) => ({
+                    ...current,
+                    resumeUrl: data.resumeUrl ?? null,
+                    resumeLastUpdatedAt: data.resumeLastUpdatedAt ?? new Date().toISOString(),
+                }))
+                updateUser({ resumeUrl: data.resumeUrl ?? null })
+                setResumeMessage('Resume deleted successfully.')
+                setConfirmDeleteType(null)
+            } catch (error) {
+                setResumeMessage(error.message || 'Resume could not be deleted.')
+                setConfirmDeleteType(null)
+            } finally {
+                setDeletingResume(false)
+                setConfirmDeleteLoading(false)
+            }
         }
     }
 
@@ -595,30 +652,9 @@ export default function StudentDashboard() {
         }
     }
 
-    async function deleteResume() {
+    function deleteResume() {
         if (!profile.resumeUrl || deletingResume || uploadingResume) return
-        if (!window.confirm('Delete your uploaded resume? This cannot be undone.')) return
-
-        setDeletingResume(true)
-        setResumeMessage('')
-
-        try {
-            const data = await apiRequest('/Resume', token, {
-                method: 'DELETE',
-            })
-
-            setProfile((current) => ({
-                ...current,
-                resumeUrl: data.resumeUrl ?? null,
-                resumeLastUpdatedAt: data.resumeLastUpdatedAt ?? new Date().toISOString(),
-            }))
-            updateUser({ resumeUrl: data.resumeUrl ?? null })
-            setResumeMessage('Resume deleted successfully.')
-        } catch (error) {
-            setResumeMessage(error.message || 'Resume could not be deleted.')
-        } finally {
-            setDeletingResume(false)
-        }
+        setConfirmDeleteType('resume')
     }
 
     const totalApplications = applications.length
@@ -693,6 +729,30 @@ export default function StudentDashboard() {
                             </button>
                         ))}
                     </nav>
+
+                    {activeTab === 'profile' && (
+                        <div className="student-profile-section-nav">
+                            <p>PROFILE SECTIONS</p>
+                            <nav aria-label="Candidate profile sections">
+                                {profileSectionLinks.map((section) => (
+                                    <button
+                                        type="button"
+                                        key={section.id}
+                                        onClick={() => {
+                                            setActiveTab('profile')
+                                            document.getElementById(section.id)?.scrollIntoView({
+                                                behavior: 'smooth',
+                                                block: 'start',
+                                            })
+                                        }}
+                                    >
+                                        <span aria-hidden="true">{section.icon}</span>
+                                        {section.label}
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+                    )}
                 </aside>
 
                 <div className="student-dashboard-content">
@@ -929,6 +989,8 @@ export default function StudentDashboard() {
                                     {savingProfile ? 'Saving…' : 'Save changes →'}
                                 </button>
                             </form>
+
+                            <CandidateProfileSections token={token} onProfileUpdated={loadDashboard} />
                         </div>
                     )}
 
@@ -1080,6 +1142,22 @@ export default function StudentDashboard() {
                     saving={uploadingPicture}
                 />
             )}
+
+            <ConfirmDialog
+                open={confirmDeleteType !== null}
+                title={confirmDeleteType === 'picture' ? 'Delete profile picture?' : 'Delete uploaded resume?'}
+                message={confirmDeleteType === 'picture'
+                    ? 'Your profile picture will be removed. This action cannot be undone.'
+                    : 'Your uploaded resume will be removed. This action cannot be undone.'}
+                confirmText="Delete"
+                cancelText="Cancel"
+                danger
+                loading={confirmDeleteLoading}
+                onConfirm={confirmDashboardDelete}
+                onCancel={() => {
+                    if (!confirmDeleteLoading) setConfirmDeleteType(null)
+                }}
+            />
         </section>
     )
 }

@@ -4671,23 +4671,33 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 11px;
     width: 100%;
-    min-height: 50px;
-    padding: 12px 16px;
-    border: 1px solid #302e45;
-    border-radius: 13px;
-    background: #151522;
-    color: #f4f3ff;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
     font: inherit;
-    font-size: 14px;
-    font-weight: 700;
     cursor: pointer;
-    transition: border-color .2s, background-color .2s;
+    box-shadow: none;
+    transition: none;
 }
 
+    /* Keep Google's rendered sign-in button within the auth card without
+   adding a second, dark wrapper around Google's own outlined button. */
+    .auth-google > div {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .auth-google iframe {
+        max-width: 100%;
+    }
+
     .auth-google:hover {
-        border-color: #7668ff;
+        border-color: transparent;
+        background: transparent;
     }
 
 .auth-divider {
@@ -5131,3 +5141,497 @@ body {
         border-color: #6252a0;
         box-shadow: 0 12px 28px rgb(0 0 0 / 18%);
     }
+
+
+/* ===== Final responsive fixes: navigation, page width and mobile overlays ===== */
+html,
+body,
+#root,
+.site-shell {
+    width: 100%;
+    max-width: 100%;
+    min-width: 320px;
+}
+
+#root {
+    margin: 0;
+    border: 0;
+    text-align: left;
+}
+
+.site-shell {
+    overflow-x: clip;
+}
+
+.navbar {
+    min-width: 0;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.mobile-toggle {
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 11px;
+    font-size: 20px;
+    line-height: 1;
+    position: relative;
+    z-index: 62;
+}
+
+.nav-links {
+    min-width: 0;
+}
+
+@media (max-width: 760px) {
+    .navbar {
+        position: relative;
+        z-index: 60;
+        height: auto;
+        min-height: 70px;
+        padding: 12px 16px;
+        gap: 12px;
+    }
+
+    .brand {
+        min-width: 0;
+        gap: 8px;
+        font-size: clamp(20px, 5.6vw, 25px);
+        letter-spacing: -0.9px;
+    }
+
+    .brand-mark {
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+    }
+
+    .nav-actions {
+        gap: 8px;
+    }
+
+    .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px;
+        flex-shrink: 0;
+    }
+
+    .theme-toggle-label {
+        display: none !important;
+    }
+
+    .mobile-toggle {
+        display: inline-flex !important;
+        flex: 0 0 44px;
+    }
+
+    .nav-links,
+    .nav-links:not(.nav-open) {
+        display: none !important;
+    }
+
+        .nav-links.nav-open {
+            position: absolute;
+            display: flex !important;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
+            top: calc(100% - 1px);
+            left: 8px;
+            right: 8px;
+            z-index: 61;
+            width: auto;
+            max-height: calc(100dvh - 90px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 14px;
+            border: 1px solid var(--border, #302e45);
+            border-radius: 18px;
+            background: var(--surface, #191927);
+            color: var(--text, #f4f3ff);
+            box-shadow: 0 18px 48px rgb(0 0 0 / 24%);
+        }
+
+        .nav-links > a,
+        .nav-links > button {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            min-width: 0;
+            min-height: 48px;
+            margin: 0;
+            padding: 12px 14px;
+            border-radius: 10px;
+            text-align: left;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .nav-links > .nav-signin {
+            border: 1px solid var(--line, #302e45);
+            background: transparent;
+            color: inherit;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .nav-links > .nav-cta {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+            min-height: 48px;
+            text-align: center;
+        }
+
+        .nav-links > a:not(.nav-cta):hover {
+            background: var(--surface-soft, rgb(127 127 127 / 8%));
+        }
+
+    .auth-overlay {
+        align-items: flex-start;
+        padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 560px;
+        max-height: none;
+        margin: 0 auto;
+        padding: 26px 20px;
+        border-radius: 24px;
+        overflow: visible;
+    }
+
+    .auth-brand {
+        padding-right: 34px;
+        overflow-wrap: anywhere;
+    }
+
+    .auth-card h2 {
+        overflow-wrap: anywhere;
+    }
+
+    .auth-role-switch {
+        min-width: 0;
+    }
+
+        .auth-role-switch button {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+    .application-overlay,
+    .application-modal-overlay {
+        align-items: flex-start;
+        padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .application-modal {
+        width: 100%;
+        max-width: 510px;
+        max-height: none;
+        margin: auto;
+        padding: 26px 20px;
+        overflow: visible;
+        border-radius: 22px;
+    }
+
+        .application-modal h2 {
+            padding-right: 28px;
+            font-size: clamp(24px, 6vw, 29px);
+            overflow-wrap: anywhere;
+        }
+
+    .modal-close {
+        z-index: 2;
+    }
+}
+
+@media (max-width: 380px) {
+    .navbar {
+        padding-inline: 12px;
+    }
+
+    .brand {
+        gap: 7px;
+        font-size: 20px;
+    }
+
+    .brand-mark {
+        flex-basis: 35px;
+        width: 35px;
+        height: 35px;
+    }
+
+    .nav-actions {
+        gap: 6px;
+    }
+
+    .theme-toggle,
+    .mobile-toggle {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .mobile-toggle {
+        flex-basis: 40px;
+    }
+
+    .auth-card,
+    .application-modal {
+        padding: 22px 16px;
+    }
+}
+
+
+/* Fix: show every navigation item in the mobile menu */
+@media (max-width: 760px) {
+    .navbar #primary-navigation.nav-links.nav-open {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 4px !important;
+        max-height: calc(100dvh - 90px);
+        overflow-y: auto !important;
+        padding: 14px !important;
+    }
+
+        .navbar #primary-navigation.nav-links.nav-open > a,
+        .navbar #primary-navigation.nav-links.nav-open > button {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            flex: 0 0 auto !important;
+            width: 100% !important;
+            min-height: 44px !important;
+            margin: 0 !important;
+            padding: 12px 14px !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            white-space: normal !important;
+        }
+
+        .navbar #primary-navigation.nav-links.nav-open > .nav-signin,
+        .navbar #primary-navigation.nav-links.nav-open > .nav-cta {
+            justify-content: center !important;
+            margin-top: 6px !important;
+        }
+}
+
+/* =========================================================
+   FIX: IN-FLOW MOBILE MENU (CENTERED CONTENT)
+   ========================================================= */
+@media (max-width: 760px) {
+    .navbar {
+        position: relative !important;
+        overflow: visible !important;
+        flex-wrap: wrap !important;
+        height: auto !important;
+        min-height: 70px !important;
+        padding-bottom: 12px !important;
+    }
+
+        .navbar #primary-navigation.nav-links {
+            display: none !important;
+        }
+
+            .navbar #primary-navigation.nav-links.nav-open {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                width: 100% !important;
+                flex: 1 0 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
+                display: flex !important;
+                flex-direction: column !important;
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                gap: 6px !important;
+                margin-top: 12px !important;
+                padding: 16px 14px !important;
+                background: #ffffff !important;
+                border: 1px solid var(--border, #ececf4) !important;
+                border-radius: 16px !important;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+                z-index: 10 !important;
+                text-align: center !important;
+            }
+
+    :root[data-theme="dark"] .navbar #primary-navigation.nav-links.nav-open {
+        background: #191927 !important;
+        border-color: #302e45 !important;
+    }
+
+    .navbar #primary-navigation.nav-links.nav-open > a,
+    .navbar #primary-navigation.nav-links.nav-open > button {
+        display: flex !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 38px !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 8px 12px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        font-size: 14px !important;
+        line-height: 1.3 !important;
+        white-space: normal !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        color: var(--text, #20213a) !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 8px !important;
+    }
+
+    :root[data-theme="dark"] .navbar #primary-navigation.nav-links.nav-open > a,
+    :root[data-theme="dark"] .navbar #primary-navigation.nav-links.nav-open > button {
+        color: #f4f3ff !important;
+    }
+
+    .navbar #primary-navigation.nav-links.nav-open > .nav-signin {
+        border: 1px solid var(--line, #ececf4) !important;
+        justify-content: center !important;
+        margin-top: 6px !important;
+        min-height: 42px !important;
+    }
+
+    :root[data-theme="dark"] .navbar #primary-navigation.nav-links.nav-open > .nav-signin {
+        border-color: #302e45 !important;
+    }
+
+    .navbar #primary-navigation.nav-links.nav-open > .nav-cta {
+        background: var(--purple, #6558e8) !important;
+        color: #ffffff !important;
+        justify-content: center !important;
+        margin-top: 4px !important;
+        min-height: 42px !important;
+        font-weight: 700 !important;
+    }
+}
+
+
+/* Make the Google Identity Services button fill the same width as the auth fields. */
+.auth-google,
+.auth-google > .S9gUrf-YoZ4jf {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+    .auth-google .S9gUrf-YoZ4jf > div,
+    .auth-google .S9gUrf-YoZ4jf > div > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .auth-google iframe {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+
+/* Custom visual for the Google button; the official GIS iframe stays clickable above it. */
+.auth-google-shell {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 0 0 20px;
+}
+
+.auth-google-visual {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    height: 50px;
+    padding: 0 16px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    background: #fff;
+    color: #3c4043;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.auth-google-logo {
+    display: block;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.auth-google {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 50px;
+    min-width: 0;
+    opacity: 0;
+}
+
+    .auth-google > div,
+    .auth-google iframe {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 50px !important;
+    }
+
+
+/* Make Saved Jobs look like the other navbar links */
+.saved-jobs-nav {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: none !important;
+    border-radius: 0;
+    background: transparent !important;
+    color: inherit;
+    font: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+    .saved-jobs-nav:hover {
+        border: none !important;
+        background: transparent !important;
+        color: #6957ed;
+    }
+
+html[data-theme="dark"] .saved-jobs-nav,
+html[data-theme="dark"] .saved-jobs-nav:hover {
+    border: none !important;
+    background: transparent !important;
+    color: inherit;
+}

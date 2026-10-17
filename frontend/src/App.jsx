@@ -4,7 +4,10 @@ import Footer from './components/Footer'
 import JobDetails from './components/JobDetails'
 import Login from './components/Login'
 import StudentDashboard from './components/StudentDashboard'
+import SavedJobs from './components/SavedJobs'
+import ShareJob from './components/ShareJob'
 import { useAuth } from './context/useAuth'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 const API_URL = 'http://localhost:5116/api'
 
@@ -16,6 +19,14 @@ const formatSalary = (salary) => {
 }
 
 function App() {
+    const locationPath = useLocation()
+    const navigate = useNavigate()
+    const isCandidateRoute = locationPath.pathname.startsWith('/candidate')
+    const isSavedJobsRoute = locationPath.pathname === '/saved-jobs'
+    const isJobDetailsRoute = /^\/jobs\/[^/]+\/?$/.test(locationPath.pathname)
+    const sharedJobId = isJobDetailsRoute
+        ? decodeURIComponent(locationPath.pathname.split('/')[2])
+        : null
     const [jobs, setJobs] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -23,7 +34,16 @@ function App() {
     const [location, setLocation] = useState('')
     const [jobType, setJobType] = useState('All')
     const [sortBy, setSortBy] = useState('newest')
-    const [savedJobs, setSavedJobs] = useState([])
+    const [savedJobs, setSavedJobs] = useState(() => {
+        try {
+            const saved = JSON.parse(
+                localStorage.getItem('hireflow-saved-jobs') || '[]'
+            )
+            return Array.isArray(saved) ? saved : []
+        } catch {
+            return []
+        }
+    })
     const [selectedJob, setSelectedJob] = useState(null)
     const [detailJob, setDetailJob] = useState(null)
     const [submitting, setSubmitting] = useState(false)
@@ -101,6 +121,38 @@ function App() {
         return () => controller.abort()
     }, [])
 
+    const routedJob = sharedJobId
+        ? jobs.find((job) => String(job.id) === sharedJobId) || null
+        : null
+
+    useEffect(() => {
+        if (!mobileMenu) return
+
+        function handleMenuKeyDown(event) {
+            if (event.key === 'Escape') setMobileMenu(false)
+        }
+
+        function handleViewportResize() {
+            if (window.innerWidth > 760) setMobileMenu(false)
+        }
+
+        document.addEventListener('keydown', handleMenuKeyDown)
+        window.addEventListener('resize', handleViewportResize)
+
+        return () => {
+            document.removeEventListener('keydown', handleMenuKeyDown)
+            window.removeEventListener('resize', handleViewportResize)
+        }
+    }, [mobileMenu])
+
+    useEffect(() => {
+        try {
+            localStorage.setItem('hireflow-saved-jobs', JSON.stringify(savedJobs))
+        } catch {
+            console.warn('Could not persist saved jobs in this browser.')
+        }
+    }, [savedJobs])
+
     useEffect(() => {
         document.documentElement.dataset.theme = theme
         try {
@@ -145,7 +197,6 @@ function App() {
     }
 
     function openApplication(job) {
-        // Applying is available only to signed-in Student accounts.
         if (!isAuthenticated || user?.role !== 'Student') {
             if (isAuthenticated && user?.role !== 'Student') {
                 setApplicationMessage('Only Student accounts can apply for jobs.')
@@ -246,7 +297,7 @@ function App() {
             </div>
 
             <header className="navbar">
-                <a className="brand" href="#home" aria-label="HireFlow home">
+                <a className="brand" href="/" aria-label="HireFlow home">
                     <span className="brand-mark">H</span>
                     <span>hire<span className="brand-accent">flow</span></span>
                 </a>
@@ -264,18 +315,36 @@ function App() {
                     </button>
                     <button
                         className="mobile-toggle"
-                        onClick={() => setMobileMenu(!mobileMenu)}
-                        aria-label="Toggle navigation"
+                        type="button"
+                        onClick={() => setMobileMenu((current) => !current)}
+                        aria-label={mobileMenu ? 'Close navigation' : 'Open navigation'}
+                        aria-controls="primary-navigation"
                         aria-expanded={mobileMenu}
                     >
                         {mobileMenu ? '✕' : '☰'}
                     </button>
                 </div>
 
-                <nav className={`nav-links ${mobileMenu ? 'nav-open' : ''}`}>
-                    <a href="#jobs" onClick={() => setMobileMenu(false)}>Find jobs</a>
-                    <a href="#categories" onClick={() => setMobileMenu(false)}>Categories</a>
-                    <a href="#about" onClick={() => setMobileMenu(false)}>About</a>
+                <nav
+                    id="primary-navigation"
+                    className={`nav-links ${mobileMenu ? 'nav-open' : ''}`}
+                    aria-label="Main navigation"
+                >
+                    <a href="/#jobs" onClick={() => setMobileMenu(false)}>Find jobs</a>
+                    <a href="/#categories" onClick={() => setMobileMenu(false)}>Categories</a>
+                    {isAuthenticated && user?.role === 'Student' && (
+                        <button
+                            type="button"
+                            className="saved-jobs-nav"
+                            onClick={() => {
+                                setMobileMenu(false)
+                                navigate('/saved-jobs')
+                            }}
+                        >
+                            Saved Jobs ({savedJobs.length})
+                        </button>
+                    )}
+                    <a href="/#about" onClick={() => setMobileMenu(false)}>About</a>
                     {isAuthenticated ? (
                         <>
                             <button
@@ -284,11 +353,12 @@ function App() {
                                 onClick={() => {
                                     setMobileMenu(false)
                                     if (user?.role === 'Student') {
-                                        document.getElementById('student-dashboard')
-                                            ?.scrollIntoView({ behavior: 'smooth' })
+                                        navigate('/candidate')
                                     } else {
-                                        document.getElementById('jobs')
-                                            ?.scrollIntoView({ behavior: 'smooth' })
+                                        navigate('/')
+                                        window.setTimeout(() => {
+                                            document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' })
+                                        }, 0)
                                     }
                                 }}
                             >
@@ -318,345 +388,392 @@ function App() {
                             Sign in
                         </button>
                     )}
-                    <a className="nav-cta" href="#jobs" onClick={() => setMobileMenu(false)}>Get started <span>↗</span></a>
+                    <a className="nav-cta" href="/#jobs" onClick={() => setMobileMenu(false)}>Get started <span>↗</span></a>
                 </nav>
             </header>
 
-            {isAuthenticated && user?.role === 'Student' ? (
-                <StudentDashboard />
+            {isCandidateRoute ? (
+                isAuthenticated && user?.role === 'Student' ? (
+                    <StudentDashboard />
+                ) : (
+                    <Navigate to="/" replace />
+                )
+            ) : isSavedJobsRoute ? (
+                isAuthenticated && user?.role === 'Student' ? (
+                    <>
+                        <SavedJobs
+                            jobs={jobs}
+                            savedJobs={savedJobs}
+                            onToggleSaved={toggleSaved}
+                            onViewDetails={(job) => navigate(`/jobs/${job.id}`)}
+                            onApply={openApplication}
+                        />
+                        <Footer />
+                    </>
+                ) : (
+                    <Navigate to="/" replace />
+                )
+            ) : isJobDetailsRoute ? (
+                <>
+                    {loading ? (
+                        <div className="status-panel">
+                            <div className="loading-spinner" />
+                            <p>Loading job details...</p>
+                        </div>
+                    ) : routedJob ? (
+                        <JobDetails
+                            job={routedJob}
+                            onBack={() => navigate('/#jobs')}
+                            onApply={() => openApplication(routedJob)}
+                            formatSalary={formatSalary}
+                        />
+                    ) : (
+                        <main className="job-details-page">
+                            <div className="job-details-wrap">
+                                <h1>Job not found</h1>
+                                <p>This job may have been removed or the link may be invalid.</p>
+                                <button
+                                    className="job-details-back"
+                                    onClick={() => navigate('/#jobs')}
+                                >
+                                    ← Back to jobs
+                                </button>
+                            </div>
+                        </main>
+                    )}
+                    <Footer />
+                </>
             ) : (
                 <>
-                    {/* Keep your existing homepage and job details here */}
-                </>
-            )}
+                    {detailJob ? (
+                        <JobDetails
+                            job={detailJob}
+                            onBack={() => {
+                                setDetailJob(null)
+                                window.setTimeout(() => document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' }), 0)
+                            }}
+                            onApply={() => openApplication(detailJob)}
+                            formatSalary={formatSalary}
+                        />
+                    ) : (
+                        <main>
+                            <section className="hero" id="home">
+                                <div className="hero-glow hero-glow-one" />
+                                <div className="hero-glow hero-glow-two" />
 
+                                <div className="hero-content">
+                                    <div className="hero-badge">
+                                        <span className="badge-sparkle">✳</span>
+                                        A better way to find your next role
+                                    </div>
 
-            {detailJob ? (
-                <JobDetails
-                    job={detailJob}
-                    onBack={() => {
-                        setDetailJob(null)
-                        window.setTimeout(() => document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' }), 0)
-                    }}
-                    onApply={() => openApplication(detailJob)}
-                    formatSalary={formatSalary}
-                />
-            ) : (
-                <main>
-                    <section className="hero" id="home">
-                        <div className="hero-glow hero-glow-one" />
-                        <div className="hero-glow hero-glow-two" />
+                                    <h1>
+                                        Work that fits
+                                        <br />
+                                        your <span className="gradient-text">ambition.</span>
+                                    </h1>
 
-                        <div className="hero-content">
-                            <div className="hero-badge">
-                                <span className="badge-sparkle">✳</span>
-                                A better way to find your next role
-                            </div>
-
-                            <h1>
-                                Work that fits
-                                <br />
-                                your <span className="gradient-text">ambition.</span>
-                            </h1>
-
-                            <p className="hero-description">
-                                Discover meaningful opportunities, connect with great companies,
-                                and build a career you're excited about.
-                            </p>
-
-                            <div className="hero-actions">
-                                <a className="button-primary" href="#jobs">Explore opportunities <span>↗</span></a>
-                                <a className="button-secondary" href="#about"><span className="play-icon">▶</span> How it works</a>
-                            </div>
-
-                            <div className="hero-proof">
-                                <div className="avatar-stack" aria-hidden="true">
-                                    <span>A</span><span>R</span><span>S</span><span>+</span>
-                                </div>
-                                <div>
-                                    <div className="proof-stars">★★★★★</div>
-                                    <p>Built for people ready to grow</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="hero-visual" aria-hidden="true">
-                            <div className="visual-orbit orbit-one" />
-                            <div className="visual-orbit orbit-two" />
-                            <div className="visual-center">
-                                <span className="center-symbol">H</span>
-                                <span className="center-caption">YOUR NEXT CHAPTER</span>
-                            </div>
-                            <div className="float-card float-card-top">
-                                <span className="float-icon float-icon-purple">↗</span>
-                                <div><strong>New possibilities</strong><small>Start exploring today</small></div>
-                            </div>
-                            <div className="float-card float-card-bottom">
-                                <span className="float-icon float-icon-green">✓</span>
-                                <div><strong>Career growth</strong><small>One opportunity at a time</small></div>
-                            </div>
-                            <div className="visual-spark spark-one">✳</div>
-                            <div className="visual-spark spark-two">✦</div>
-                        </div>
-
-                        <div className="hero-bottom-label">
-                            <span>DISCOVER</span><i /> <span>CONNECT</span><i /> <span>GROW</span>
-                        </div>
-                    </section>
-
-                    <section className="search-section" aria-label="Search jobs">
-                        <div className="search-panel">
-                            <label className="search-field">
-                                <span className="field-icon">⌕</span>
-                                <span className="field-content">
-                                    <span className="field-label">What are you looking for?</span>
-                                    <input
-                                        value={search}
-                                        onChange={(event) => setSearch(event.target.value)}
-                                        placeholder="Job title, company or keyword"
-                                    />
-                                </span>
-                            </label>
-
-                            <div className="search-divider" />
-
-                            <label className="search-field location-field">
-                                <span className="field-icon">⌖</span>
-                                <span className="field-content">
-                                    <span className="field-label">Where?</span>
-                                    <input
-                                        value={location}
-                                        onChange={(event) => setLocation(event.target.value)}
-                                        placeholder="City or remote"
-                                    />
-                                </span>
-                            </label>
-
-                            <button className="search-button" onClick={() => {
-                                document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' })
-                            }}>
-                                Search jobs <span>→</span>
-                            </button>
-                        </div>
-                        <p className="search-hint">
-                            <span>✦</span> Try “Developer”, “Remote” or “Full-time”
-                        </p>
-                    </section>
-
-                    <section className="trust-strip" aria-label="HireFlow benefits">
-                        <div><span className="trust-icon">◎</span><span>Opportunities that matter</span></div>
-                        <div><span className="trust-icon">↗</span><span>Simple job discovery</span></div>
-                        <div><span className="trust-icon">✳</span><span>Built for your next step</span></div>
-                    </section>
-
-                    <section className="categories-section section-wrap" id="categories">
-                        <div className="section-heading">
-                            <div>
-                                <p className="eyebrow">FIND YOUR DIRECTION</p>
-                                <h2>Explore by <span>category.</span></h2>
-                                <p className="section-description">Start with the kind of opportunity you're looking for.</p>
-                            </div>
-                            <a className="text-link" href="#jobs">Browse all jobs <span>↗</span></a>
-                        </div>
-
-                        <div className="category-grid">
-                            {[
-                                { name: 'All opportunities', type: 'All', symbol: '✳', color: 'lavender' },
-                                { name: 'Full-time', type: 'Full-time', symbol: '▣', color: 'mint' },
-                                { name: 'Part-time', type: 'Part-time', symbol: '◷', color: 'peach' },
-                                { name: 'Internships', type: 'Internship', symbol: '✦', color: 'blue' },
-                            ].map((category) => (
-                                <button
-                                    key={category.name}
-                                    className={`category-card ${jobType === category.type ? 'category-active' : ''}`}
-                                    onClick={() => {
-                                        setJobType(category.type)
-                                        document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' })
-                                    }}
-                                >
-                                    <span className={`category-symbol ${category.color}`}>{category.symbol}</span>
-                                    <span className="category-name">{category.name}</span>
-                                    <span className="category-arrow">↗</span>
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section className="jobs-section" id="jobs">
-                        <div className="section-wrap">
-                            <div className="section-heading jobs-heading">
-                                <div>
-                                    <p className="eyebrow">YOUR NEXT OPPORTUNITY</p>
-                                    <h2>Featured <span>jobs.</span></h2>
-                                    <p className="section-description">
-                                        Real opportunities, loaded directly from HireFlow.
+                                    <p className="hero-description">
+                                        Discover meaningful opportunities, connect with great companies,
+                                        and build a career you're excited about.
                                     </p>
-                                </div>
-                                <div className="jobs-count">
-                                    <strong>{loading ? '—' : filteredJobs.length.toString().padStart(2, '0')}</strong>
-                                    <span>{filteredJobs.length === 1 ? 'open position' : 'open positions'}</span>
-                                </div>
-                            </div>
 
-                            <div className="filter-toolbar">
-                                <div className="filter-chips">
-                                    {['All', 'Full-time', 'Part-time', 'Internship'].map((type) => (
+                                    <div className="hero-actions">
+                                        <a className="button-primary" href="#jobs">Explore opportunities <span>↗</span></a>
+                                        <a className="button-secondary" href="#about"><span className="play-icon">▶</span> How it works</a>
+                                    </div>
+
+                                    <div className="hero-proof">
+                                        <div className="avatar-stack" aria-hidden="true">
+                                            <span>A</span><span>R</span><span>S</span><span>+</span>
+                                        </div>
+                                        <div>
+                                            <div className="proof-stars">★★★★★</div>
+                                            <p>Built for people ready to grow</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="hero-visual" aria-hidden="true">
+                                    <div className="visual-orbit orbit-one" />
+                                    <div className="visual-orbit orbit-two" />
+                                    <div className="visual-center">
+                                        <span className="center-symbol">H</span>
+                                        <span className="center-caption">YOUR NEXT CHAPTER</span>
+                                    </div>
+                                    <div className="float-card float-card-top">
+                                        <span className="float-icon float-icon-purple">↗</span>
+                                        <div><strong>New possibilities</strong><small>Start exploring today</small></div>
+                                    </div>
+                                    <div className="float-card float-card-bottom">
+                                        <span className="float-icon float-icon-green">✓</span>
+                                        <div><strong>Career growth</strong><small>One opportunity at a time</small></div>
+                                    </div>
+                                    <div className="visual-spark spark-one">✳</div>
+                                    <div className="visual-spark spark-two">✦</div>
+                                </div>
+
+                                <div className="hero-bottom-label">
+                                    <span>DISCOVER</span><i /> <span>CONNECT</span><i /> <span>GROW</span>
+                                </div>
+                            </section>
+
+                            <section className="search-section" aria-label="Search jobs">
+                                <div className="search-panel">
+                                    <label className="search-field">
+                                        <span className="field-icon">⌕</span>
+                                        <span className="field-content">
+                                            <span className="field-label">What are you looking for?</span>
+                                            <input
+                                                value={search}
+                                                onChange={(event) => setSearch(event.target.value)}
+                                                placeholder="Job title, company or keyword"
+                                            />
+                                        </span>
+                                    </label>
+
+                                    <div className="search-divider" />
+
+                                    <label className="search-field location-field">
+                                        <span className="field-icon">⌖</span>
+                                        <span className="field-content">
+                                            <span className="field-label">Where?</span>
+                                            <input
+                                                value={location}
+                                                onChange={(event) => setLocation(event.target.value)}
+                                                placeholder="City or remote"
+                                            />
+                                        </span>
+                                    </label>
+
+                                    <button className="search-button" onClick={() => {
+                                        document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' })
+                                    }}>
+                                        Search jobs <span>→</span>
+                                    </button>
+                                </div>
+                                <p className="search-hint">
+                                    <span>✦</span> Try “Developer”, “Remote” or “Full-time”
+                                </p>
+                            </section>
+
+                            <section className="trust-strip" aria-label="HireFlow benefits">
+                                <div><span className="trust-icon">◎</span><span>Opportunities that matter</span></div>
+                                <div><span className="trust-icon">↗</span><span>Simple job discovery</span></div>
+                                <div><span className="trust-icon">✳</span><span>Built for your next step</span></div>
+                            </section>
+
+                            <section className="categories-section section-wrap" id="categories">
+                                <div className="section-heading">
+                                    <div>
+                                        <p className="eyebrow">FIND YOUR DIRECTION</p>
+                                        <h2>Explore by <span>category.</span></h2>
+                                        <p className="section-description">Start with the kind of opportunity you're looking for.</p>
+                                    </div>
+                                    <a className="text-link" href="#jobs">Browse all jobs <span>↗</span></a>
+                                </div>
+
+                                <div className="category-grid">
+                                    {[
+                                        { name: 'All opportunities', type: 'All', symbol: '✳', color: 'lavender' },
+                                        { name: 'Full-time', type: 'Full-time', symbol: '▣', color: 'mint' },
+                                        { name: 'Part-time', type: 'Part-time', symbol: '◷', color: 'peach' },
+                                        { name: 'Internships', type: 'Internship', symbol: '✦', color: 'blue' },
+                                    ].map((category) => (
                                         <button
-                                            key={type}
-                                            onClick={() => setJobType(type)}
-                                            className={`filter-chip ${jobType === type ? 'filter-chip-active' : ''}`}
+                                            key={category.name}
+                                            className={`category-card ${jobType === category.type ? 'category-active' : ''}`}
+                                            onClick={() => {
+                                                setJobType(category.type)
+                                                document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' })
+                                            }}
                                         >
-                                            {type}
+                                            <span className={`category-symbol ${category.color}`}>{category.symbol}</span>
+                                            <span className="category-name">{category.name}</span>
+                                            <span className="category-arrow">↗</span>
                                         </button>
                                     ))}
                                 </div>
-                                <label className="sort-select">
-                                    <span>Sort by</span>
-                                    <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-                                        <option value="newest">Most recent</option>
-                                        <option value="salary">Highest salary</option>
-                                    </select>
-                                </label>
-                            </div>
+                            </section>
 
-                            {loading && (
-                                <div className="status-panel">
-                                    <div className="loading-spinner" />
-                                    <p>Finding opportunities for you...</p>
-                                </div>
-                            )}
-
-                            {error && (
-                                <div className="status-panel error-panel">
-                                    <span className="status-symbol">!</span>
-                                    <h3>We couldn't load the jobs</h3>
-                                    <p>{error}</p>
-                                    <button className="button-primary" onClick={loadJobs}>Try again ↻</button>
-                                </div>
-                            )}
-
-                            {!loading && !error && filteredJobs.length === 0 && (
-                                <div className="status-panel">
-                                    <span className="status-symbol">⌕</span>
-                                    <h3>No matching jobs found</h3>
-                                    <p>Try another keyword or reset your filters.</p>
-                                    <button className="button-secondary" onClick={() => {
-                                        setSearch('')
-                                        setLocation('')
-                                        setJobType('All')
-                                    }}>Clear filters</button>
-                                </div>
-                            )}
-
-                            {!loading && !error && filteredJobs.length > 0 && (
-                                <div className="jobs-grid">
-                                    {filteredJobs.map((job, index) => (
-                                        <article className="job-card" key={job.id}>
-                                            <div className="job-card-head">
-                                                <div className={`company-avatar company-color-${index % 4}`}>
-                                                    {job.company?.trim().charAt(0).toUpperCase() || 'H'}
-                                                </div>
-                                                <button
-                                                    className={`save-button ${savedJobs.includes(job.id) ? 'is-saved' : ''}`}
-                                                    onClick={() => toggleSaved(job.id)}
-                                                    aria-label={savedJobs.includes(job.id) ? 'Unsave job' : 'Save job'}
-                                                    title={savedJobs.includes(job.id) ? 'Unsave job' : 'Save job'}
-                                                >
-                                                    {savedJobs.includes(job.id) ? '♥' : '♡'}
-                                                </button>
-                                            </div>
-
-                                            <div className="job-card-labels">
-                                                <span className="job-type-label">{job.jobType || 'Opportunity'}</span>
-                                                {job.location?.toLowerCase().includes('remote') && (
-                                                    <span className="remote-label">Remote</span>
-                                                )}
-                                            </div>
-
-                                            <h3 className="job-title">{job.title}</h3>
-                                            <p className="job-company">{job.company}</p>
-
-                                            <p className="job-summary">
-                                                {job.description || 'Explore this opportunity and take the next step in your career.'}
+                            <section className="jobs-section" id="jobs">
+                                <div className="section-wrap">
+                                    <div className="section-heading jobs-heading">
+                                        <div>
+                                            <p className="eyebrow">YOUR NEXT OPPORTUNITY</p>
+                                            <h2>Featured <span>jobs.</span></h2>
+                                            <p className="section-description">
+                                                Real opportunities, loaded directly from HireFlow.
                                             </p>
+                                        </div>
+                                        <div className="jobs-count">
+                                            <strong>{loading ? '—' : filteredJobs.length.toString().padStart(2, '0')}</strong>
+                                            <span>{filteredJobs.length === 1 ? 'open position' : 'open positions'}</span>
+                                        </div>
+                                    </div>
 
-                                            <div className="job-card-meta">
-                                                <span>⌖ {job.location || 'Location flexible'}</span>
-                                                <strong>{formatSalary(job.salary)}{Number(job.salary) > 0 ? <small> / month</small> : null}</strong>
-                                            </div>
+                                    <div className="filter-toolbar">
+                                        <div className="filter-chips">
+                                            {['All', 'Full-time', 'Part-time', 'Internship'].map((type) => (
+                                                <button
+                                                    key={type}
+                                                    onClick={() => setJobType(type)}
+                                                    className={`filter-chip ${jobType === type ? 'filter-chip-active' : ''}`}
+                                                >
+                                                    {type}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <label className="sort-select">
+                                            <span>Sort by</span>
+                                            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                                                <option value="newest">Most recent</option>
+                                                <option value="salary">Highest salary</option>
+                                            </select>
+                                        </label>
+                                    </div>
 
-                                            <div className="job-card-footer">
-                                                <span className="job-posted">
-                                                    {job.createdAt
-                                                        ? new Date(job.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                                                        : 'Recently posted'}
-                                                </span>
-                                                <div className="job-card-actions">
-                                                    <button className="details-link" onClick={() => {
-                                                        setDetailJob(job)
-                                                        window.scrollTo({ top: 0, behavior: 'smooth' })
-                                                    }}>
-                                                        View details
-                                                    </button>
-                                                    <button className="apply-link" onClick={() => openApplication(job)}>
-                                                        Apply now <span>↗</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </article>
-                                    ))}
+                                    {loading && (
+                                        <div className="status-panel">
+                                            <div className="loading-spinner" />
+                                            <p>Finding opportunities for you...</p>
+                                        </div>
+                                    )}
+
+                                    {error && (
+                                        <div className="status-panel error-panel">
+                                            <span className="status-symbol">!</span>
+                                            <h3>We couldn't load the jobs</h3>
+                                            <p>{error}</p>
+                                            <button className="button-primary" onClick={loadJobs}>Try again ↻</button>
+                                        </div>
+                                    )}
+
+                                    {!loading && !error && filteredJobs.length === 0 && (
+                                        <div className="status-panel">
+                                            <span className="status-symbol">⌕</span>
+                                            <h3>No matching jobs found</h3>
+                                            <p>Try another keyword or reset your filters.</p>
+                                            <button className="button-secondary" onClick={() => {
+                                                setSearch('')
+                                                setLocation('')
+                                                setJobType('All')
+                                            }}>Clear filters</button>
+                                        </div>
+                                    )}
+
+                                    {!loading && !error && filteredJobs.length > 0 && (
+                                        <div className="jobs-grid">
+                                            {filteredJobs.map((job, index) => (
+                                                <article className="job-card" key={job.id}>
+                                                    <div className="job-card-head">
+                                                        <div className={`company-avatar company-color-${index % 4}`}>
+                                                            {job.company?.trim().charAt(0).toUpperCase() || 'H'}
+                                                        </div>
+                                                        <div className="job-card-quick-actions">
+                                                            <button
+                                                                type="button"
+                                                                className={`save-button ${savedJobs.includes(job.id) ? 'is-saved' : ''}`}
+                                                                onClick={() => toggleSaved(job.id)}
+                                                                aria-label={savedJobs.includes(job.id) ? 'Unsave job' : 'Save job'}
+                                                                title={savedJobs.includes(job.id) ? 'Unsave job' : 'Save job'}
+                                                            >
+                                                                {savedJobs.includes(job.id) ? '♥' : '♡'}
+                                                            </button>
+                                                            <ShareJob job={job} />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="job-card-labels">
+                                                        <span className="job-type-label">{job.jobType || 'Opportunity'}</span>
+                                                        {job.location?.toLowerCase().includes('remote') && (
+                                                            <span className="remote-label">Remote</span>
+                                                        )}
+                                                    </div>
+
+                                                    <h3 className="job-title">{job.title}</h3>
+                                                    <p className="job-company">{job.company}</p>
+
+                                                    <p className="job-summary">
+                                                        {job.description || 'Explore this opportunity and take the next step in your career.'}
+                                                    </p>
+
+                                                    <div className="job-card-meta">
+                                                        <span>⌖ {job.location || 'Location flexible'}</span>
+                                                        <strong>{formatSalary(job.salary)}{Number(job.salary) > 0 ? <small> / month</small> : null}</strong>
+                                                    </div>
+
+                                                    <div className="job-card-footer">
+                                                        <span className="job-posted">
+                                                            {job.createdAt
+                                                                ? new Date(job.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                                                : 'Recently posted'}
+                                                        </span>
+                                                        <div className="job-card-actions">
+                                                            <button className="details-link" onClick={() => navigate(`/jobs/${job.id}`)}>
+                                                                View details
+                                                            </button>
+                                                            <button className="apply-link" onClick={() => openApplication(job)}>
+                                                                Apply now <span>↗</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="jobs-bottom">
+                                        <span>Showing {filteredJobs.length} of {jobs.length} opportunities</span>
+                                        <button onClick={loadJobs} className="refresh-link">Refresh listings ↻</button>
+                                    </div>
                                 </div>
-                            )}
+                            </section>
 
-                            <div className="jobs-bottom">
-                                <span>Showing {filteredJobs.length} of {jobs.length} opportunities</span>
-                                <button onClick={loadJobs} className="refresh-link">Refresh listings ↻</button>
-                            </div>
-                        </div>
-                    </section>
+                            <section className="about-section section-wrap" id="about">
+                                <div className="about-visual">
+                                    <div className="about-card about-card-main">
+                                        <span className="about-star">✳</span>
+                                        <p className="about-card-label">YOUR CAREER</p>
+                                        <h3>Small steps.<br />Big possibilities.</h3>
+                                        <div className="about-progress"><span /></div>
+                                        <p className="about-progress-label">Your next chapter starts with one application.</p>
+                                    </div>
+                                    <div className="about-mini-card">
+                                        <span>↗</span><div><strong>Keep moving forward</strong><small>Your next opportunity awaits</small></div>
+                                    </div>
+                                </div>
+                                <div className="about-copy">
+                                    <p className="eyebrow">MORE THAN A JOB SEARCH</p>
+                                    <h2>Your future deserves <span>a better starting point.</span></h2>
+                                    <p className="section-description">
+                                        Finding the right role shouldn't feel complicated. HireFlow
+                                        brings opportunities into one place so you can focus on what
+                                        matters: finding work that matches your goals.
+                                    </p>
+                                    <a href="#jobs" className="button-primary">Find your opportunity <span>↗</span></a>
+                                    <div className="about-points">
+                                        <div><span>✓</span> Explore available roles</div>
+                                        <div><span>✓</span> Compare opportunities at a glance</div>
+                                        <div><span>✓</span> Apply directly through HireFlow</div>
+                                    </div>
+                                </div>
+                            </section>
 
-                    <section className="about-section section-wrap" id="about">
-                        <div className="about-visual">
-                            <div className="about-card about-card-main">
-                                <span className="about-star">✳</span>
-                                <p className="about-card-label">YOUR CAREER</p>
-                                <h3>Small steps.<br />Big possibilities.</h3>
-                                <div className="about-progress"><span /></div>
-                                <p className="about-progress-label">Your next chapter starts with one application.</p>
-                            </div>
-                            <div className="about-mini-card">
-                                <span>↗</span><div><strong>Keep moving forward</strong><small>Your next opportunity awaits</small></div>
-                            </div>
-                        </div>
-                        <div className="about-copy">
-                            <p className="eyebrow">MORE THAN A JOB SEARCH</p>
-                            <h2>Your future deserves <span>a better starting point.</span></h2>
-                            <p className="section-description">
-                                Finding the right role shouldn't feel complicated. HireFlow
-                                brings opportunities into one place so you can focus on what
-                                matters: finding work that matches your goals.
-                            </p>
-                            <a href="#jobs" className="button-primary">Find your opportunity <span>↗</span></a>
-                            <div className="about-points">
-                                <div><span>✓</span> Explore available roles</div>
-                                <div><span>✓</span> Compare opportunities at a glance</div>
-                                <div><span>✓</span> Apply directly through HireFlow</div>
-                            </div>
-                        </div>
-                    </section>
+                            <section className="final-cta">
+                                <div className="cta-decoration cta-decoration-one" />
+                                <div className="cta-decoration cta-decoration-two" />
+                                <p className="eyebrow">YOUR NEXT CHAPTER STARTS NOW</p>
+                                <h2>Ready to find your <span>next move?</span></h2>
+                                <p>Explore the opportunities waiting for you.</p>
+                                <a href="#jobs" className="cta-button">Explore open positions <span>↗</span></a>
+                            </section>
+                        </main>
+                    )}
 
-                    <section className="final-cta">
-                        <div className="cta-decoration cta-decoration-one" />
-                        <div className="cta-decoration cta-decoration-two" />
-                        <p className="eyebrow">YOUR NEXT CHAPTER STARTS NOW</p>
-                        <h2>Ready to find your <span>next move?</span></h2>
-                        <p>Explore the opportunities waiting for you.</p>
-                        <a href="#jobs" className="cta-button">Explore open positions <span>↗</span></a>
-                    </section>
-                </main>
+                    <Footer />
+                </>
             )}
-
-            <Footer />
 
             {selectedJob && (
                 <div className="modal-backdrop" onClick={() => !submitting && setSelectedJob(null)}>

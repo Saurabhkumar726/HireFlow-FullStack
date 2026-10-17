@@ -1,0 +1,62 @@
+.job-card-quick-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.share-job-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-job-button {
+    display: inline-flex;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--border-color, #eeebf7);
+    border-radius: 11px;
+    background: var(--card-bg, #ffffff);
+    color: var(--muted-text, #85829c);
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+    .share-job-button:hover {
+        color: #6957ed;
+        background: #f1eeff;
+        border-color: #d6ceff;
+        transform: translateY(-1px);
+    }
+
+html[data-theme="dark"] .share-job-button {
+    color: #c4bfd9;
+    background: #211e32;
+    border-color: #3a354f;
+}
+
+    html[data-theme="dark"] .share-job-button:hover {
+        color: #c6baff;
+        background: #30294a;
+        border-color: #7562f5;
+    }
+
+.share-job-message {
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + 8px);
+    right: 0;
+    width: max-content;
+    max-width: 220px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #242039;
+    color: #ffffff;
+    font-size: 12px;
+    box-shadow: 0 5px 16px rgb(0 0 0 / 12%);
+}
