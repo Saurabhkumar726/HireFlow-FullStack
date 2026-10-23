@@ -1,4 +1,5 @@
-﻿using HireFlow.Api.Authentication;
+﻿
+using HireFlow.Api.Authentication;
 using HireFlow.Api.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,8 @@ namespace HireFlow.Api.Data
         public DbSet<Job> Jobs { get; set; }
 
         public DbSet<JobApplication> JobApplications { get; set; }
+
+        public DbSet<Interview> Interviews { get; set; }
 
         public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
 
@@ -75,6 +78,15 @@ namespace HireFlow.Api.Data
                 .WithMany()
                 .HasForeignKey(job => job.CreatedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // JobApplication -> Interviews
+            // Explicitly use the existing JobApplication navigation property
+            // and JobApplicationId foreign key to prevent a shadow FK.
+            modelBuilder.Entity<Interview>()
+                .HasOne(interview => interview.JobApplication)
+                .WithMany()
+                .HasForeignKey(interview => interview.JobApplicationId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Password reset OTP index
             modelBuilder.Entity<PasswordResetOtp>()

@@ -1,0 +1,796 @@
+
+.hr-interviews {
+    --hi-bg: var(--bg-primary, #f7f8fc);
+    --hi-surface: var(--bg-card, #ffffff);
+    --hi-text: var(--text-primary, #172033);
+    --hi-muted: var(--text-secondary, #667085);
+    --hi-border: var(--border-color, #e5e9f2);
+    --hi-accent: var(--primary-color, #635bff);
+    --hi-accent-hover: var(--primary-hover, #5148e5);
+    --hi-input: var(--input-bg, #ffffff);
+    color: var(--hi-text);
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 24px;
+}
+
+/* Match the HireFlow dashboard's global dark theme. */
+html[data-theme="dark"] .hr-interviews,
+[data-theme="dark"] .hr-interviews,
+.dark .hr-interviews,
+body.dark-mode .hr-interviews {
+    --hi-bg: #101119;
+    --hi-surface: #191a27;
+    --hi-text: #f3f2ff;
+    --hi-muted: #aaaac5;
+    --hi-border: #2c2d40;
+    --hi-accent: #7162f3;
+    --hi-accent-hover: #8a7cff;
+    --hi-input: #171a28;
+    color: var(--hi-text);
+    color-scheme: dark;
+}
+
+.hr-interviews *,
+.hr-interviews *::before,
+.hr-interviews *::after {
+    box-sizing: border-box;
+}
+
+.hr-interviews-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 26px;
+}
+
+.hr-interviews-eyebrow {
+    display: inline-block;
+    margin-bottom: 9px;
+    color: var(--hi-accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+}
+
+.hr-interviews-header h2,
+.hi-modal-header h2 {
+    margin: 0;
+    color: var(--hi-text);
+    font-size: clamp(1.55rem, 3vw, 2rem);
+    font-weight: 750;
+    letter-spacing: -0.035em;
+}
+
+.hr-interviews-header p {
+    margin: 9px 0 0;
+    color: var(--hi-muted);
+    font-size: 0.94rem;
+    line-height: 1.6;
+}
+
+.hr-interviews-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.hi-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 10px 15px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.87rem;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 160ms ease, border-color 160ms ease, transform 160ms ease, opacity 160ms ease;
+}
+
+    .hi-button:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .hi-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+.hi-button-primary {
+    color: #fff;
+    background: var(--hi-accent);
+    border-color: var(--hi-accent);
+}
+
+    .hi-button-primary:hover:not(:disabled) {
+        background: var(--hi-accent-hover);
+    }
+
+.hi-button-secondary {
+    color: var(--hi-text);
+    background: var(--hi-surface);
+    border-color: var(--hi-border);
+}
+
+    .hi-button-secondary:hover:not(:disabled) {
+        border-color: var(--hi-accent);
+    }
+
+.hi-button-danger {
+    color: #c43243;
+    background: transparent;
+    border-color: #efc4cb;
+}
+
+    .hi-button-danger:hover:not(:disabled) {
+        background: #fff0f2;
+    }
+
+.hi-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 24px;
+}
+
+.hi-stat-card {
+    min-width: 0;
+    padding: 20px;
+    color: var(--hi-text);
+    background: var(--hi-surface);
+    border: 1px solid var(--hi-border);
+    border-radius: 15px;
+    box-shadow: 0 4px 18px rgb(22 34 60 / 3%);
+}
+
+    .hi-stat-card span,
+    .hi-stat-card small {
+        display: block;
+        color: var(--hi-muted);
+    }
+
+    .hi-stat-card span {
+        font-size: 0.84rem;
+        font-weight: 650;
+    }
+
+    .hi-stat-card strong {
+        display: block;
+        margin: 12px 0 7px;
+        color: var(--hi-text);
+        font-size: 2rem;
+        line-height: 1;
+        letter-spacing: -0.04em;
+    }
+
+    .hi-stat-card small {
+        font-size: 0.75rem;
+    }
+
+.hi-alert {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 13px 15px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+    .hi-alert button {
+        flex-shrink: 0;
+        padding: 2px 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+.hi-alert-error {
+    color: #a32232;
+    background: #fff0f1;
+    border-color: #f4c5cb;
+}
+
+.hi-alert-success {
+    color: #176b45;
+    background: #eaf9f0;
+    border-color: #bce8cd;
+}
+
+.hi-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+    .hi-toolbar input,
+    .hi-toolbar select,
+    .hi-form-field input,
+    .hi-form-field select,
+    .hi-form-field textarea {
+        width: 100%;
+        min-width: 0;
+        color: var(--hi-text);
+        background: var(--hi-input);
+        border: 1px solid var(--hi-border);
+        border-radius: 10px;
+        outline: none;
+        font: inherit;
+        font-size: 0.9rem;
+        transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .hi-toolbar input,
+    .hi-toolbar select {
+        min-height: 45px;
+        padding: 10px 13px;
+    }
+
+    .hi-toolbar input {
+        flex: 1;
+    }
+
+    .hi-toolbar select {
+        width: min(210px, 38%);
+    }
+
+        .hi-toolbar input:focus,
+        .hi-toolbar select:focus,
+        .hi-form-field input:focus,
+        .hi-form-field select:focus,
+        .hi-form-field textarea:focus {
+            border-color: var(--hi-accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--hi-accent) 15%, transparent);
+        }
+
+.hi-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 265px;
+    padding: 34px 20px;
+    text-align: center;
+    background: var(--hi-surface);
+    border: 1px dashed var(--hi-border);
+    border-radius: 16px;
+}
+
+.hi-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 15px;
+    color: var(--hi-accent);
+    background: color-mix(in srgb, var(--hi-accent) 12%, transparent);
+    border-radius: 15px;
+    font-size: 1.7rem;
+}
+
+.hi-empty h3 {
+    margin: 0;
+    color: var(--hi-text);
+    font-size: 1.05rem;
+}
+
+.hi-empty p {
+    max-width: 440px;
+    margin: 9px 0 20px;
+    color: var(--hi-muted);
+    font-size: 0.88rem;
+    line-height: 1.65;
+}
+
+.hi-loading-indicator {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 15px;
+    border: 3px solid var(--hi-border);
+    border-top-color: var(--hi-accent);
+    border-radius: 50%;
+    animation: hi-spin 0.8s linear infinite;
+}
+
+@keyframes hi-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.hi-interview-list {
+    display: grid;
+    gap: 15px;
+}
+
+.hi-interview-card {
+    min-width: 0;
+    padding: 21px;
+    color: var(--hi-text);
+    background: var(--hi-surface);
+    border: 1px solid var(--hi-border);
+    border-radius: 15px;
+    box-shadow: 0 4px 18px rgb(22 34 60 / 3%);
+}
+
+.hi-interview-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.hi-interview-person {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.hi-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    color: var(--hi-accent);
+    background: color-mix(in srgb, var(--hi-accent) 12%, transparent);
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.hi-person-details {
+    min-width: 0;
+}
+
+    .hi-person-details h3 {
+        margin: 0;
+        color: var(--hi-text);
+        font-size: 1rem;
+        font-weight: 750;
+        overflow-wrap: anywhere;
+    }
+
+    .hi-person-details p {
+        margin: 5px 0;
+        color: var(--hi-muted);
+        font-size: 0.83rem;
+        overflow-wrap: anywhere;
+    }
+
+    .hi-person-details > span {
+        display: inline-block;
+        color: var(--hi-accent);
+        font-size: 0.81rem;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+    }
+
+.hi-status {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 750;
+}
+
+.hi-status-scheduled {
+    color: #2354b5;
+    background: #edf3ff;
+    border-color: #d4e2ff;
+}
+
+.hi-status-completed {
+    color: #16734b;
+    background: #e9f8ef;
+    border-color: #c6ebd4;
+}
+
+.hi-status-cancelled {
+    color: #ad3441;
+    background: #fff0f1;
+    border-color: #f5cbd0;
+}
+
+.hi-interview-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-top: 21px;
+    padding: 17px 0;
+    border-top: 1px solid var(--hi-border);
+    border-bottom: 1px solid var(--hi-border);
+}
+
+.hi-detail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    min-width: 0;
+}
+
+.hi-detail-label {
+    color: var(--hi-muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.hi-detail-item strong,
+.hi-detail-item a {
+    color: var(--hi-text);
+    font-size: 0.85rem;
+    font-weight: 650;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.hi-detail-item a {
+    color: var(--hi-accent);
+    text-decoration: none;
+}
+
+    .hi-detail-item a:hover {
+        text-decoration: underline;
+    }
+
+.hi-detail-item .hi-muted {
+    color: var(--hi-muted);
+    font-weight: 500;
+}
+
+.hi-interview-notes {
+    margin: 14px 0 0;
+    color: var(--hi-muted);
+    font-size: 0.85rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.hi-interview-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+    .hi-interview-card-footer > span {
+        color: var(--hi-muted);
+        font-size: 0.76rem;
+    }
+
+    .hi-interview-card-footer > div {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+.hi-results-count {
+    margin: 16px 0 0;
+    color: var(--hi-muted);
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.hi-modal-backdrop {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+    background: rgb(12 18 32 / 62%);
+    backdrop-filter: blur(5px);
+}
+
+.hi-modal {
+    width: min(100%, 620px);
+    max-height: min(90vh, 850px);
+    padding: 25px;
+    overflow-y: auto;
+    color: var(--hi-text);
+    background: var(--hi-surface);
+    border: 1px solid var(--hi-border);
+    border-radius: 18px;
+    box-shadow: 0 25px 80px rgb(0 0 0 / 25%);
+}
+
+.hi-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 23px;
+}
+
+    .hi-modal-header h2 {
+        font-size: 1.45rem;
+    }
+
+.hi-modal-close {
+    display: grid;
+    place-items: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    color: var(--hi-muted);
+    background: transparent;
+    border: 1px solid var(--hi-border);
+    border-radius: 9px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+    .hi-modal-close:hover:not(:disabled) {
+        color: var(--hi-text);
+        background: var(--hi-bg);
+    }
+
+    .hi-modal-close:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+.hi-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    margin-bottom: 17px;
+}
+
+    .hi-form-field > span {
+        color: var(--hi-text);
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .hi-form-field input,
+    .hi-form-field select {
+        min-height: 44px;
+        padding: 10px 12px;
+    }
+
+    .hi-form-field textarea {
+        min-height: 100px;
+        padding: 12px;
+        resize: vertical;
+    }
+
+    .hi-form-field small {
+        color: var(--hi-muted);
+        font-size: 0.78rem;
+        line-height: 1.5;
+    }
+
+.hi-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.hi-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 23px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hi-border);
+}
+
+/* Dark-mode refinements: remove the unintended gray-blue surfaces. */
+html[data-theme="dark"] .hr-interviews .hi-stat-card,
+html[data-theme="dark"] .hr-interviews .hi-interview-card,
+html[data-theme="dark"] .hr-interviews .hi-empty,
+html[data-theme="dark"] .hr-interviews .hi-modal {
+    background: #191a27;
+    border-color: #2c2d40;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-toolbar input,
+html[data-theme="dark"] .hr-interviews .hi-toolbar select,
+html[data-theme="dark"] .hr-interviews .hi-form-field input,
+html[data-theme="dark"] .hr-interviews .hi-form-field select,
+html[data-theme="dark"] .hr-interviews .hi-form-field textarea {
+    background: #141521;
+    border-color: #303145;
+    color: #f3f2ff;
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-button-secondary {
+    background: #191a27;
+    border-color: #303145;
+    color: #f3f2ff;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-interview-details {
+    border-color: #303145;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-avatar {
+    background: #302b55;
+    color: #bcb4ff;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-status-scheduled {
+    color: #c5d7ff;
+    background: #242e48;
+    border-color: #343f5c;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-status-completed {
+    color: #83e0b1;
+    background: #19372e;
+    border-color: #285342;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-status-cancelled {
+    color: #ffaaa6;
+    background: #3c252c;
+    border-color: #57313b;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-button-danger {
+    color: #ff8f98;
+    border-color: #75404a;
+}
+
+    html[data-theme="dark"] .hr-interviews .hi-button-danger:hover:not(:disabled) {
+        background: #382128;
+    }
+
+html[data-theme="dark"] .hr-interviews .hi-empty-icon {
+    background: #302b55;
+    color: #bcb4ff;
+}
+
+html[data-theme="dark"] .hr-interviews .hi-modal-close:hover:not(:disabled) {
+    background: #242536;
+}
+
+@media (max-width: 1000px) {
+    .hi-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .hr-interviews-header {
+        flex-direction: column;
+    }
+
+    .hr-interviews-header-actions {
+        width: 100%;
+    }
+
+        .hr-interviews-header-actions .hi-button {
+            flex: 1;
+        }
+
+    .hi-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+        .hi-toolbar select {
+            width: 100%;
+        }
+
+    .hi-interview-details {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .hi-detail-item {
+        gap: 5px;
+    }
+
+    .hi-interview-card {
+        padding: 16px;
+    }
+
+    .hi-interview-card-top {
+        flex-direction: column;
+    }
+
+    .hi-status {
+        align-self: flex-start;
+    }
+
+    .hi-interview-card-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+        .hi-interview-card-footer > div {
+            width: 100%;
+        }
+
+        .hi-interview-card-footer .hi-button {
+            flex: 1;
+        }
+
+    .hi-modal {
+        padding: 19px;
+    }
+
+    .hi-form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .hi-stat-grid {
+        gap: 10px;
+    }
+
+    .hi-stat-card {
+        padding: 14px;
+    }
+
+        .hi-stat-card strong {
+            font-size: 1.65rem;
+        }
+
+    .hr-interviews-header-actions {
+        flex-direction: column;
+    }
+
+        .hr-interviews-header-actions .hi-button {
+            width: 100%;
+        }
+
+    .hi-interview-person {
+        align-items: flex-start;
+    }
+
+    .hi-modal-backdrop {
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .hi-modal-actions {
+        flex-direction: column-reverse;
+    }
+
+        .hi-modal-actions .hi-button {
+            width: 100%;
+        }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hr-interviews *,
+    .hr-interviews *::before,
+    .hr-interviews *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

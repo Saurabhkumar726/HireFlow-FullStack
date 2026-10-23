@@ -1,0 +1,226 @@
+/* Shared HR workspace layout. Keep page spacing consistent across every HR route. */
+.hr-workspace {
+	--hr-sidebar-bg: var(--surface, #ffffff);
+	--hr-border: var(--border, #e7e8ee);
+	--hr-text: var(--text, #202233);
+	--hr-muted: var(--muted, #777b8c);
+	--hr-hover: var(--surface-hover, #f5f5fc);
+	--hr-active-bg: #efefff;
+	--hr-active-border: #e3e2ff;
+	--hr-accent: #6258db;
+	display: flex;
+	align-items: stretch;
+	width: 100%;
+	min-height: calc(100vh - 100px);
+	background: var(--background, #f8f9fc);
+	color: var(--hr-text);
+}
+
+	.hr-workspace,
+	.hr-workspace *,
+	.hr-workspace *::before,
+	.hr-workspace *::after {
+		box-sizing: border-box;
+	}
+
+.hr-main {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: clamp(24px, 3vw, 38px) clamp(18px, 3.2vw, 44px);
+}
+
+.hr-page-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	width: 100%;
+	margin: 0 0 clamp(26px, 3vw, 36px);
+}
+
+	.hr-page-heading > div:first-child {
+		min-width: 0;
+	}
+
+.hr-page-eyebrow {
+	display: block;
+	margin: 0 0 12px;
+	color: var(--hr-muted);
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 1.3px;
+	line-height: 1.4;
+}
+
+.hr-page-heading h1 {
+	margin: 0;
+	color: var(--hr-text);
+	font-size: clamp(26px, 2.6vw, 36px);
+	font-weight: 800;
+	letter-spacing: -1px;
+	line-height: 1.18;
+	overflow-wrap: anywhere;
+}
+
+.hr-page-heading p {
+	margin: 10px 0 0;
+	color: var(--hr-muted);
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.hr-page-account {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	flex: 0 0 auto;
+	padding: 10px 14px;
+	border: 1px solid var(--hr-border);
+	border-radius: 999px;
+	background: var(--hr-sidebar-bg);
+	color: var(--hr-muted);
+	font-size: 11px;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.hr-account-status {
+	width: 7px;
+	height: 7px;
+	flex: 0 0 7px;
+	border-radius: 50%;
+	background: #29ad78;
+}
+
+/* One consistent content boundary prevents pages adding their own extra gutters. */
+.hr-page-content {
+	width: 100%;
+	min-width: 0;
+	min-height: 380px;
+	margin: 0;
+}
+
+	.hr-page-content > * {
+		min-width: 0;
+	}
+
+	/* HRProfile previously added another 28px gutter inside the already padded layout. */
+	.hr-page-content > .hr-profile {
+		width: 100%;
+		max-width: none;
+		margin: 0;
+		padding: 0;
+	}
+
+.hr-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 330px;
+	padding: 32px 20px;
+	border: 1px solid var(--hr-border);
+	border-radius: 18px;
+	background: var(--hr-sidebar-bg);
+	text-align: center;
+}
+
+.hr-placeholder-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 58px;
+	height: 58px;
+	margin-bottom: 18px;
+	border-radius: 18px;
+	background: #efefff;
+	color: #6258db;
+	font-size: 27px;
+}
+
+.hr-placeholder h2 {
+	margin: 0 0 10px;
+	color: var(--hr-text);
+	font-size: 21px;
+	font-weight: 750;
+}
+
+.hr-placeholder p {
+	max-width: 430px;
+	margin: 0;
+	color: var(--hr-muted);
+	font-size: 13px;
+	line-height: 1.8;
+}
+
+html[data-theme='dark'] .hr-workspace {
+	--hr-sidebar-bg: var(--surface, #171923);
+	--hr-border: var(--border, #303342);
+	--hr-text: var(--text, #f2f3fa);
+	--hr-muted: var(--muted, #a1a5b7);
+	--hr-hover: var(--surface-hover, #232635);
+	--hr-active-bg: #2b2850;
+	--hr-active-border: #403b70;
+	--hr-accent: #aaa3ff;
+	background: var(--background, #11131c);
+}
+
+html[data-theme='dark'] .hr-placeholder-icon,
+html[data-theme='dark'] .hr-sidebar-avatar {
+	background: #302b55;
+	color: #c1bbff;
+}
+
+@media (max-width: 1000px) {
+	.hr-main {
+		padding-inline: 24px;
+	}
+}
+
+@media (max-width: 760px) {
+	.hr-workspace {
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.hr-main {
+		width: 100%;
+		padding: 24px 16px 32px;
+	}
+
+	.hr-page-heading {
+		align-items: flex-start;
+		gap: 14px;
+		margin-bottom: 26px;
+	}
+
+		.hr-page-heading h1 {
+			font-size: clamp(25px, 6vw, 32px);
+		}
+
+	.hr-page-account {
+		display: none;
+	}
+
+	.hr-page-content {
+		min-height: 260px;
+	}
+
+	.hr-placeholder {
+		min-height: 260px;
+	}
+}
+
+@media (max-width: 420px) {
+	.hr-main {
+		padding: 20px 12px 28px;
+	}
+
+	.hr-page-heading {
+		margin-bottom: 22px;
+	}
+
+	.hr-page-eyebrow {
+		margin-bottom: 9px;
+	}
+}

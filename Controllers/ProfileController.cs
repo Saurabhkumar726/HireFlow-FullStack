@@ -9,7 +9,7 @@ namespace HireFlow.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Student,HR")]
     public class ProfileController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -146,7 +146,7 @@ namespace HireFlow.Api.Controllers
 
             if (user == null)
             {
-                return NotFound(new { message = "Student account not found." });
+                return NotFound(new { message = "Account not found." });
             }
 
             var uploadDirectory = Path.Combine(
@@ -216,7 +216,7 @@ namespace HireFlow.Api.Controllers
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
-                return NotFound(new { message = "Student account not found." });
+                return NotFound(new { message = "Account not found." });
 
             var previousPictureUrl = user.ProfilePictureUrl;
 

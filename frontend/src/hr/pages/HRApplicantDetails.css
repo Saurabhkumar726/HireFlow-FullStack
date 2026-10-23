@@ -1,0 +1,372 @@
+
+.hr-applicant-details {
+    width: 100%;
+    color: var(--text-primary, #252641);
+}
+
+/* Back to Applicants button */
+.hr-applicant-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 28px;
+    padding: 10px 16px;
+    color: #7665ee;
+    background: rgba(118, 101, 238, 0.08);
+    border: 1px solid rgba(118, 101, 238, 0.22);
+    border-radius: 10px;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.5;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .hr-applicant-back:hover {
+        color: #5a48df;
+        background: rgba(118, 101, 238, 0.15);
+        border-color: rgba(118, 101, 238, 0.5);
+        box-shadow: 0 4px 12px rgba(118, 101, 238, 0.1);
+        transform: translateX(-2px);
+    }
+
+    .hr-applicant-back:active {
+        transform: translateX(-1px) scale(0.98);
+    }
+
+    .hr-applicant-back:focus-visible {
+        outline: 2px solid #7665ee;
+        outline-offset: 3px;
+    }
+
+/* Applicant heading */
+.hr-applicant-details-heading {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    margin-bottom: 26px;
+}
+
+.hr-applicant-details-avatar {
+    display: flex;
+    flex-shrink: 0;
+    width: 66px;
+    height: 66px;
+    align-items: center;
+    justify-content: center;
+    color: #b6adff;
+    background: #302b55;
+    border-radius: 19px;
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.hr-applicant-details-eyebrow {
+    color: #7665ee;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+}
+
+.hr-applicant-details-heading h2 {
+    margin: 7px 0 5px;
+    color: var(--text-primary, #252641);
+    font-size: 25px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.hr-applicant-details-heading p {
+    margin: 0;
+    color: var(--text-secondary, #777f98);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+/* Details grid and panels */
+.hr-applicant-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.hr-applicant-details-panel {
+    min-width: 0;
+    padding: 24px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e8eaf3);
+    border-radius: 17px;
+}
+
+    .hr-applicant-details-panel h3 {
+        margin: 0 0 20px;
+        color: var(--text-primary, #252641);
+        font-size: 17px;
+        font-weight: 750;
+    }
+
+.hr-applicant-detail-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border, #eceef5);
+}
+
+    .hr-applicant-detail-row span {
+        flex-shrink: 0;
+        color: var(--text-secondary, #777f98);
+        font-size: 12px;
+    }
+
+    .hr-applicant-detail-row strong {
+        color: var(--text-primary, #252641);
+        font-size: 12px;
+        font-weight: 700;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+/* Resume link */
+.hr-applicant-resume {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 0 16px;
+    color: #fff;
+    background: #6555e9;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 750;
+    transition: background 0.2s ease;
+}
+
+    .hr-applicant-resume:hover {
+        background: #5544dc;
+    }
+
+.hr-applicant-no-resume,
+.hr-applicant-panel-description {
+    color: var(--text-secondary, #777f98);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Status form */
+.hr-applicant-details-panel form {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+    .hr-applicant-details-panel form label {
+        color: var(--text-primary, #252641);
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .hr-applicant-details-panel form select {
+        width: 100%;
+        min-height: 46px;
+        padding: 0 13px;
+        color: var(--text-primary, #252641);
+        background: var(--surface, #fff);
+        border: 1px solid var(--border, #e2e5ef);
+        border-radius: 10px;
+        outline: none;
+        font: inherit;
+        font-size: 13px;
+    }
+
+        .hr-applicant-details-panel form select:focus {
+            border-color: #7665ee;
+            box-shadow: 0 0 0 3px rgb(108 92 231 / 10%);
+        }
+
+.hr-applicant-save-status {
+    min-height: 44px;
+    margin-top: 5px;
+    padding: 0 16px;
+    color: #fff;
+    background: #6555e9;
+    border: 1px solid #6555e9;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+    .hr-applicant-save-status:hover:not(:disabled) {
+        background: #5544dc;
+    }
+
+    .hr-applicant-save-status:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+    }
+
+/* Cover letter */
+.hr-applicant-cover-letter {
+    grid-column: 1 / -1;
+}
+
+    .hr-applicant-cover-letter p {
+        margin: 0;
+        color: var(--text-primary, #35364f);
+        font-size: 13px;
+        line-height: 1.9;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+/* Error and success messages */
+.hr-applicant-details-alert {
+    margin-bottom: 18px;
+    padding: 15px 17px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.hr-applicant-details-error {
+    color: #c52f3d;
+    background: #fff0f1;
+    border-color: #ffd5d9;
+}
+
+.hr-applicant-details-success {
+    color: #14784f;
+    background: #eafaf2;
+    border-color: #bcebd2;
+}
+
+.hr-applicant-details-error p {
+    margin: 0 0 12px;
+}
+
+.hr-applicant-details-error button,
+.hr-applicant-details-error a {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    margin: 4px 10px 0 0;
+    padding: 0 12px;
+    color: inherit;
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: 9px;
+    text-decoration: none;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Loading state */
+.hr-applicant-details-state {
+    padding: 50px 20px;
+    color: var(--text-secondary, #777f98);
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e8eaf3);
+    border-radius: 16px;
+    text-align: center;
+}
+
+/* Dark theme */
+html[data-theme='dark'] .hr-applicant-details {
+    color: #f1f2ff;
+}
+
+html[data-theme='dark'] .hr-applicant-details-heading h2,
+html[data-theme='dark'] .hr-applicant-details-panel h3,
+html[data-theme='dark'] .hr-applicant-detail-row strong,
+html[data-theme='dark'] .hr-applicant-details-panel form label,
+html[data-theme='dark'] .hr-applicant-cover-letter p {
+    color: #f1f2ff;
+}
+
+html[data-theme='dark'] .hr-applicant-details-heading p,
+html[data-theme='dark'] .hr-applicant-detail-row span,
+html[data-theme='dark'] .hr-applicant-no-resume,
+html[data-theme='dark'] .hr-applicant-panel-description,
+html[data-theme='dark'] .hr-applicant-details-state {
+    color: #aeb7d2;
+}
+
+html[data-theme='dark'] .hr-applicant-details-panel,
+html[data-theme='dark'] .hr-applicant-details-state {
+    background: #191929;
+    border-color: #303047;
+}
+
+html[data-theme='dark'] .hr-applicant-detail-row {
+    border-bottom-color: #303047;
+}
+
+html[data-theme='dark'] .hr-applicant-details-panel form select {
+    color: #f1f2ff;
+    background: #191929;
+    border-color: #35354e;
+    color-scheme: dark;
+}
+
+html[data-theme='dark'] .hr-applicant-back {
+    color: #b6adff;
+    background: rgba(118, 101, 238, 0.12);
+    border-color: rgba(182, 173, 255, 0.25);
+}
+
+    html[data-theme='dark'] .hr-applicant-back:hover {
+        color: #d1caff;
+        background: rgba(118, 101, 238, 0.22);
+        border-color: #9b8cff;
+    }
+
+html[data-theme='dark'] .hr-applicant-details-error {
+    color: #ffb9bf;
+    background: #351d26;
+    border-color: #63303b;
+}
+
+html[data-theme='dark'] .hr-applicant-details-success {
+    color: #9ce6bf;
+    background: #183127;
+    border-color: #28553f;
+}
+
+/* Responsive layout */
+@media (max-width: 760px) {
+    .hr-applicant-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hr-applicant-cover-letter {
+        grid-column: auto;
+    }
+
+    .hr-applicant-details-panel {
+        padding: 19px;
+    }
+
+    .hr-applicant-detail-row {
+        gap: 12px;
+    }
+
+        .hr-applicant-detail-row span {
+            max-width: 42%;
+            white-space: normal;
+        }
+}

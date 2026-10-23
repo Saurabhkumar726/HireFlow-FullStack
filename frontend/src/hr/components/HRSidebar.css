@@ -1,0 +1,260 @@
+/* HR navigation sidebar shared by every employer workspace page. */
+.hr-sidebar {
+    display: flex;
+    flex: 0 0 250px;
+    flex-direction: column;
+    align-self: stretch;
+    width: 250px;
+    min-width: 250px;
+    min-height: calc(100vh - 100px);
+    padding: 26px 16px 18px;
+    border-right: 1px solid var(--hr-border, #e7e8ee);
+    background: var(--hr-sidebar-bg, var(--surface, #ffffff));
+    color: var(--hr-text, #202233);
+}
+
+    .hr-sidebar,
+    .hr-sidebar *,
+    .hr-sidebar *::before,
+    .hr-sidebar *::after {
+        box-sizing: border-box;
+    }
+
+.hr-sidebar-heading {
+    padding: 0 10px 27px;
+    border-bottom: 1px solid var(--hr-border, #e7e8ee);
+}
+
+.hr-sidebar-eyebrow {
+    display: block;
+    margin-bottom: 10px;
+    color: #7771e8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+}
+
+.hr-sidebar-heading h2 {
+    margin: 0 0 8px;
+    font-size: 21px;
+    font-weight: 750;
+    letter-spacing: -0.6px;
+    line-height: 1.25;
+}
+
+.hr-sidebar-heading p {
+    margin: 0;
+    color: var(--hr-muted, #777b8c);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.hr-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-top: 25px;
+}
+
+.hr-sidebar-section-label {
+    padding: 0 11px 10px;
+    color: var(--hr-muted, #85899a);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
+.hr-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: var(--hr-muted, #656a7b);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 160ms ease, color 160ms ease;
+}
+
+    .hr-sidebar-link:hover {
+        background: var(--hr-hover, #f5f5fc);
+        color: var(--hr-text, #202233);
+    }
+
+    .hr-sidebar-link.active {
+        border-color: var(--hr-active-border, #e3e2ff);
+        background: var(--hr-active-bg, #efefff);
+        color: var(--hr-accent, #6258db);
+        font-weight: 750;
+    }
+
+.hr-sidebar-icon {
+    display: inline-flex;
+    flex: 0 0 21px;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.hr-sidebar-add {
+    margin-left: auto;
+    font-size: 18px;
+}
+
+/* Keep the user identity and back button together at the bottom with even spacing. */
+.hr-sidebar-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--hr-border, #e7e8ee);
+}
+
+.hr-sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 0 5px 16px;
+}
+
+.hr-sidebar-avatar {
+    position: relative;
+    display: flex;
+    flex: 0 0 38px;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #e9e7ff;
+    color: #5c50ce;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.hr-sidebar-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.hr-sidebar-avatar-image {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+    object-position: center;
+}
+
+.hr-sidebar-user-info {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+    .hr-sidebar-user-info strong {
+        overflow: hidden;
+        color: var(--hr-text, #202233);
+        font-size: 12px;
+        line-height: 1.4;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .hr-sidebar-user-info span {
+        color: var(--hr-muted, #85899a);
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+.hr-sidebar-home {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 40px;
+    padding: 10px;
+    border: 1px solid var(--hr-border, #e7e8ee);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--hr-muted, #656a7b);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+    .hr-sidebar-home:hover {
+        border-color: var(--hr-active-border, #e3e2ff);
+        background: var(--hr-hover, #f5f5fc);
+        color: var(--hr-text, #202233);
+    }
+
+    .hr-sidebar-home:focus-visible,
+    .hr-sidebar-link:focus-visible {
+        outline: 2px solid var(--hr-accent, #6258db);
+        outline-offset: 2px;
+    }
+
+@media (max-width: 760px) {
+    .hr-sidebar {
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        padding: 18px 14px;
+        border-right: 0;
+        border-bottom: 1px solid var(--hr-border, #e7e8ee);
+    }
+
+    .hr-sidebar-heading {
+        padding-bottom: 16px;
+    }
+
+    .hr-sidebar-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+        padding-top: 16px;
+    }
+
+    .hr-sidebar-section-label {
+        grid-column: 1 / -1;
+    }
+
+    .hr-sidebar-link {
+        gap: 8px;
+        padding: 0 9px;
+        font-size: 12px;
+    }
+
+    .hr-sidebar-bottom {
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hr-sidebar-link,
+    .hr-sidebar-home {
+        transition: none;
+    }
+}

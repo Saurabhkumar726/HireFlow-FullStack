@@ -4,6 +4,7 @@ import './StudentDashboard.css'
 import CandidateProfileSections from './CandidateProfileSections'
 import { useAuth } from '../context/useAuth'
 import ConfirmDialog from './ConfirmDialog'
+import CandidateInterviews from './CandidateInterviews'
 
 const API_URL = 'http://localhost:5116/api'
 const API_ORIGIN = 'http://localhost:5116'
@@ -20,6 +21,7 @@ const tabs = [
     { id: 'profile', label: 'My Profile', icon: '♙' },
     { id: 'resume', label: 'My Resume', icon: '▤' },
     { id: 'applications', label: 'My Applications', icon: '▣' },
+    { id: 'interviews', label: 'My Interviews', icon: '◷' },
 ]
 
 const profileSectionLinks = [
@@ -769,6 +771,12 @@ export default function StudentDashboard() {
                         </div>
                     )}
 
+                    {!loading && activeTab === 'interviews' && (
+                        <div className="student-tab-content student-interviews-tab-content">
+                            <CandidateInterviews />
+                        </div>
+                    )}
+
                     {!loading && activeTab === 'overview' && (
                         <div className="student-tab-content">
                             <div className="student-section-heading">
@@ -990,7 +998,7 @@ export default function StudentDashboard() {
                                 </button>
                             </form>
 
-                            <CandidateProfileSections token={token} onProfileUpdated={loadDashboard} />
+                            <CandidateProfileSections token={token} />
                         </div>
                     )}
 

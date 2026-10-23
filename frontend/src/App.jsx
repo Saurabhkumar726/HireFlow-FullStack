@@ -4,8 +4,10 @@ import Footer from './components/Footer'
 import JobDetails from './components/JobDetails'
 import Login from './components/Login'
 import StudentDashboard from './components/StudentDashboard'
+import CandidateInterviews from './components/CandidateInterviews'
 import SavedJobs from './components/SavedJobs'
 import ShareJob from './components/ShareJob'
+import HRLayout from './hr/layouts/HRLayout'
 import { useAuth } from './context/useAuth'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 
@@ -20,7 +22,10 @@ const formatSalary = (salary) => {
 
 function App() {
     const locationPath = useLocation()
+    const isHRRoute = locationPath.pathname.startsWith('/hr')
     const navigate = useNavigate()
+    const isCandidateInterviewsRoute =
+        locationPath.pathname === '/candidate/interviews'
     const isCandidateRoute = locationPath.pathname.startsWith('/candidate')
     const isSavedJobsRoute = locationPath.pathname === '/saved-jobs'
     const isJobDetailsRoute = /^\/jobs\/[^/]+\/?$/.test(locationPath.pathname)
@@ -330,21 +335,34 @@ function App() {
                     className={`nav-links ${mobileMenu ? 'nav-open' : ''}`}
                     aria-label="Main navigation"
                 >
-                    <a href="/#jobs" onClick={() => setMobileMenu(false)}>Find jobs</a>
-                    <a href="/#categories" onClick={() => setMobileMenu(false)}>Categories</a>
-                    {isAuthenticated && user?.role === 'Student' && (
-                        <button
-                            type="button"
-                            className="saved-jobs-nav"
-                            onClick={() => {
-                                setMobileMenu(false)
-                                navigate('/saved-jobs')
-                            }}
-                        >
-                            Saved Jobs ({savedJobs.length})
-                        </button>
+                    {!isHRRoute && (
+                        <>
+                            <a href="/#jobs" onClick={() => setMobileMenu(false)}>
+                                Find jobs
+                            </a>
+
+                            <a href="/#categories" onClick={() => setMobileMenu(false)}>
+                                Categories
+                            </a>
+
+                            {isAuthenticated && user?.role === 'Student' && (
+                                <button
+                                    type="button"
+                                    className="saved-jobs-nav"
+                                    onClick={() => {
+                                        setMobileMenu(false)
+                                        navigate('/saved-jobs')
+                                    }}
+                                >
+                                    Saved Jobs ({savedJobs.length})
+                                </button>
+                            )}
+
+                            <a href="/#about" onClick={() => setMobileMenu(false)}>
+                                About
+                            </a>
+                        </>
                     )}
-                    <a href="/#about" onClick={() => setMobileMenu(false)}>About</a>
                     {isAuthenticated ? (
                         <>
                             <button
@@ -352,13 +370,13 @@ function App() {
                                 className="nav-signin"
                                 onClick={() => {
                                     setMobileMenu(false)
-                                    if (user?.role === 'Student') {
+
+                                    if (user?.role === 'HR') {
+                                        navigate('/hr')
+                                    } else if (user?.role === 'Student') {
                                         navigate('/candidate')
                                     } else {
                                         navigate('/')
-                                        window.setTimeout(() => {
-                                            document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' })
-                                        }, 0)
                                     }
                                 }}
                             >
@@ -388,11 +406,27 @@ function App() {
                             Sign in
                         </button>
                     )}
-                    <a className="nav-cta" href="/#jobs" onClick={() => setMobileMenu(false)}>Get started <span>↗</span></a>
+                    {!isHRRoute && (
+                        <a
+                            className="nav-cta"
+                            href="/#jobs"
+                            onClick={() => setMobileMenu(false)}
+                        >
+                            Get started <span>↗</span>
+                        </a>
+                    )}
                 </nav>
             </header>
 
-            {isCandidateRoute ? (
+            {isHRRoute ? (
+                <HRLayout />
+            ) : isCandidateInterviewsRoute ? (
+                isAuthenticated && user?.role === 'Student' ? (
+                    <CandidateInterviews />
+                ) : (
+                    <Navigate to="/" replace />
+                )
+            ) : isCandidateRoute ? (
                 isAuthenticated && user?.role === 'Student' ? (
                     <StudentDashboard />
                 ) : (

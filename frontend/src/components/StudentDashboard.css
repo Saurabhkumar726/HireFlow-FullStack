@@ -1222,14 +1222,14 @@ html[data-theme="dark"] .student-resume-info .student-resume-last-updated {
     word-break: normal;
 }
 
-.student-sidebar-profile strong {
-    max-width: 100%;
-    white-space: normal;
-}
+    .student-sidebar-profile strong {
+        max-width: 100%;
+        white-space: normal;
+    }
 
-.student-sidebar-profile > span:not(.student-profile-last-updated) {
-    overflow-wrap: anywhere;
-}
+    .student-sidebar-profile > span:not(.student-profile-last-updated) {
+        overflow-wrap: anywhere;
+    }
 
 .student-profile-last-updated {
     overflow-wrap: normal;
@@ -1250,11 +1250,11 @@ html[data-theme="dark"] .student-resume-info .student-resume-last-updated {
     min-width: 0;
 }
 
-.student-application-main strong,
-.student-application-main span,
-.student-application-main small {
-    overflow-wrap: anywhere;
-}
+    .student-application-main strong,
+    .student-application-main span,
+    .student-application-main small {
+        overflow-wrap: anywhere;
+    }
 
 @media (max-width: 900px) {
     .student-dashboard {
@@ -1289,32 +1289,32 @@ html[data-theme="dark"] .student-resume-info .student-resume-last-updated {
         text-align: left;
     }
 
-    .student-sidebar-profile .student-avatar {
-        grid-area: avatar;
-        width: 64px;
-        height: 64px;
-    }
+        .student-sidebar-profile .student-avatar {
+            grid-area: avatar;
+            width: 64px;
+            height: 64px;
+        }
 
-    .student-sidebar-profile strong {
-        grid-area: name;
-        align-self: end;
-        line-height: 1.35;
-    }
+        .student-sidebar-profile strong {
+            grid-area: name;
+            align-self: end;
+            line-height: 1.35;
+        }
 
-    .student-sidebar-profile > span:not(.student-profile-last-updated) {
-        grid-area: email;
-        max-width: 100%;
-        overflow-wrap: anywhere;
-        line-height: 1.4;
-    }
+        .student-sidebar-profile > span:not(.student-profile-last-updated) {
+            grid-area: email;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            line-height: 1.4;
+        }
 
-    .student-sidebar-profile .student-profile-last-updated {
-        grid-area: updated;
-        align-self: start;
-        max-width: 100%;
-        font-size: 11px;
-        line-height: 1.4;
-    }
+        .student-sidebar-profile .student-profile-last-updated {
+            grid-area: updated;
+            align-self: start;
+            max-width: 100%;
+            font-size: 11px;
+            line-height: 1.4;
+        }
 
     .student-dashboard-nav {
         display: flex;
@@ -1326,21 +1326,21 @@ html[data-theme="dark"] .student-resume-info .student-resume-last-updated {
         scrollbar-width: thin;
     }
 
-    .student-dashboard-nav button {
-        flex: 0 0 auto;
-        width: auto;
-        min-height: 44px;
-        white-space: nowrap;
-    }
+        .student-dashboard-nav button {
+            flex: 0 0 auto;
+            width: auto;
+            min-height: 44px;
+            white-space: nowrap;
+        }
 
     .student-profile-section-nav {
         margin-top: 12px;
         padding-top: 12px;
     }
 
-    .student-profile-section-nav nav {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+        .student-profile-section-nav nav {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
 }
 
 @media (max-width: 520px) {
@@ -1355,10 +1355,10 @@ html[data-theme="dark"] .student-resume-info .student-resume-last-updated {
         margin-bottom: 22px;
     }
 
-    .student-dashboard-header h1 {
-        font-size: clamp(26px, 7vw, 34px);
-        overflow-wrap: anywhere;
-    }
+        .student-dashboard-header h1 {
+            font-size: clamp(26px, 7vw, 34px);
+            overflow-wrap: anywhere;
+        }
 
     .student-refresh-button {
         align-self: flex-start;
@@ -1374,32 +1374,32 @@ html[data-theme="dark"] .student-resume-info .student-resume-last-updated {
         gap: 3px 10px;
     }
 
-    .student-sidebar-profile .student-avatar {
-        width: 54px;
-        height: 54px;
-    }
+        .student-sidebar-profile .student-avatar {
+            width: 54px;
+            height: 54px;
+        }
 
-    .student-sidebar-profile strong {
-        font-size: 14px;
-    }
+        .student-sidebar-profile strong {
+            font-size: 14px;
+        }
 
-    .student-sidebar-profile > span:not(.student-profile-last-updated) {
-        font-size: 12px;
-    }
+        .student-sidebar-profile > span:not(.student-profile-last-updated) {
+            font-size: 12px;
+        }
 
-    .student-sidebar-profile .student-profile-last-updated {
-        font-size: 10px;
-    }
+        .student-sidebar-profile .student-profile-last-updated {
+            font-size: 10px;
+        }
 
     .student-dashboard-nav {
         margin-right: -2px;
         margin-left: -2px;
     }
 
-    .student-dashboard-nav button {
-        padding: 10px 12px;
-        font-size: 13px;
-    }
+        .student-dashboard-nav button {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
 
     .student-profile-section-nav nav {
         grid-template-columns: minmax(0, 1fr);
@@ -1437,4 +1437,75 @@ html[data-theme="dark"] .student-resume-info .student-resume-last-updated {
     .student-status {
         align-self: flex-start;
     }
+}
+
+/* ===== Candidate interviews tab: inherit HireFlow's dark dashboard theme ===== */
+.student-interviews-tab-content {
+    width: 100%;
+    min-width: 0;
+    color: var(--student-text, #f5f2ff);
+}
+
+    .student-interviews-tab-content > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+html[data-theme="dark"] .student-interviews-tab-content {
+    color: #f5f2ff;
+    color-scheme: dark;
+}
+
+    /* The interview widget has its own card layout; keep it visually consistent
+   with the dashboard without affecting the other student tabs. */
+    html[data-theme="dark"] .student-interviews-tab-content h1,
+    html[data-theme="dark"] .student-interviews-tab-content h2,
+    html[data-theme="dark"] .student-interviews-tab-content h3,
+    html[data-theme="dark"] .student-interviews-tab-content h4,
+    html[data-theme="dark"] .student-interviews-tab-content strong,
+    html[data-theme="dark"] .student-interviews-tab-content label {
+        color: #f5f2ff;
+    }
+
+    html[data-theme="dark"] .student-interviews-tab-content p,
+    html[data-theme="dark"] .student-interviews-tab-content small,
+    html[data-theme="dark"] .student-interviews-tab-content span {
+        overflow-wrap: anywhere;
+    }
+
+    html[data-theme="dark"] .student-interviews-tab-content button,
+    html[data-theme="dark"] .student-interviews-tab-content select,
+    html[data-theme="dark"] .student-interviews-tab-content input,
+    html[data-theme="dark"] .student-interviews-tab-content textarea {
+        font: inherit;
+    }
+
+    html[data-theme="dark"] .student-interviews-tab-content select,
+    html[data-theme="dark"] .student-interviews-tab-content input,
+    html[data-theme="dark"] .student-interviews-tab-content textarea {
+        background-color: #242236;
+        border-color: #45415d;
+        color: #f5f2ff;
+    }
+
+        html[data-theme="dark"] .student-interviews-tab-content button:focus-visible,
+        html[data-theme="dark"] .student-interviews-tab-content select:focus-visible,
+        html[data-theme="dark"] .student-interviews-tab-content a:focus-visible {
+            outline: 2px solid #b7a5ff;
+            outline-offset: 3px;
+        }
+
+    html[data-theme="dark"] .student-interviews-tab-content a {
+        overflow-wrap: anywhere;
+    }
+
+@media (max-width: 680px) {
+    .student-interviews-tab-content {
+        gap: 16px;
+    }
+
+        .student-interviews-tab-content .student-section-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
 }
