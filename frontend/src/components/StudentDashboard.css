@@ -1509,3 +1509,128 @@ html[data-theme="dark"] .student-interviews-tab-content {
             flex-direction: column;
         }
 }
+
+
+/* HireFlow navigation polish: consistent round, multi-tone icon badges. */
+.student-dashboard-nav button {
+    min-height: 48px;
+    padding: 7px 10px;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    gap: 11px;
+}
+
+    .student-dashboard-nav button > span {
+        width: 33px;
+        height: 33px;
+        flex: 0 0 33px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 15px;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.72), 0 4px 10px rgba(31,37,66,.05);
+    }
+
+    .student-dashboard-nav button:nth-child(4n + 1) > span {
+        color: #6651d8;
+        background: linear-gradient(145deg, #eeeaff, #dcd5ff);
+    }
+
+    .student-dashboard-nav button:nth-child(4n + 2) > span {
+        color: #3472c9;
+        background: linear-gradient(145deg, #e5f1ff, #cfe3ff);
+    }
+
+    .student-dashboard-nav button:nth-child(4n + 3) > span {
+        color: #188d88;
+        background: linear-gradient(145deg, #def8f2, #c4eee7);
+    }
+
+    .student-dashboard-nav button:nth-child(4n) > span {
+        color: #bd7a19;
+        background: linear-gradient(145deg, #fff1d9, #ffe0ad);
+    }
+
+    .student-dashboard-nav button:hover,
+    .student-dashboard-nav button.active {
+        border-color: var(--student-border, #e8e5fa);
+        box-shadow: 0 5px 14px rgba(40, 38, 90, .045);
+    }
+
+.student-profile-section-nav button {
+    min-height: 37px;
+    border-radius: 11px;
+}
+
+    .student-profile-section-nav button > span {
+        width: 27px;
+        height: 27px;
+        flex: 0 0 27px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.72);
+    }
+
+    .student-profile-section-nav button:nth-child(4n + 1) > span {
+        color: #6651d8;
+        background: #eeeaff;
+    }
+
+    .student-profile-section-nav button:nth-child(4n + 2) > span {
+        color: #3472c9;
+        background: #e5f1ff;
+    }
+
+    .student-profile-section-nav button:nth-child(4n + 3) > span {
+        color: #188d88;
+        background: #def8f2;
+    }
+
+    .student-profile-section-nav button:nth-child(4n) > span {
+        color: #bd7a19;
+        background: #fff1d9;
+    }
+
+html[data-theme="dark"] .student-dashboard-nav button > span,
+html[data-theme="dark"] .student-profile-section-nav button > span {
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .student-dashboard-nav button:nth-child(4n + 1) > span,
+html[data-theme="dark"] .student-profile-section-nav button:nth-child(4n + 1) > span {
+    color: #c7bcff;
+    background: #3b3262;
+}
+
+html[data-theme="dark"] .student-dashboard-nav button:nth-child(4n + 2) > span,
+html[data-theme="dark"] .student-profile-section-nav button:nth-child(4n + 2) > span {
+    color: #a9d0ff;
+    background: #243e60;
+}
+
+html[data-theme="dark"] .student-dashboard-nav button:nth-child(4n + 3) > span,
+html[data-theme="dark"] .student-profile-section-nav button:nth-child(4n + 3) > span {
+    color: #9de8d9;
+    background: #214b49;
+}
+
+html[data-theme="dark"] .student-dashboard-nav button:nth-child(4n) > span,
+html[data-theme="dark"] .student-profile-section-nav button:nth-child(4n) > span {
+    color: #ffd89b;
+    background: #59432a;
+}
+
+@media (max-width: 680px) {
+    .student-dashboard-nav button {
+        min-height: 45px;
+        padding: 7px 8px;
+    }
+
+        .student-dashboard-nav button > span {
+            width: 30px;
+            height: 30px;
+            flex-basis: 30px;
+        }
+}

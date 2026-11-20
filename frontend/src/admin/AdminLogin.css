@@ -1,0 +1,47 @@
+/* Component-specific rules live in AdminPortal.css to keep the portal visually consistent. */
+
+/*
+ * HireFlow Admin Login
+ * Shared portal layout and responsive styles are defined in AdminPortal.css.
+ * This file imports those styles so AdminLogin remains independently styled
+ * and the existing Admin portal design stays consistent.
+ */
+
+@import './AdminPortal.css';
+
+/* Login form accessibility and interaction states */
+.admin-login-form input:focus-visible,
+.admin-password-toggle:focus-visible,
+.admin-submit-button:focus-visible {
+    outline: 2px solid #7156df;
+    outline-offset: 3px;
+}
+
+.admin-password-toggle:hover {
+    color: #7156df;
+}
+
+.admin-submit-button:hover:not(:disabled) {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.admin-submit-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.admin-submit-button,
+.admin-password-toggle {
+    transition: filter 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-submit-button,
+    .admin-password-toggle {
+        transition: none;
+    }
+
+    .admin-button-spinner {
+        animation-duration: 1.5s;
+    }
+}

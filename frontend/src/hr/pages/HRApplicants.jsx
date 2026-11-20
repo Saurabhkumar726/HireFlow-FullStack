@@ -2,9 +2,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './HRApplicants.css'
+import SkeletonLoader from '../../components/SkeletonLoader.jsx'
 
 const API_BASE = 'http://localhost:5116/api'
-const STATUSES = ['Pending', 'Reviewed', 'Shortlisted', 'Rejected']
+const EDITABLE_STATUSES = ['Pending', 'Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected', 'Rejected']
+const FILTER_STATUSES = [...EDITABLE_STATUSES, 'Withdrawn']
 
 function getApplicationId(application) {
     const value =
@@ -56,7 +58,8 @@ function getJobTitle(application) {
 }
 
 function getStatus(application) {
-    return application?.status ?? application?.Status ?? 'Pending'
+    const value = application?.status ?? application?.Status ?? 'Pending'
+    return String(value).toLowerCase() === 'reviewed' ? 'Under Review' : value
 }
 
 function getAppliedDate(application) {
@@ -126,6 +129,9 @@ function HRApplicants() {
     const [error, setError] = useState('')
     const [notice, setNotice] = useState('')
     const [reloadKey, setReloadKey] = useState(0)
+    const [selectedIds, setSelectedIds] = useState([])
+    const [bulkStatus, setBulkStatus] = useState('Under Review')
+    const [bulkBusy, setBulkBusy] = useState(false)
 
     const loadApplications = useCallback(async (signal) => {
         try {
@@ -227,6 +233,96 @@ function HRApplicants() {
         })
     }, [applications, search, statusFilter])
 
+    const selectableApplications = useMemo(
+        () => filteredApplications.filter((item) => {
+            const id = getApplicationId(item)
+            const status = String(getStatus(item))
+            return id !== null && !['Selected', 'Withdrawn'].includes(status)
+        }),
+        [filteredApplications]
+    )
+
+    const allVisibleSelected = selectableApplications.length > 0 &&
+        selectableApplications.every((item) => selectedIds.includes(getApplicationId(item)))
+
+    function toggleApplicationSelection(applicationId) {
+        setSelectedIds((current) => current.includes(applicationId)
+            ? current.filter((id) => id !== applicationId)
+            : [...current, applicationId])
+    }
+
+    function toggleVisibleSelection() {
+        const visibleIds = selectableApplications.map(getApplicationId)
+        setSelectedIds((current) => allVisibleSelected
+            ? current.filter((id) => !visibleIds.includes(id))
+            : [...new Set([...current, ...visibleIds])])
+    }
+
+    async function runBulkStatusUpdate() {
+        const ids = selectedIds.filter((id) => applications.some((item) =>
+            getApplicationId(item) === id && !['Selected', 'Withdrawn'].includes(String(getStatus(item)))
+        ))
+        if (!ids.length) {
+            setError('Select at least one active applicant first.')
+            return
+        }
+        let rejectionReason = ''
+        if (bulkStatus === 'Rejected') {
+            rejectionReason = window.prompt('Enter the rejection reason to share with the selected candidates:')?.trim() || ''
+            if (!rejectionReason) {
+                setError('A rejection reason is required for bulk rejection.')
+                return
+            }
+        }
+        setBulkBusy(true)
+        setError('')
+        setNotice('')
+        try {
+            const token = localStorage.getItem('hireflow-token')
+            if (!token) throw new Error('Your session has expired. Please sign in again.')
+            const response = await fetch(`${API_BASE}/ApplicantManagement/bulk-status`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ applicationIds: ids, status: bulkStatus, rejectionReason }),
+            })
+            if (!response.ok) throw new Error(await getErrorMessage(response))
+            const result = await response.json().catch(() => ({}))
+            setNotice(`${Number(result.updatedCount ?? ids.length)} applications updated to ${bulkStatus}.`)
+            setSelectedIds([])
+            refreshApplications()
+        } catch (err) {
+            setError(err.message || 'Bulk update failed.')
+        } finally {
+            setBulkBusy(false)
+        }
+    }
+
+    async function exportApplications(format) {
+        setError('')
+        try {
+            const token = localStorage.getItem('hireflow-token')
+            if (!token) throw new Error('Your session has expired. Please sign in again.')
+            const params = new URLSearchParams({ format })
+            if (statusFilter !== 'All') params.set('status', statusFilter)
+            const response = await fetch(`${API_BASE}/ApplicantManagement/export?${params.toString()}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!response.ok) throw new Error(await getErrorMessage(response))
+            const blob = await response.blob()
+            const url = URL.createObjectURL(blob)
+            const anchor = document.createElement('a')
+            anchor.href = url
+            anchor.download = `hireflow-applicants-${new Date().toISOString().slice(0, 10)}.${format}`
+            document.body.appendChild(anchor)
+            anchor.click()
+            anchor.remove()
+            URL.revokeObjectURL(url)
+            setNotice(`Applicant ${format.toUpperCase()} export downloaded.`)
+        } catch (err) {
+            setError(err.message || 'Export failed.')
+        }
+    }
+
     const pendingCount = useMemo(
         () =>
             applications.filter(
@@ -245,6 +341,14 @@ function HRApplicants() {
         [applications]
     )
 
+    useEffect(() => {
+        const availableIds = new Set(applications
+            .filter((item) => !['Selected', 'Withdrawn'].includes(String(getStatus(item))))
+            .map(getApplicationId)
+            .filter((id) => id !== null))
+        setSelectedIds((current) => current.filter((id) => availableIds.has(id)))
+    }, [applications])
+
     const refreshApplications = useCallback(() => {
         setLoading(true)
         setError('')
@@ -262,7 +366,7 @@ function HRApplicants() {
             return
         }
 
-        if (!STATUSES.includes(nextStatus)) {
+        if (!EDITABLE_STATUSES.includes(nextStatus)) {
             setError('Please select a valid application status.')
             return
         }
@@ -270,6 +374,19 @@ function HRApplicants() {
         const previousStatus = getStatus(application)
 
         if (previousStatus === nextStatus) return
+        if (['Selected', 'Withdrawn'].includes(String(previousStatus))) {
+            setError('Selected and Withdrawn applications are final and cannot be changed from this list.')
+            return
+        }
+
+        let rejectionReason = ''
+        if (nextStatus === 'Rejected') {
+            rejectionReason = window.prompt('Enter a rejection reason to share with the candidate:')?.trim() || ''
+            if (!rejectionReason) {
+                setError('A rejection reason is required. Open applicant details to review the application and try again.')
+                return
+            }
+        }
 
         setUpdatingId(applicationId)
         setError('')
@@ -283,7 +400,7 @@ function HRApplicants() {
             }
 
             const response = await fetch(
-                `${API_BASE}/JobApplications/${applicationId}/status`,
+                `${API_BASE}/JobApplications/${applicationId}/status-details`,
                 {
                     method: 'PUT',
                     headers: {
@@ -291,8 +408,7 @@ function HRApplicants() {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
                     },
-                    // The backend accepts the status as a JSON string.
-                    body: JSON.stringify(nextStatus),
+                    body: JSON.stringify({ status: nextStatus, rejectionReason }),
                 }
             )
 
@@ -303,7 +419,7 @@ function HRApplicants() {
             setApplications((current) =>
                 current.map((item) =>
                     getApplicationId(item) === applicationId
-                        ? { ...item, status: nextStatus, Status: nextStatus }
+                        ? { ...item, status: nextStatus, Status: nextStatus, rejectionReason: rejectionReason || null, RejectionReason: rejectionReason || null }
                         : item
                 )
             )
@@ -394,7 +510,7 @@ function HRApplicants() {
                     aria-label="Filter by application status"
                 >
                     <option value="All">All statuses</option>
-                    {STATUSES.map((status) => (
+                    {FILTER_STATUSES.map((status) => (
                         <option key={status} value={status}>
                             {status}
                         </option>
@@ -402,10 +518,24 @@ function HRApplicants() {
                 </select>
             </div>
 
-            {loading ? (
-                <div className="hr-applicants-empty">
-                    Loading applications…
+            <div className="hr-applicants-bulk-toolbar">
+                <label className="hr-applicants-select-all">
+                    <input type="checkbox" checked={allVisibleSelected} onChange={toggleVisibleSelection} disabled={!selectableApplications.length || bulkBusy} />
+                    <span>Select visible ({selectableApplications.length})</span>
+                </label>
+                <div className="hr-applicants-bulk-actions">
+                    <span className="hr-applicants-selected-count">{selectedIds.length} selected</span>
+                    <select aria-label="Bulk application status" value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value)} disabled={bulkBusy}>
+                        {EDITABLE_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+                    </select>
+                    <button type="button" onClick={runBulkStatusUpdate} disabled={bulkBusy || selectedIds.length === 0}>{bulkBusy ? 'Updating…' : 'Apply to selected'}</button>
+                    <button type="button" className="secondary" onClick={() => exportApplications('csv')}>Export CSV</button>
+                    <button type="button" className="secondary" onClick={() => exportApplications('xlsx')}>Export Excel</button>
                 </div>
+            </div>
+
+            {loading ? (
+                <SkeletonLoader variant="application-list" count={5} />
             ) : filteredApplications.length === 0 ? (
                 <div className="hr-applicants-empty">
                     <div className="hr-applicants-empty-icon">♙</div>
@@ -450,6 +580,14 @@ function HRApplicants() {
                                 }
                             >
                                 <div className="hr-applicant-card-main">
+                                    <label className="hr-applicant-select" aria-label={`Select ${name}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={applicationId !== null && selectedIds.includes(applicationId)}
+                                            disabled={applicationId === null || ['Selected', 'Withdrawn'].includes(status) || bulkBusy}
+                                            onChange={() => toggleApplicationSelection(applicationId)}
+                                        />
+                                    </label>
                                     <div className="hr-applicant-avatar">
                                         {name.charAt(0).toUpperCase()}
                                     </div>
@@ -500,6 +638,7 @@ function HRApplicants() {
                                             value={status}
                                             disabled={
                                                 applicationId === null ||
+                                                ['Selected', 'Withdrawn'].includes(status) ||
                                                 isUpdating
                                             }
                                             onChange={(event) =>
@@ -510,13 +649,13 @@ function HRApplicants() {
                                             }
                                             aria-label={`Update status for ${name}`}
                                         >
-                                            {!STATUSES.includes(status) && (
+                                            {!FILTER_STATUSES.includes(status) && (
                                                 <option value={status}>
                                                     {status}
                                                 </option>
                                             )}
 
-                                            {STATUSES.map((item) => (
+                                            {EDITABLE_STATUSES.map((item) => (
                                                 <option
                                                     key={item}
                                                     value={item}

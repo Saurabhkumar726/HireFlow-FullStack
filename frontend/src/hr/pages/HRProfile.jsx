@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/useAuth';
 import ConfirmDialog from '../components/ConfirmDialog';
+import CityLocationAutocomplete from '../../components/CityLocationAutocomplete';
+import SkeletonLoader from '../../components/SkeletonLoader.jsx';
 import './HRProfile.css';
 
 const API_URL = 'http://localhost:5116/api';
@@ -65,6 +67,7 @@ export default function HRProfile() {
     const [jobTitle, setJobTitle] = useState(() => user?.jobTitle || '');
     const [location, setLocation] = useState(() => user?.location || '');
     const [editing, setEditing] = useState(false);
+    const [profileInitializing, setProfileInitializing] = useState(true);
     const [loading, setLoading] = useState(false);
     const [photoBusy, setPhotoBusy] = useState(false);
     const [message, setMessage] = useState('');
@@ -84,7 +87,7 @@ export default function HRProfile() {
     // Restore the profile from the database when the signed-in account loads.
     // This ensures the saved photo is available after logout/login or refresh.
     useEffect(() => {
-        if (!token || !user) return;
+        if (!token || !user) return undefined;
 
         let cancelled = false;
 
@@ -131,6 +134,8 @@ export default function HRProfile() {
                         profileError
                     );
                 }
+            } finally {
+                if (!cancelled) setProfileInitializing(false);
             }
         }
 
@@ -457,6 +462,14 @@ export default function HRProfile() {
         setConfirmDeletePhoto(false);
     }
 
+    if (user && profileInitializing) {
+        return (
+            <div className="hr-profile">
+                <SkeletonLoader variant="profile" />
+            </div>
+        );
+    }
+
     if (!user) {
         return (
             <div className="hr-profile">
@@ -702,16 +715,15 @@ export default function HRProfile() {
 
                         <label className="hr-profile-field">
                             <span>Location</span>
-                            <input
+                            <CityLocationAutocomplete
                                 type="text"
                                 value={location}
-                                onChange={(event) =>
-                                    setLocation(event.target.value)
-                                }
-                                placeholder="City, State or Country"
+                                onChange={setLocation}
+                                placeholder="City, State"
                                 disabled={!editing || loading}
                                 maxLength={150}
                                 autoComplete="address-level2"
+                                ariaLabel="HR profile location"
                             />
                         </label>
                     </div>

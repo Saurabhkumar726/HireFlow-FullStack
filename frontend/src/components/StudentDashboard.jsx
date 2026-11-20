@@ -5,6 +5,7 @@ import CandidateProfileSections from './CandidateProfileSections'
 import { useAuth } from '../context/useAuth'
 import ConfirmDialog from './ConfirmDialog'
 import CandidateInterviews from './CandidateInterviews'
+import SkeletonLoader from './SkeletonLoader.jsx'
 
 const API_URL = 'http://localhost:5116/api'
 const API_ORIGIN = 'http://localhost:5116'
@@ -765,10 +766,7 @@ export default function StudentDashboard() {
                     )}
 
                     {loading && (
-                        <div className="student-loading">
-                            <span className="loading-spinner" />
-                            <p>Loading your dashboard…</p>
-                        </div>
+                        <SkeletonLoader variant="dashboard" />
                     )}
 
                     {!loading && activeTab === 'interviews' && (

@@ -1,7 +1,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmDialog from '../components/ConfirmDialog'
+import CandidateResponseReview from '../components/CandidateResponseReview'
+import InterviewFeedbackPanel from '../components/InterviewFeedbackPanel'
 import './HRInterviews.css'
+import SkeletonLoader from '../../components/SkeletonLoader.jsx'
 
 const API_BASE = 'http://localhost:5116/api'
 const INTERVIEW_TYPES = ['Online', 'In-person', 'Phone']
@@ -462,7 +465,7 @@ function HRInterviews() {
 
         setError('')
         setNotice('')
-        setPendingConfirmation({ type: 'delete', item })
+        setPendingConfirmation({ type: 'cancel', item })
     }
 
     async function deleteInterview(item) {
@@ -495,10 +498,12 @@ function HRInterviews() {
             await readResponse(response)
 
             setInterviews((current) =>
-                current.filter((interview) => getId(interview) !== id)
+                current.map((interview) => getId(interview) === id
+                    ? { ...interview, status: 'Cancelled', Status: 'Cancelled' }
+                    : interview)
             )
             setPendingConfirmation(null)
-            setNotice('Interview deleted successfully.')
+            setNotice('Interview cancelled and retained in interview history.')
         } catch (err) {
             setError(err.message || 'Unable to delete the interview.')
             setPendingConfirmation(null)
@@ -515,7 +520,7 @@ function HRInterviews() {
             return
         }
 
-        if (pendingConfirmation.type === 'delete') {
+        if (pendingConfirmation.type === 'cancel') {
             await deleteInterview(pendingConfirmation.item)
         }
     }
@@ -621,11 +626,7 @@ function HRInterviews() {
             </div>
 
             {loading ? (
-                <div className="hi-empty">
-                    <span className="hi-loading-indicator" />
-                    <h3>Loading interviews…</h3>
-                    <p>Fetching your interview schedule.</p>
-                </div>
+                <SkeletonLoader variant="interviews" count={4} />
             ) : filteredInterviews.length === 0 ? (
                 <div className="hi-empty">
                     <div className="hi-empty-icon">▦</div>
@@ -728,6 +729,12 @@ function HRInterviews() {
                                     </p>
                                 )}
 
+                                <CandidateResponseReview
+                                    interview={item}
+                                    onChanged={() => setReloadKey((current) => current + 1)}
+                                />
+                                <InterviewFeedbackPanel interview={item} />
+
                                 <footer className="hi-interview-card-footer">
                                     <span>Interview #{id ?? '—'}</span>
                                     <div>
@@ -738,13 +745,15 @@ function HRInterviews() {
                                         >
                                             Edit
                                         </button>
-                                        <button
-                                            type="button"
-                                            className="hi-button hi-button-danger"
-                                            onClick={() => requestDeleteInterview(item)}
-                                        >
-                                            Delete
-                                        </button>
+                                        {getInterviewStatus(item) !== 'Cancelled' && (
+                                            <button
+                                                type="button"
+                                                className="hi-button hi-button-danger"
+                                                onClick={() => requestDeleteInterview(item)}
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
                                     </div>
                                 </footer>
                             </article>
@@ -762,22 +771,22 @@ function HRInterviews() {
                 title={
                     pendingConfirmation?.type === 'complete'
                         ? 'Mark interview as completed?'
-                        : 'Delete interview?'
+                        : 'Cancel interview?'
                 }
                 message={
                     pendingConfirmation?.type === 'complete'
                         ? `Are you sure you want to mark the interview with "${getApplicantName(editingInterview)}" as completed?`
-                        : pendingConfirmation?.type === 'delete'
-                            ? `Delete the interview with "${getApplicantName(pendingConfirmation.item)}"? This action cannot be undone.`
+                        : pendingConfirmation?.type === 'cancel'
+                            ? `Cancel the interview with "${getApplicantName(pendingConfirmation.item)}"? It will remain visible in the interview history.`
                             : ''
                 }
                 confirmText={
                     pendingConfirmation?.type === 'complete'
                         ? 'Mark Completed'
-                        : 'Delete Interview'
+                        : 'Cancel Interview'
                 }
                 cancelText="Cancel"
-                danger={pendingConfirmation?.type === 'delete'}
+                danger={pendingConfirmation?.type === 'cancel'}
                 loading={saving || deletingId !== null}
                 onConfirm={confirmPendingAction}
                 onCancel={cancelPendingConfirmation}

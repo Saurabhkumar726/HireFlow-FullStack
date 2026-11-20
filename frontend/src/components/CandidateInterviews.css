@@ -839,3 +839,174 @@ html[data-theme="dark"] .candidate-interviews-page a:focus-visible {
             font-size: 11px;
         }
 }
+
+/* Phase 7E — candidate interview response workflow */
+.candidate-interview-response {
+    margin-top: 17px;
+    padding: 16px;
+    border: 1px solid var(--ci-border);
+    border-radius: 13px;
+    background: var(--ci-soft);
+}
+
+.candidate-interview-response-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+    .candidate-interview-response-heading strong {
+        font-size: 13px;
+    }
+
+.candidate-interview-response-status {
+    display: inline-flex;
+    padding: 5px 9px;
+    border-radius: 999px;
+    color: #725a00;
+    background: #fff4cf;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+    .candidate-interview-response-status.accepted,
+    .candidate-interview-response-status.rescheduleapproved {
+        color: #14784f;
+        background: #e4f7ed;
+    }
+
+    .candidate-interview-response-status.declined,
+    .candidate-interview-response-status.rescheduledeclined {
+        color: #b5473c;
+        background: #fff0ed;
+    }
+
+.candidate-interview-response-note {
+    margin: 9px 0 0;
+    color: var(--ci-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.candidate-interview-response-actions,
+.candidate-interview-reschedule-form > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+    .candidate-interview-response-actions button,
+    .candidate-interview-reschedule-form button {
+        min-height: 37px;
+        padding: 0 12px;
+        border: 1px solid var(--ci-border);
+        border-radius: 9px;
+        background: var(--ci-surface);
+        color: var(--ci-text);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+        .candidate-interview-response-actions button.is-primary,
+        .candidate-interview-reschedule-form button.is-primary {
+            color: #fff;
+            background: #6555e9;
+            border-color: #6555e9;
+        }
+
+        .candidate-interview-response-actions button:disabled,
+        .candidate-interview-reschedule-form button:disabled {
+            opacity: .55;
+            cursor: wait;
+        }
+
+.candidate-interview-reschedule-form {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--ci-border);
+}
+
+    .candidate-interview-reschedule-form label {
+        display: grid;
+        gap: 6px;
+        color: var(--ci-muted);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .candidate-interview-reschedule-form input,
+    .candidate-interview-reschedule-form textarea {
+        width: 100%;
+        min-width: 0;
+        padding: 10px;
+        border: 1px solid var(--ci-border);
+        border-radius: 9px;
+        background: var(--ci-surface);
+        color: var(--ci-text);
+        font: inherit;
+        font-size: 13px;
+    }
+
+    .candidate-interview-reschedule-form label:nth-child(2) {
+        grid-column: 1 / -1;
+    }
+
+    .candidate-interview-reschedule-form > div {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+
+html[data-theme='dark'] .candidate-interview-response {
+    background: #1b1b2b;
+    border-color: #35354e;
+}
+
+html[data-theme='dark'] .candidate-interview-response-status {
+    color: #ffe39a;
+    background: #3a321c;
+}
+
+    html[data-theme='dark'] .candidate-interview-response-status.accepted,
+    html[data-theme='dark'] .candidate-interview-response-status.rescheduleapproved {
+        color: #9ce6bf;
+        background: #183127;
+    }
+
+    html[data-theme='dark'] .candidate-interview-response-status.declined,
+    html[data-theme='dark'] .candidate-interview-response-status.rescheduledeclined {
+        color: #ffb9bf;
+        background: #351d26;
+    }
+
+html[data-theme='dark'] .candidate-interview-response-actions button,
+html[data-theme='dark'] .candidate-interview-reschedule-form button:not(.is-primary),
+html[data-theme='dark'] .candidate-interview-reschedule-form input,
+html[data-theme='dark'] .candidate-interview-reschedule-form textarea {
+    color: #f1f2ff;
+    background: #191929;
+    border-color: #35354e;
+    color-scheme: dark;
+}
+
+@media (max-width: 620px) {
+    .candidate-interview-reschedule-form {
+        grid-template-columns: minmax(0,1fr);
+    }
+
+        .candidate-interview-reschedule-form label:nth-child(2),
+        .candidate-interview-reschedule-form > div {
+            grid-column: auto;
+        }
+
+    .candidate-interview-response-actions button {
+        flex: 1 1 130px;
+    }
+}

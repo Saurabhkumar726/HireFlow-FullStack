@@ -155,12 +155,13 @@ function PasswordInput({
     )
 }
 
-export default function Login({ onClose, onSuccess }) {
+export default function Login({ onClose, onSuccess, initialRole = 'Student' }) {
     const { login, loginWithGoogle, register } = useAuth()
     const googleButtonRef = useRef(null)
 
-    const [role, setRole] = useState('Student')
+    const [role, setRole] = useState(initialRole === 'HR' ? 'HR' : 'Student')
     const [mode, setMode] = useState('login')
+
     const [fullName, setFullName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import './CandidateInterviews.css'
+import SkeletonLoader from './SkeletonLoader.jsx'
 
-const API_URL = 'http://localhost:5116/api'
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116/api').replace(/\/$/, '')
 
 // API timestamps without a timezone suffix are stored as UTC.
 function parseApiDateTime(value) {
@@ -63,6 +64,10 @@ function CandidateInterviews() {
     const [refreshKey, setRefreshKey] = useState(0)
     const [activeFilter, setActiveFilter] = useState('All')
     const [currentTime, setCurrentTime] = useState(() => new Date().getTime())
+    const [rescheduleOpenId, setRescheduleOpenId] = useState(null)
+    const [proposedTimes, setProposedTimes] = useState({})
+    const [responseNotes, setResponseNotes] = useState({})
+    const [respondingId, setRespondingId] = useState(null)
 
     const loadInterviews = useCallback(async (signal) => {
         try {
@@ -122,6 +127,52 @@ function CandidateInterviews() {
 
         return () => clearInterval(interval)
     }, [])
+
+    async function sendCandidateResponse(interview, action) {
+        const interviewId = Number(interview.id)
+        if (!Number.isSafeInteger(interviewId) || interviewId <= 0) return
+        const note = responseNotes[interviewId] || ''
+        let proposedScheduledAtUtc
+        if (action === 'RequestReschedule') {
+            const value = proposedTimes[interviewId]
+            if (!value) {
+                setError('Choose a proposed date and time first.')
+                return
+            }
+            const parsed = new Date(value)
+            if (Number.isNaN(parsed.getTime()) || parsed.getTime() <= Date.now()) {
+                setError('Choose a date and time in the future.')
+                return
+            }
+            proposedScheduledAtUtc = parsed.toISOString()
+        }
+
+        setRespondingId(interviewId)
+        setError('')
+        try {
+            const response = await fetch(`${API_URL}/InterviewWorkflow/${interviewId}/candidate-response`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({ action, note, proposedScheduledAtUtc }),
+            })
+            const data = await response.json().catch(() => ({}))
+            if (!response.ok) throw new Error(data.message || 'Could not submit your interview response.')
+            setInterviews((current) => current.map((item) => Number(item.id) === interviewId
+                ? { ...item, candidateResponseStatus: data.candidateResponseStatus || (action === 'Accept' ? 'Accepted' : action === 'Decline' ? 'Declined' : 'RescheduleRequested'), candidateResponseAtUtc: data.candidateResponseAtUtc || new Date().toISOString(), proposedScheduledAtUtc: proposedScheduledAtUtc || item.proposedScheduledAtUtc }
+                : item))
+            setRescheduleOpenId(null)
+            setError('')
+        } catch (requestError) {
+            setError(requestError.message || 'Could not submit your interview response.')
+        } finally {
+            setRespondingId(null)
+        }
+    }
+
+    function localDateTimeMinimum() {
+        const date = new Date(Date.now() + 60 * 60 * 1000)
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+    }
 
     const filteredInterviews = useMemo(() => {
         if (activeFilter === 'All') return interviews
@@ -208,10 +259,7 @@ function CandidateInterviews() {
                 </div>
 
                 {loading ? (
-                    <div className="candidate-interviews-state" role="status">
-                        <span className="candidate-interviews-spinner" />
-                        <p>Loading your interviews…</p>
-                    </div>
+                    <SkeletonLoader variant="interviews" count={3} />
                 ) : error ? (
                     <div className="candidate-interviews-state error" role="alert">
                         <h3>We couldn't load your interviews</h3>
@@ -279,6 +327,36 @@ function CandidateInterviews() {
                                                 <span><b aria-hidden="true">▣</b>{interview.interviewType || 'Interview'}</span>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div className="candidate-interview-response">
+                                        <div className="candidate-interview-response-heading">
+                                            <strong>Your response</strong>
+                                            <span className={`candidate-interview-response-status ${String(interview.candidateResponseStatus || 'Pending').toLowerCase()}`}>
+                                                {String(interview.candidateResponseStatus || 'Pending').replace(/([A-Z])/g, ' $1').trim()}
+                                            </span>
+                                        </div>
+                                        {interview.candidateResponseNote && <p className="candidate-interview-response-note">{interview.candidateResponseNote}</p>}
+                                        {interview.candidateResponseStatus === 'RescheduleRequested' && interview.proposedScheduledAtUtc && (
+                                            <p className="candidate-interview-response-note">Requested time: {formatDate(interview.proposedScheduledAtUtc)} · {formatTime(interview.proposedScheduledAtUtc)}</p>
+                                        )}
+                                        {isUpcoming && !['Accepted', 'Declined', 'RescheduleRequested', 'RescheduleApproved'].includes(interview.candidateResponseStatus) && (
+                                            <>
+                                                <div className="candidate-interview-response-actions">
+                                                    <button type="button" className="is-primary" disabled={respondingId === Number(interview.id)} onClick={() => sendCandidateResponse(interview, 'Accept')}>Accept interview</button>
+                                                    <button type="button" disabled={respondingId === Number(interview.id)} onClick={() => sendCandidateResponse(interview, 'Decline')}>Decline</button>
+                                                    <button type="button" disabled={respondingId === Number(interview.id)} onClick={() => setRescheduleOpenId(current => current === Number(interview.id) ? null : Number(interview.id))}>Request reschedule</button>
+                                                </div>
+                                                {rescheduleOpenId === Number(interview.id) && (
+                                                    <div className="candidate-interview-reschedule-form">
+                                                        <label>Proposed date and time<input type="datetime-local" min={localDateTimeMinimum()} value={proposedTimes[interview.id] || ''} onChange={event => setProposedTimes(current => ({ ...current, [interview.id]: event.target.value }))} /></label>
+                                                        <label>Message to HR (optional)<textarea rows={2} maxLength={1000} value={responseNotes[interview.id] || ''} onChange={event => setResponseNotes(current => ({ ...current, [interview.id]: event.target.value }))} placeholder="Share a suitable time or a short note." /></label>
+                                                        <div><button type="button" className="is-primary" disabled={respondingId === Number(interview.id)} onClick={() => sendCandidateResponse(interview, 'RequestReschedule')}>{respondingId === Number(interview.id) ? 'Sending…' : 'Send request'}</button><button type="button" onClick={() => setRescheduleOpenId(null)}>Cancel</button></div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                        {!isUpcoming && status === 'scheduled' && <small>This interview is no longer accepting responses because its start time has passed.</small>}
                                     </div>
 
                                     {interview.notes && (

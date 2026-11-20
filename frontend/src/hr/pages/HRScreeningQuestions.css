@@ -1,0 +1,251 @@
+.hr-screening-page {
+    width: 100%;
+    color: var(--hf-text, inherit);
+}
+
+.hr-screening-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+.hr-screening-eyebrow {
+    color: var(--hf-accent);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .16em;
+}
+
+.hr-screening-intro h2 {
+    margin: 8px 0;
+    font-size: clamp(24px, 3vw, 32px);
+    letter-spacing: -.04em;
+}
+
+.hr-screening-intro p, .hr-screening-form-heading p, .hr-screening-list-heading p {
+    margin: 0;
+    color: var(--hf-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.hr-screening-job-select {
+    width: min(360px, 100%);
+    display: grid;
+    gap: 7px;
+    color: var(--hf-muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+    .hr-screening-job-select select, .hr-screening-form input:not([type=checkbox]), .hr-screening-form select, .hr-screening-form textarea {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid var(--hf-border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: var(--hf-text);
+        background: var(--hf-surface);
+        font: inherit;
+    }
+
+.hr-screening-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.hr-screening-form, .hr-screening-list {
+    padding: 22px;
+    border: 1px solid var(--hf-border);
+    border-radius: 16px;
+    background: var(--hf-surface);
+    box-shadow: 0 10px 30px rgba(24, 24, 48, .04);
+}
+
+.hr-screening-form-heading, .hr-screening-list-heading {
+    margin-bottom: 18px;
+}
+
+    .hr-screening-form-heading h3, .hr-screening-list-heading h3 {
+        margin: 0 0 6px;
+        font-size: 17px;
+    }
+
+.hr-screening-form > label {
+    display: grid;
+    gap: 7px;
+    margin-bottom: 15px;
+    color: var(--hf-text);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+    .hr-screening-form > label small {
+        display: block;
+        color: var(--hf-muted);
+        font-weight: 500;
+    }
+
+.hr-screening-form textarea {
+    min-height: 88px;
+    resize: vertical;
+}
+
+.hr-screening-form-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin: 12px 0 18px;
+}
+
+    .hr-screening-form-meta label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--hf-muted);
+        font-size: 12px;
+    }
+
+    .hr-screening-form-meta input[type=checkbox] {
+        accent-color: var(--hf-accent);
+    }
+
+    .hr-screening-form-meta input[type=number] {
+        width: 86px;
+        min-height: 36px;
+    }
+
+.hr-screening-form-actions, .hr-screening-question-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+    .hr-screening-form-actions button, .hr-screening-question-actions button {
+        min-height: 38px;
+        border: 1px solid var(--hf-accent);
+        border-radius: 9px;
+        padding: 0 13px;
+        color: white;
+        background: var(--hf-accent);
+        font-size: 12px;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+        .hr-screening-form-actions button.secondary, .hr-screening-question-actions button {
+            color: var(--hf-accent);
+            background: var(--hf-accent-soft);
+            border-color: var(--hf-accent-border);
+        }
+
+            .hr-screening-question-actions button.danger {
+                color: #bf3d52;
+                background: #fff3f4;
+                border-color: #f1c7cd;
+            }
+
+        .hr-screening-form-actions button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+.hr-screening-question-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 17px 0;
+    border-top: 1px solid var(--hf-border);
+}
+
+    .hr-screening-question-card h4 {
+        margin: 8px 0 6px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .hr-screening-question-card p {
+        margin: 0;
+        color: var(--hf-muted);
+        font-size: 11px;
+    }
+
+    .hr-screening-question-card ul {
+        margin: 9px 0 0;
+        padding-left: 18px;
+        color: var(--hf-muted);
+        font-size: 12px;
+    }
+
+    .hr-screening-question-card.is-inactive {
+        opacity: .6;
+    }
+
+.hr-screening-type {
+    display: inline-flex;
+    padding: 4px 7px;
+    border-radius: 999px;
+    color: var(--hf-accent);
+    background: var(--hf-accent-soft);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.hr-screening-question-actions {
+    flex: 0 0 auto;
+}
+
+.hr-screening-empty {
+    padding: 30px 14px;
+    text-align: center;
+    color: var(--hf-muted);
+    font-size: 13px;
+}
+
+.hr-screening-alert {
+    padding: 12px 14px;
+    margin: 0 0 16px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+    .hr-screening-alert.is-error {
+        color: #b52d42;
+        background: #fff0f2;
+    }
+
+    .hr-screening-alert.is-success {
+        color: #18774a;
+        background: #ecfdf3;
+    }
+
+@media (max-width: 860px) {
+    .hr-screening-intro {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hr-screening-job-select {
+        width: 100%;
+    }
+
+    .hr-screening-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .hr-screening-form, .hr-screening-list {
+        padding: 16px;
+    }
+
+    .hr-screening-question-card {
+        flex-direction: column;
+    }
+}

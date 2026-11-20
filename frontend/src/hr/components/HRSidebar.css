@@ -1,13 +1,24 @@
-/* HR navigation sidebar shared by every employer workspace page. */
+/* Consistent, colour-accented navigation for the employer workspace. */
+/* Align the sidebar heading with the HR page heading. */
+:root {
+    --hr-sidebar-top-offset: 0px;
+}
+
 .hr-sidebar {
+    position: sticky;
+    top: var(--hr-sidebar-top-offset, 0px);
+    z-index: 20;
     display: flex;
     flex: 0 0 250px;
     flex-direction: column;
-    align-self: stretch;
+    align-self: flex-start;
     width: 250px;
     min-width: 250px;
-    min-height: calc(100vh - 100px);
-    padding: 26px 16px 18px;
+    height: calc(100dvh - var(--hr-sidebar-top-offset, 0px));
+    min-height: min(420px, calc(100dvh - var(--hr-sidebar-top-offset, 0px)));
+    max-height: calc(100dvh - var(--hr-sidebar-top-offset, 0px));
+    overflow: hidden;
+    padding: 14px 16px 18px;
     border-right: 1px solid var(--hr-border, #e7e8ee);
     background: var(--hr-sidebar-bg, var(--surface, #ffffff));
     color: var(--hr-text, #202233);
@@ -38,7 +49,7 @@
     margin: 0 0 8px;
     font-size: 21px;
     font-weight: 750;
-    letter-spacing: -0.6px;
+    letter-spacing: -.6px;
     line-height: 1.25;
 }
 
@@ -51,13 +62,33 @@
 
 .hr-sidebar-nav {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
-    gap: 5px;
-    padding-top: 25px;
+    gap: 6px;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 24px 3px 12px 0;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--hr-muted, #85899a) 35%, transparent) transparent;
 }
 
+    .hr-sidebar-nav::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .hr-sidebar-nav::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .hr-sidebar-nav::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--hr-muted, #85899a) 35%, transparent);
+    }
+
 .hr-sidebar-section-label {
-    padding: 0 11px 10px;
+    padding: 0 11px 9px;
     color: var(--hr-muted, #85899a);
     font-size: 10px;
     font-weight: 800;
@@ -65,55 +96,115 @@
 }
 
 .hr-sidebar-link {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-height: 44px;
-    padding: 0 12px;
+    gap: 11px;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    flex: 0 0 auto;
+    padding: 6px 11px;
     border: 1px solid transparent;
-    border-radius: 10px;
+    border-radius: 14px;
     color: var(--hr-muted, #656a7b);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 650;
     text-decoration: none;
-    transition: background 160ms ease, color 160ms ease;
+    transition: background 170ms ease, color 170ms ease, border-color 170ms ease, transform 170ms ease;
 }
 
     .hr-sidebar-link:hover {
         background: var(--hr-hover, #f5f5fc);
         color: var(--hr-text, #202233);
+        transform: translateX(2px);
     }
 
     .hr-sidebar-link.active {
         border-color: var(--hr-active-border, #e3e2ff);
-        background: var(--hr-active-bg, #efefff);
+        background: var(--hr-active-bg, #f2f0ff);
         color: var(--hr-accent, #6258db);
-        font-weight: 750;
+        font-weight: 800;
     }
 
 .hr-sidebar-icon {
     display: inline-flex;
-    flex: 0 0 21px;
+    flex: 0 0 34px;
     align-items: center;
     justify-content: center;
-    width: 21px;
-    font-size: 18px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 16px;
     line-height: 1;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.72), 0 4px 10px rgba(31,37,66,.06);
+    transition: transform 170ms ease;
+}
+
+.hr-sidebar-link:hover .hr-sidebar-icon {
+    transform: scale(1.06);
+}
+
+.hr-sidebar-icon--violet {
+    color: #6651d8;
+    background: linear-gradient(145deg, #eeeaff, #dcd5ff);
+}
+
+.hr-sidebar-icon--blue {
+    color: #3472c9;
+    background: linear-gradient(145deg, #e5f1ff, #cfe3ff);
+}
+
+.hr-sidebar-icon--teal {
+    color: #188d88;
+    background: linear-gradient(145deg, #def8f2, #c4eee7);
+}
+
+.hr-sidebar-icon--amber {
+    color: #bd7a19;
+    background: linear-gradient(145deg, #fff1d9, #ffe0ad);
+}
+
+.hr-sidebar-link-label {
+    min-width: 0;
+    flex: 1 1 auto;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
 .hr-sidebar-add {
     margin-left: auto;
-    font-size: 18px;
+    width: 23px;
+    height: 23px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--hr-accent, #6258db);
+    background: var(--hr-active-bg, #efefff);
+    font-size: 17px;
 }
 
-/* Keep the user identity and back button together at the bottom with even spacing. */
+.hr-sidebar-link-indicator {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.hr-sidebar-link.active .hr-sidebar-link-indicator {
+    background: var(--hr-accent, #6258db);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--hr-accent, #6258db) 12%, transparent);
+}
+
 .hr-sidebar-bottom {
     display: flex;
     flex-direction: column;
     gap: 0;
     width: 100%;
+    flex: 0 0 auto;
     margin-top: auto;
-    padding-top: 20px;
+    padding-top: 18px;
     border-top: 1px solid var(--hr-border, #e7e8ee);
 }
 
@@ -134,8 +225,8 @@
     width: 38px;
     height: 38px;
     overflow: hidden;
-    border-radius: 12px;
-    background: #e9e7ff;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #eeeaff, #dcd5ff);
     color: #5c50ce;
     font-size: 15px;
     font-weight: 800;
@@ -186,16 +277,17 @@
 .hr-sidebar-home {
     display: flex;
     align-items: center;
+    gap: 9px;
     width: 100%;
-    min-height: 40px;
-    padding: 10px;
+    min-height: 42px;
+    padding: 8px 10px;
     border: 1px solid var(--hr-border, #e7e8ee);
-    border-radius: 9px;
+    border-radius: 12px;
     background: transparent;
     color: var(--hr-muted, #656a7b);
     font: inherit;
     font-size: 12px;
-    font-weight: 650;
+    font-weight: 700;
     line-height: 1.4;
     text-align: left;
     cursor: pointer;
@@ -208,53 +300,228 @@
         color: var(--hr-text, #202233);
     }
 
-    .hr-sidebar-home:focus-visible,
-    .hr-sidebar-link:focus-visible {
-        outline: 2px solid var(--hr-accent, #6258db);
-        outline-offset: 2px;
+.hr-sidebar-home-icon {
+    width: 27px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #3472c9;
+    background: #e5f1ff;
+    font-size: 15px;
+}
+
+.hr-sidebar-home:focus-visible, .hr-sidebar-link:focus-visible {
+    outline: 2px solid var(--hr-accent, #6258db);
+    outline-offset: 2px;
+}
+
+:root[data-theme='dark'] .hr-sidebar-icon--violet {
+    color: #c7bcff;
+    background: linear-gradient(145deg, #3b3262, #30294f);
+}
+
+:root[data-theme='dark'] .hr-sidebar-icon--blue {
+    color: #a9d0ff;
+    background: linear-gradient(145deg, #243e60, #20334e);
+}
+
+:root[data-theme='dark'] .hr-sidebar-icon--teal {
+    color: #9de8d9;
+    background: linear-gradient(145deg, #214b49, #1d3d3d);
+}
+
+:root[data-theme='dark'] .hr-sidebar-icon--amber {
+    color: #ffd89b;
+    background: linear-gradient(145deg, #59432a, #473621);
+}
+
+
+@media (max-width: 1320px) {
+    :root {
+        --hr-sidebar-top-offset: 0px;
+    }
+}
+
+@media (max-width: 1000px) and (min-width: 761px) {
+    .hr-sidebar {
+        flex-basis: 224px;
+        width: 224px;
+        min-width: 224px;
+        padding: 22px 12px 16px;
     }
 
+    .hr-sidebar-heading {
+        padding-right: 7px;
+        padding-left: 7px;
+    }
+
+        .hr-sidebar-heading h2 {
+            font-size: 19px;
+        }
+
+    .hr-sidebar-link {
+        gap: 8px;
+        padding-right: 8px;
+        padding-left: 8px;
+        font-size: 12px;
+    }
+
+    .hr-sidebar-icon {
+        width: 31px;
+        height: 31px;
+        flex-basis: 31px;
+    }
+}
+
 @media (max-width: 760px) {
+    :root {
+        --hr-sidebar-top-offset: 0px;
+    }
+
     .hr-sidebar {
+        position: relative;
+        top: auto;
+        z-index: auto;
         flex: 0 0 auto;
+        align-self: auto;
         width: 100%;
         min-width: 0;
+        height: auto;
         min-height: 0;
-        padding: 18px 14px;
+        max-height: none;
+        overflow: visible;
+        padding: 6px 14px 18px;
         border-right: 0;
         border-bottom: 1px solid var(--hr-border, #e7e8ee);
     }
 
     .hr-sidebar-heading {
-        padding-bottom: 16px;
+        padding: 0 4px 16px;
     }
 
     .hr-sidebar-nav {
         display: grid;
+        flex: 0 0 auto;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 6px;
-        padding-top: 16px;
+        gap: 7px;
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
+        padding: 16px 0 0;
     }
 
     .hr-sidebar-section-label {
         grid-column: 1 / -1;
+        padding-left: 5px;
     }
 
     .hr-sidebar-link {
+        min-height: 48px;
         gap: 8px;
-        padding: 0 9px;
+        padding: 6px 8px;
         font-size: 12px;
     }
 
+    .hr-sidebar-icon {
+        width: 31px;
+        height: 31px;
+        flex-basis: 31px;
+    }
+
+    .hr-sidebar-link-indicator {
+        display: none;
+    }
+
     .hr-sidebar-bottom {
+        flex: 0 0 auto;
         margin-top: 16px;
         padding-top: 16px;
     }
 }
 
+@media (max-width: 380px) {
+    .hr-sidebar-nav {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .hr-sidebar-link,
-    .hr-sidebar-home {
+    .hr-sidebar-link, .hr-sidebar-home, .hr-sidebar-icon {
+        transition: none;
+    }
+}
+
+
+/* HR sidebar logout action — uses the existing AuthContext logout flow. */
+.hr-sidebar-logout {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 42px;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid color-mix(in srgb, #d9485f 24%, var(--hr-border, #e7e8ee));
+    border-radius: 12px;
+    background: color-mix(in srgb, #d9485f 5%, transparent);
+    color: #c43d54;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+    .hr-sidebar-logout:hover {
+        border-color: color-mix(in srgb, #d9485f 48%, var(--hr-border, #e7e8ee));
+        background: color-mix(in srgb, #d9485f 10%, transparent);
+        color: #ad263f;
+        transform: translateY(-1px);
+    }
+
+    .hr-sidebar-logout:active {
+        transform: translateY(0);
+    }
+
+.hr-sidebar-logout-icon {
+    display: grid;
+    flex: 0 0 27px;
+    place-items: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    background: color-mix(in srgb, #d9485f 11%, transparent);
+    color: currentColor;
+}
+
+    .hr-sidebar-logout-icon svg {
+        display: block;
+        width: 16px;
+        height: 16px;
+    }
+
+.hr-sidebar-logout:focus-visible {
+    outline: 2px solid #d9485f;
+    outline-offset: 2px;
+}
+
+:root[data-theme='dark'] .hr-sidebar-logout {
+    border-color: rgba(255, 126, 148, 0.24);
+    background: rgba(217, 72, 95, 0.09);
+    color: #ff9aaa;
+}
+
+    :root[data-theme='dark'] .hr-sidebar-logout:hover {
+        border-color: rgba(255, 126, 148, 0.48);
+        background: rgba(217, 72, 95, 0.16);
+        color: #ffb4c0;
+    }
+
+@media (prefers-reduced-motion: reduce) {
+    .hr-sidebar-logout {
         transition: none;
     }
 }

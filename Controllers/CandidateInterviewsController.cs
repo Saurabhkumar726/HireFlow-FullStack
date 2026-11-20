@@ -32,23 +32,26 @@ namespace HireFlow.Api.Controllers
                 return Forbid();
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub");
             var email = User.FindFirstValue(ClaimTypes.Email)
                 ?? User.FindFirstValue("email")
                 ?? User.FindFirstValue("preferred_username");
 
-            if (string.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(userId))
             {
-                return Unauthorized(new { message = "Your account email could not be identified. Please sign in again." });
+                return Unauthorized(new { message = "Your account could not be identified. Please sign in again." });
             }
 
-            var normalizedEmail = email.Trim().ToLower();
+            var normalizedEmail = email?.Trim().ToLower();
 
             var interviews = await _context.Interviews
                 .AsNoTracking()
                 .Where(interview =>
                     interview.JobApplication != null &&
-                    interview.JobApplication.ApplicantEmail != null &&
-                    interview.JobApplication.ApplicantEmail.ToLower() == normalizedEmail)
+                    (interview.JobApplication.UserId == userId ||
+                     (interview.JobApplication.UserId == null && normalizedEmail != null &&
+                      interview.JobApplication.ApplicantEmail.ToLower() == normalizedEmail)))
                 .OrderByDescending(interview => interview.ScheduledAt)
                 .Select(interview => new
                 {
@@ -59,6 +62,10 @@ namespace HireFlow.Api.Controllers
                     interview.MeetingLink,
                     interview.Notes,
                     interview.Status,
+                    interview.CandidateResponseStatus,
+                    interview.CandidateResponseAtUtc,
+                    interview.CandidateResponseNote,
+                    interview.ProposedScheduledAtUtc,
                     interview.CreatedAt,
                     interview.UpdatedAt,
                     JobTitle = interview.JobApplication!.Job != null

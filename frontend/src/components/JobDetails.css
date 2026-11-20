@@ -427,3 +427,66 @@
         height: 48px;
     }
 }
+
+.job-type-label,
+.job-unavailable-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    color: var(--purple);
+    background: #efecff;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.job-unavailable-label {
+    color: #99531b;
+    background: #fff1df;
+}
+
+.job-details-primary-action .button-primary:disabled,
+.overview-apply:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+.job-closed-notice {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 16px;
+    padding: 15px 18px;
+    border: 1px solid #f2d6b4;
+    border-radius: 12px;
+    color: #86501f;
+    background: #fff8ed;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.job-details-company-link {
+    display: inline-flex;
+    margin-top: 12px;
+    color: var(--purple);
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+:root[data-theme="dark"] .job-type-label {
+    color: #c4bdff;
+    background: #292442;
+}
+
+:root[data-theme="dark"] .job-unavailable-label {
+    color: #ffd09a;
+    background: #3a2b1c;
+}
+
+:root[data-theme="dark"] .job-closed-notice {
+    border-color: #75522e;
+    color: #ffd09a;
+    background: #2c241d;
+}

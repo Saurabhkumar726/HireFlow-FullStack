@@ -119,6 +119,17 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 
+// City/state location autocomplete. The source is synchronized by an Admin; searches use SQL Server.
+builder.Services.AddHttpClient<CityLocationSyncService>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(5);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("HireFlow-CityLocationSync/1.0");
+});
+
+// Phase 7B: durable email delivery and daily digest. Phase 7G: scheduled interview reminders.
+builder.Services.AddHostedService<EmailOutboxWorker>();
+builder.Services.AddHostedService<InterviewReminderWorker>();
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("ApprovedHR", policy =>

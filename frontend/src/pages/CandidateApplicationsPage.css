@@ -1,0 +1,1091 @@
+.candidate-applications-page {
+    width: 100%;
+    min-height: 65vh;
+    padding: clamp(32px, 5vw, 72px) 24px 88px;
+    background: var(--hf-page);
+    color: var(--hf-text);
+}
+
+.candidate-applications-shell {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+}
+
+.candidate-applications-back {
+    display: inline-flex;
+    margin-bottom: 34px;
+    color: var(--hf-muted);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+    .candidate-applications-back:hover,
+    .candidate-application-link:hover {
+        color: var(--hf-accent);
+    }
+
+.candidate-applications-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.candidate-applications-eyebrow {
+    display: inline-block;
+    margin-bottom: 13px;
+    color: var(--hf-accent);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 1.8px;
+}
+
+.candidate-applications-heading h1 {
+    margin: 0 0 10px;
+    color: var(--hf-text);
+    font-family: Manrope, sans-serif;
+    font-size: clamp(34px, 5vw, 58px);
+    font-weight: 850;
+    letter-spacing: -2.5px;
+    line-height: 1.08;
+}
+
+    .candidate-applications-heading h1 em {
+        color: var(--hf-accent);
+        font-style: normal;
+    }
+
+.candidate-applications-heading p {
+    max-width: 640px;
+    color: var(--hf-muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.candidate-application-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 17px;
+    border: 1px solid var(--hf-accent);
+    border-radius: 11px;
+    background: var(--hf-accent);
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .16s ease, background .16s ease, border-color .16s ease;
+}
+
+    .candidate-application-button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        background: var(--hf-accent-strong);
+        border-color: var(--hf-accent-strong);
+    }
+
+    .candidate-application-button:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+.candidate-application-button-secondary {
+    color: var(--hf-text);
+    background: var(--hf-surface);
+    border-color: var(--hf-border);
+}
+
+    .candidate-application-button-secondary:hover:not(:disabled) {
+        color: var(--hf-accent);
+        background: var(--hf-surface-soft);
+        border-color: var(--hf-accent-border);
+    }
+
+.candidate-applications-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 0 26px;
+}
+
+    .candidate-applications-stats article {
+        display: flex;
+        min-width: 0;
+        min-height: 98px;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 19px 20px;
+        border: 1px solid var(--hf-border);
+        border-radius: 16px;
+        background: var(--hf-surface);
+    }
+
+    .candidate-applications-stats span {
+        color: var(--hf-muted);
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    .candidate-applications-stats strong {
+        color: var(--hf-text);
+        font-family: Manrope, sans-serif;
+        font-size: 29px;
+        font-weight: 850;
+        line-height: 1;
+    }
+
+.candidate-application-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 18px;
+    padding: 13px 15px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+    .candidate-application-alert button {
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+.candidate-application-alert-error {
+    color: #b52e40;
+    background: #fff0f2;
+    border-color: #ffd3da;
+}
+
+.candidate-application-alert-success {
+    color: #13764c;
+    background: #eafaf1;
+    border-color: #bfead1;
+}
+
+html[data-theme='dark'] .candidate-application-alert-error {
+    color: #ffb6bf;
+    background: #351c25;
+    border-color: #60313d;
+}
+
+html[data-theme='dark'] .candidate-application-alert-success {
+    color: #a0e7c0;
+    background: #183226;
+    border-color: #28553d;
+}
+
+.candidate-applications-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 210px;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+    .candidate-applications-toolbar input,
+    .candidate-applications-toolbar select,
+    .candidate-application-edit input,
+    .candidate-application-edit textarea {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        min-height: 46px;
+        padding: 11px 13px;
+        border: 1px solid var(--hf-border);
+        border-radius: 10px;
+        outline: none;
+        background: var(--hf-surface);
+        color: var(--hf-text);
+        font: inherit;
+        font-size: 13px;
+        color-scheme: light;
+    }
+
+html[data-theme='dark'] .candidate-applications-toolbar input,
+html[data-theme='dark'] .candidate-applications-toolbar select,
+html[data-theme='dark'] .candidate-application-edit input,
+html[data-theme='dark'] .candidate-application-edit textarea {
+    color-scheme: dark;
+}
+
+.candidate-applications-toolbar input::placeholder,
+.candidate-application-edit input::placeholder {
+    color: var(--hf-placeholder);
+}
+
+.candidate-applications-toolbar input:focus,
+.candidate-applications-toolbar select:focus,
+.candidate-application-edit input:focus,
+.candidate-application-edit textarea:focus {
+    border-color: var(--hf-accent);
+    box-shadow: 0 0 0 3px var(--hf-accent-soft);
+}
+
+.candidate-applications-list {
+    display: grid;
+    gap: 15px;
+}
+
+.candidate-application-card {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid var(--hf-border);
+    border-radius: 17px;
+    background: var(--hf-surface);
+    box-shadow: 0 7px 24px rgb(20 20 50 / 3%);
+}
+
+.candidate-application-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    min-width: 0;
+}
+
+.candidate-application-company-mark {
+    display: grid;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--hf-accent-soft);
+    color: var(--hf-accent);
+    font-size: 18px;
+    font-weight: 850;
+}
+
+.candidate-application-card-title {
+    flex: 1;
+    min-width: 0;
+}
+
+    .candidate-application-card-title h2 {
+        margin: 0 0 4px;
+        color: var(--hf-text);
+        font-family: Manrope, sans-serif;
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -.3px;
+    }
+
+    .candidate-application-card-title p {
+        margin: 0 0 6px;
+        color: var(--hf-muted);
+        font-size: 12px;
+    }
+
+    .candidate-application-card-title > span {
+        color: var(--hf-placeholder);
+        font-size: 11px;
+    }
+
+.candidate-application-status {
+    flex: 0 0 auto;
+    padding: 7px 10px;
+    border: 1px solid var(--hf-accent-border);
+    border-radius: 999px;
+    background: var(--hf-accent-soft);
+    color: var(--hf-accent);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.candidate-status-under-review, .candidate-status-interview-scheduled {
+    color: #2869bd;
+    background: #eaf3ff;
+    border-color: #cfe2ff;
+}
+
+.candidate-status-shortlisted, .candidate-status-selected {
+    color: #157b52;
+    background: #eafaf2;
+    border-color: #c4ecd5;
+}
+
+.candidate-status-rejected {
+    color: #bb3d4b;
+    background: #fff0f2;
+    border-color: #ffd1d7;
+}
+
+.candidate-status-withdrawn {
+    color: var(--hf-muted);
+    background: var(--hf-surface-soft);
+    border-color: var(--hf-border);
+}
+
+html[data-theme='dark'] .candidate-status-under-review,
+html[data-theme='dark'] .candidate-status-interview-scheduled {
+    color: #a8caff;
+    background: #1b2d47;
+    border-color: #2b4d78;
+}
+
+html[data-theme='dark'] .candidate-status-shortlisted,
+html[data-theme='dark'] .candidate-status-selected {
+    color: #9be0bb;
+    background: #173226;
+    border-color: #28543e;
+}
+
+html[data-theme='dark'] .candidate-status-rejected {
+    color: #ffacb5;
+    background: #351c25;
+    border-color: #60313d;
+}
+
+.candidate-application-progress {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin: 23px 0 17px;
+}
+
+.candidate-application-progress-step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    color: var(--hf-placeholder);
+    text-align: center;
+}
+
+    .candidate-application-progress-step:not(:last-child)::after {
+        position: absolute;
+        top: 13px;
+        left: calc(50% + 18px);
+        width: calc(100% - 28px);
+        height: 2px;
+        content: '';
+        background: var(--hf-border);
+    }
+
+    .candidate-application-progress-step span {
+        z-index: 1;
+        display: grid;
+        width: 27px;
+        height: 27px;
+        place-items: center;
+        border: 1px solid var(--hf-border);
+        border-radius: 50%;
+        background: var(--hf-surface-soft);
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .candidate-application-progress-step small {
+        display: block;
+        max-width: 100%;
+        font-size: 10px;
+        line-height: 1.3;
+    }
+
+    .candidate-application-progress-step.is-complete {
+        color: var(--hf-accent);
+    }
+
+        .candidate-application-progress-step.is-complete span {
+            border-color: var(--hf-accent);
+            background: var(--hf-accent);
+            color: #fff;
+        }
+
+        .candidate-application-progress-step.is-complete:not(:last-child)::after {
+            background: var(--hf-accent);
+        }
+
+.candidate-application-reason {
+    margin: 10px 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--hf-surface-soft);
+    color: var(--hf-muted);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+    .candidate-application-reason strong {
+        color: var(--hf-text);
+    }
+
+.candidate-application-history {
+    margin: 15px 0 0;
+    border-top: 1px solid var(--hf-border);
+    padding-top: 14px;
+}
+
+    .candidate-application-history summary {
+        color: var(--hf-accent);
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .candidate-application-history ol {
+        display: grid;
+        gap: 10px;
+        margin: 13px 0 0;
+        padding: 0 0 0 19px;
+        color: var(--hf-muted);
+    }
+
+    .candidate-application-history li {
+        padding-left: 3px;
+        font-size: 12px;
+    }
+
+        .candidate-application-history li span {
+            color: var(--hf-text);
+            font-weight: 750;
+        }
+
+    .candidate-application-history time {
+        display: block;
+        margin-top: 3px;
+        color: var(--hf-placeholder);
+        font-size: 10px;
+    }
+
+    .candidate-application-history li p {
+        margin-top: 4px;
+        line-height: 1.5;
+    }
+
+.candidate-application-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 17px;
+    padding-top: 15px;
+    border-top: 1px solid var(--hf-border);
+}
+
+.candidate-application-link {
+    color: var(--hf-accent);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.candidate-application-withdraw {
+    border: 0;
+    background: transparent;
+    color: #c04b5b;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+    .candidate-application-withdraw:disabled {
+        opacity: .55;
+        cursor: wait;
+    }
+
+.candidate-application-edit {
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid var(--hf-accent-border);
+    border-radius: 14px;
+    background: var(--hf-surface-soft);
+}
+
+.candidate-application-edit-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+    .candidate-application-edit-heading span {
+        color: var(--hf-accent);
+        font-size: 9px;
+        font-weight: 850;
+        letter-spacing: 1.2px;
+    }
+
+    .candidate-application-edit-heading h4 {
+        margin: 5px 0 0;
+        color: var(--hf-text);
+        font-size: 15px;
+    }
+
+    .candidate-application-edit-heading button {
+        width: 30px;
+        height: 30px;
+        border: 1px solid var(--hf-border);
+        border-radius: 8px;
+        background: var(--hf-surface);
+        color: var(--hf-muted);
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+.candidate-application-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.candidate-application-edit label {
+    display: grid;
+    min-width: 0;
+    gap: 7px;
+    color: var(--hf-text);
+    font-size: 11px;
+    font-weight: 750;
+}
+
+    .candidate-application-edit label > span {
+        color: var(--hf-muted);
+        font-weight: 500;
+    }
+
+.candidate-application-edit input {
+    min-height: 42px;
+    padding: 9px 11px;
+    background: var(--hf-surface);
+}
+
+.candidate-application-edit textarea {
+    min-height: 100px;
+    resize: vertical;
+    background: var(--hf-surface);
+}
+
+.candidate-application-edit-wide {
+    grid-column: 1 / -1;
+}
+
+.candidate-application-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 14px;
+}
+
+.candidate-applications-empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 54px 24px;
+    border: 1px dashed var(--hf-border);
+    border-radius: 17px;
+    background: var(--hf-surface);
+    color: var(--hf-muted);
+    text-align: center;
+}
+
+.candidate-applications-empty-icon {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    place-items: center;
+    border-radius: 16px;
+    background: var(--hf-accent-soft);
+    color: var(--hf-accent);
+    font-size: 25px;
+}
+
+.candidate-applications-empty h2 {
+    margin: 0;
+    color: var(--hf-text);
+    font-size: 19px;
+}
+
+.candidate-applications-empty p {
+    max-width: 460px;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.candidate-applications-empty .candidate-application-button {
+    margin-top: 5px;
+}
+
+@media (max-width: 720px) {
+    .candidate-applications-page {
+        padding: 32px 16px 60px;
+    }
+
+    .candidate-applications-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .candidate-applications-stats {
+        gap: 8px;
+    }
+
+        .candidate-applications-stats article {
+            min-height: 84px;
+            padding: 14px;
+        }
+
+        .candidate-applications-stats span {
+            font-size: 10px;
+        }
+
+        .candidate-applications-stats strong {
+            font-size: 24px;
+        }
+
+    .candidate-applications-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .candidate-application-card {
+        padding: 16px;
+    }
+
+    .candidate-application-card-top {
+        flex-wrap: wrap;
+    }
+
+    .candidate-application-status {
+        margin-left: 62px;
+    }
+}
+
+@media (max-width: 480px) {
+    .candidate-applications-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+        .candidate-applications-stats article:last-child {
+            grid-column: 1 / -1;
+        }
+
+    .candidate-application-edit-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .candidate-application-edit-wide {
+        grid-column: auto;
+    }
+
+    .candidate-application-progress {
+        gap: 3px;
+    }
+
+    .candidate-application-progress-step small {
+        font-size: 8px;
+    }
+
+    .candidate-application-card-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+        .candidate-application-card-actions .candidate-application-button {
+            width: 100%;
+        }
+}
+
+
+.candidate-application-interviews {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border: 1px solid var(--hf-border, #e5e7ef);
+    border-radius: 14px;
+    background: var(--hf-surface-soft, #f7f7fc);
+}
+
+.candidate-application-interviews-heading,
+.candidate-application-interview-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.candidate-application-interviews-heading {
+    margin-bottom: 12px;
+    color: var(--hf-text, #202033);
+}
+
+.candidate-application-interviews a {
+    color: var(--hf-accent, #6555e9);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.candidate-application-interview-row {
+    padding: 10px 0;
+    border-top: 1px solid var(--hf-border, #e5e7ef);
+}
+
+    .candidate-application-interview-row > div {
+        display: grid;
+        gap: 4px;
+    }
+
+    .candidate-application-interview-row strong {
+        color: var(--hf-text, #202033);
+        font-size: 13px;
+    }
+
+    .candidate-application-interview-row span {
+        color: var(--hf-muted, #72738a);
+        font-size: 12px;
+    }
+
+html[data-theme='dark'] .candidate-application-interviews {
+    background: var(--hf-surface-soft, #1d1d2c);
+    border-color: var(--hf-border, #36364d);
+}
+
+html[data-theme='dark'] .candidate-application-interviews-heading,
+html[data-theme='dark'] .candidate-application-interview-row strong {
+    color: var(--hf-text, #f0efff);
+}
+
+html[data-theme='dark'] .candidate-application-interview-row {
+    border-color: var(--hf-border, #36364d);
+}
+
+@media (max-width: 560px) {
+    .candidate-application-interviews-heading,
+    .candidate-application-interview-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+
+/* Branded withdrawal confirmation dialog (replaces native browser confirm/prompt). */
+.candidate-withdrawal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    display: grid;
+    place-items: center;
+    overflow-y: auto;
+    padding: 24px;
+    background: rgb(10 11 24 / 68%);
+    -webkit-backdrop-filter: blur(9px);
+    backdrop-filter: blur(9px);
+    animation: candidate-withdrawal-fade-in 160ms ease-out;
+}
+
+.candidate-withdrawal-dialog {
+    position: relative;
+    width: min(100%, 500px);
+    max-height: min(88vh, 760px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 30px;
+    border: 1px solid var(--hf-border, #e5e5f0);
+    border-radius: 22px;
+    background: var(--hf-surface, #ffffff);
+    color: var(--hf-text, #202033);
+    box-shadow: 0 28px 90px rgb(0 0 0 / 30%);
+    animation: candidate-withdrawal-rise-in 180ms ease-out;
+}
+
+.candidate-withdrawal-icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    margin-bottom: 20px;
+    border: 1px solid var(--hf-accent-border, #dcd7ff);
+    border-radius: 14px;
+    background: var(--hf-accent-soft, #f0edff);
+    color: var(--hf-accent, #6555e9);
+    font-size: 22px;
+    font-weight: 850;
+}
+
+.candidate-withdrawal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid var(--hf-border, #e5e5f0);
+    border-radius: 10px;
+    background: var(--hf-surface-soft, #f7f7fc);
+    color: var(--hf-muted, #74748b);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+    .candidate-withdrawal-close:hover:not(:disabled) {
+        border-color: var(--hf-accent-border, #dcd7ff);
+        color: var(--hf-accent, #6555e9);
+    }
+
+    .candidate-withdrawal-close:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+.candidate-withdrawal-eyebrow {
+    display: block;
+    margin-bottom: 9px;
+    color: var(--hf-accent, #6555e9);
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: 1.6px;
+}
+
+.candidate-withdrawal-dialog h2 {
+    margin: 0 38px 10px 0;
+    color: var(--hf-text, #202033);
+    font-family: Manrope, sans-serif;
+    font-size: clamp(22px, 4vw, 28px);
+    font-weight: 850;
+    letter-spacing: -.8px;
+    line-height: 1.2;
+}
+
+.candidate-withdrawal-copy {
+    margin: 0 0 23px;
+    color: var(--hf-muted, #74748b);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+    .candidate-withdrawal-copy strong {
+        color: var(--hf-text, #202033);
+    }
+
+.candidate-withdrawal-reason-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 8px;
+    color: var(--hf-text, #202033);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+    .candidate-withdrawal-reason-label span {
+        color: var(--hf-muted, #85859a);
+        font-size: 11px;
+        font-weight: 550;
+    }
+
+.candidate-withdrawal-dialog textarea {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-height: 108px;
+    padding: 12px 14px;
+    border: 1px solid var(--hf-border, #e5e5f0);
+    border-radius: 12px;
+    outline: none;
+    background: var(--hf-surface-soft, #f7f7fc);
+    color: var(--hf-text, #202033);
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+    resize: vertical;
+    color-scheme: light;
+}
+
+    .candidate-withdrawal-dialog textarea::placeholder {
+        color: var(--hf-placeholder, #9999ad);
+    }
+
+    .candidate-withdrawal-dialog textarea:focus {
+        border-color: var(--hf-accent, #6555e9);
+        box-shadow: 0 0 0 3px var(--hf-accent-soft, #f0edff);
+    }
+
+    .candidate-withdrawal-dialog textarea:disabled {
+        opacity: .65;
+        cursor: wait;
+    }
+
+.candidate-withdrawal-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 7px;
+    color: var(--hf-placeholder, #9999ad);
+    font-size: 10px;
+}
+
+.candidate-withdrawal-error {
+    margin: 13px 0 0;
+    padding: 10px 12px;
+    border: 1px solid #ffd0d8;
+    border-radius: 10px;
+    background: #fff0f2;
+    color: #b52e40;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.candidate-withdrawal-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 23px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hf-border, #e5e5f0);
+}
+
+.candidate-withdrawal-cancel,
+.candidate-withdrawal-confirm {
+    display: inline-flex;
+    min-height: 43px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    border: 1px solid var(--hf-border, #e5e5f0);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+
+.candidate-withdrawal-cancel {
+    background: var(--hf-surface, #ffffff);
+    color: var(--hf-text, #202033);
+}
+
+.candidate-withdrawal-confirm {
+    border-color: #c94759;
+    background: #c94759;
+    color: #ffffff;
+}
+
+    .candidate-withdrawal-cancel:hover:not(:disabled),
+    .candidate-withdrawal-confirm:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .candidate-withdrawal-cancel:disabled,
+    .candidate-withdrawal-confirm:disabled {
+        opacity: .55;
+        cursor: wait;
+    }
+
+    .candidate-withdrawal-cancel:focus-visible,
+    .candidate-withdrawal-confirm:focus-visible,
+    .candidate-withdrawal-close:focus-visible {
+        outline: 3px solid var(--hf-accent, #6555e9);
+        outline-offset: 3px;
+    }
+
+html[data-theme='dark'] .candidate-withdrawal-dialog {
+    border-color: var(--hf-border, #35354b);
+    background: var(--hf-surface, #191927);
+    color: var(--hf-text, #f0efff);
+}
+
+    html[data-theme='dark'] .candidate-withdrawal-dialog h2,
+    html[data-theme='dark'] .candidate-withdrawal-copy strong,
+    html[data-theme='dark'] .candidate-withdrawal-reason-label {
+        color: var(--hf-text, #f0efff);
+    }
+
+html[data-theme='dark'] .candidate-withdrawal-copy {
+    color: var(--hf-muted, #aaa8c3);
+}
+
+html[data-theme='dark'] .candidate-withdrawal-close,
+html[data-theme='dark'] .candidate-withdrawal-cancel {
+    border-color: var(--hf-border, #35354b);
+    background: var(--hf-surface-soft, #222235);
+    color: var(--hf-text, #f0efff);
+}
+
+html[data-theme='dark'] .candidate-withdrawal-dialog textarea {
+    border-color: var(--hf-border, #35354b);
+    background: var(--hf-surface-soft, #222235);
+    color: var(--hf-text, #f0efff);
+    color-scheme: dark;
+}
+
+    html[data-theme='dark'] .candidate-withdrawal-dialog textarea::placeholder {
+        color: var(--hf-placeholder, #88879f);
+    }
+
+html[data-theme='dark'] .candidate-withdrawal-error {
+    border-color: #633541;
+    background: #351c25;
+    color: #ffb6bf;
+}
+
+html[data-theme='dark'] .candidate-withdrawal-actions {
+    border-color: var(--hf-border, #35354b);
+}
+
+@keyframes candidate-withdrawal-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes candidate-withdrawal-rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(.99);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 520px) {
+    .candidate-withdrawal-overlay {
+        align-items: end;
+        padding: 12px;
+    }
+
+    .candidate-withdrawal-dialog {
+        width: 100%;
+        max-height: 88dvh;
+        padding: 24px 20px 20px;
+        border-radius: 20px;
+    }
+
+    .candidate-withdrawal-close {
+        top: 15px;
+        right: 15px;
+    }
+
+    .candidate-withdrawal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .candidate-withdrawal-cancel,
+    .candidate-withdrawal-confirm {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .candidate-withdrawal-overlay,
+    .candidate-withdrawal-dialog {
+        animation: none;
+    }
+}

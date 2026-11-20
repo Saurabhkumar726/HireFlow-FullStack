@@ -1,0 +1,17 @@
+.hf-footer { margin-top: 0; padding: 68px max(32px, calc((100% - 1180px) / 2)) 22px; border-top: 1px solid var(--hf-border); background: var(--hf-footer); color: var(--hf-text); }
+.hf-footer-main { display: grid; grid-template-columns: minmax(240px, 1.8fr) repeat(3, minmax(130px, 1fr)); gap: clamp(28px, 5vw, 76px); padding-bottom: 55px; }
+.hf-footer-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--hf-text); font-family: Manrope, 'DM Sans', sans-serif; font-size: 23px; font-weight: 800; letter-spacing: -1px; }
+.hf-footer-brand > span:last-child > span { color: var(--hf-accent); }
+.hf-footer-brand-mark { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 11px; color: #fff; background: linear-gradient(145deg, #7568ef, #5143c8); font-size: 18px; font-weight: 800; }
+.hf-footer-brand-column > p { max-width: 300px; margin: 18px 0 18px; color: var(--hf-muted); font-size: 13px; line-height: 1.8; }
+.hf-footer-contact-link { color: var(--hf-accent); font-size: 13px; font-weight: 750; }
+.hf-footer-contact-link span { padding-left: 3px; }
+.hf-footer-column { display: flex; flex-direction: column; align-items: flex-start; gap: 13px; }
+.hf-footer-column h2 { margin: 5px 0 7px; color: var(--hf-text); font-size: 13px; font-weight: 800; letter-spacing: .02em; }
+.hf-footer-column a { color: var(--hf-muted); font-size: 12px; font-weight: 550; transition: color .16s ease; }
+.hf-footer-column a:hover { color: var(--hf-accent); }
+.hf-footer-bottom { min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--hf-border); color: var(--hf-muted); font-size: 11px; }
+.hf-footer-bottom a { color: var(--hf-accent); font-weight: 750; white-space: nowrap; }
+
+@media (max-width: 850px) { .hf-footer { padding-inline: 28px; } .hf-footer-main { grid-template-columns: 1.4fr 1fr 1fr; } .hf-footer-brand-column { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .hf-footer { padding: 48px 20px 18px; } .hf-footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px 22px; padding-bottom: 38px; } .hf-footer-brand-column { grid-column: 1 / -1; } .hf-footer-bottom { padding-top: 16px; flex-wrap: wrap; align-items: flex-start; } .hf-footer-bottom > span:nth-child(2) { order: 3; flex-basis: 100%; } }

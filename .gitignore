@@ -14,3 +14,27 @@ obj/
 
 # Uploaded user files — never commit
 Uploads/
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/coverage/
+frontend/.vite/
+
+# Frontend local environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Certificates and private keys
+*.pfx
+*.p12
+*.pem
+*.key
+
+# Logs and local caches
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
