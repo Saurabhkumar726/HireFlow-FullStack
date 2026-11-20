@@ -1,6 +1,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import CityLocationAutocomplete from './CityLocationAutocomplete'
 import './CandidateProfileSections.css'
+import SkeletonLoader from './SkeletonLoader.jsx'
 
 const API_URL = 'http://localhost:5116/api'
 
@@ -331,6 +333,17 @@ function EditorFields({ fields, value, onChange }) {
                                 </option>
                             ))}
                         </select>
+                    ) : field.name === 'location' ? (
+                        <CityLocationAutocomplete
+                            value={value[field.name] ?? ''}
+                            onChange={nextValue =>
+                                onChange(field.name, nextValue)
+                            }
+                            placeholder="City, State"
+                            ariaLabel={`${field.label} city and state`}
+                            maxLength={150}
+                            required={field.required}
+                        />
                     ) : (
                         <input
                             type={field.type || 'text'}
@@ -1020,9 +1033,7 @@ export default function CandidateProfileSections({ token, onProfileUpdated }) {
             )}
 
             {loading ? (
-                <div className="candidate-loading">
-                    Loading your career profile…
-                </div>
+                <SkeletonLoader variant="profile" />
             ) : (
                 <>
                     <section
@@ -1299,19 +1310,17 @@ export default function CandidateProfileSections({ token, onProfileUpdated }) {
 
                                     <label className="candidate-field">
                                         <span>Preferred locations</span>
-                                        <input
-                                            maxLength="300"
-                                            value={
-                                                scalarDraft.preferredLocations || ''
-                                            }
-                                            onChange={e =>
+                                        <CityLocationAutocomplete
+                                            maxLength={300}
+                                            value={scalarDraft.preferredLocations || ''}
+                                            onChange={value =>
                                                 setScalarDraft(current => ({
                                                     ...current,
-                                                    preferredLocations:
-                                                        e.target.value,
+                                                    preferredLocations: value,
                                                 }))
                                             }
-                                            placeholder="Separate locations with commas"
+                                            placeholder="City, State (or enter multiple locations)"
+                                            ariaLabel="Preferred locations"
                                         />
                                     </label>
 

@@ -1,0 +1,361 @@
+.candidate-preferences-form {
+    display: grid;
+    gap: 24px;
+}
+
+.candidate-preferences-section {
+    padding: 24px;
+    border: 1px solid var(--hf-border);
+    border-radius: 20px;
+    background: var(--hf-surface);
+}
+
+.candidate-preferences-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+    .candidate-preferences-section-heading > span {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        color: var(--hf-accent);
+        background: var(--hf-accent-soft);
+        font-size: 12px;
+        font-weight: 850;
+    }
+
+    .candidate-preferences-section-heading h3 {
+        margin: 0 0 5px;
+        color: var(--hf-text);
+        font-size: 17px;
+        letter-spacing: -.35px;
+    }
+
+    .candidate-preferences-section-heading p {
+        margin: 0;
+        color: var(--hf-muted);
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+.candidate-preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.candidate-preference-field {
+    display: grid;
+    gap: 9px;
+    min-width: 0;
+    color: var(--hf-text);
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.candidate-preference-label-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+    .candidate-preference-label-row > span {
+        color: var(--hf-placeholder);
+        font-size: 11px;
+        font-weight: 650;
+    }
+
+.candidate-preference-hint {
+    margin: -4px 0 1px;
+    color: var(--hf-muted);
+    font-size: 12px;
+    font-weight: 450;
+    line-height: 1.5;
+}
+
+.candidate-tag-control {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    min-height: 48px;
+    padding: 7px;
+    border: 1px solid var(--hf-border);
+    border-radius: 13px;
+    background: var(--hf-surface-soft);
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+    .candidate-tag-control:focus-within {
+        border-color: var(--hf-accent);
+        box-shadow: 0 0 0 3px var(--hf-accent-soft);
+    }
+
+.candidate-tag-list {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+    .candidate-tag-list input {
+        min-width: 130px;
+        flex: 1;
+        border: 0 !important;
+        outline: 0 !important;
+        padding: 7px 8px !important;
+        color: var(--hf-text) !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        font: inherit;
+        font-size: 13px;
+    }
+
+        .candidate-tag-list input::placeholder {
+            color: var(--hf-placeholder);
+        }
+
+.candidate-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px 6px 10px;
+    border: 1px solid var(--hf-accent-border);
+    border-radius: 999px;
+    color: var(--hf-accent);
+    background: var(--hf-accent-soft);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+    .candidate-tag button {
+        width: 17px;
+        height: 17px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        color: inherit;
+        background: transparent;
+        font-size: 15px;
+        line-height: 1;
+    }
+
+        .candidate-tag button:hover {
+            background: var(--hf-accent-border);
+        }
+
+.candidate-tag-add {
+    align-self: center;
+    padding: 8px 11px;
+    border: 1px solid var(--hf-border);
+    border-radius: 9px;
+    color: var(--hf-muted);
+    background: var(--hf-surface);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+    .candidate-tag-add:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+.candidate-preference-field > small {
+    color: var(--hf-placeholder);
+    font-size: 11px;
+    font-weight: 450;
+}
+
+.candidate-preference-field select,
+.candidate-preference-field > input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 13px;
+    border: 1px solid var(--hf-border);
+    border-radius: 12px;
+    color: var(--hf-text);
+    background: var(--hf-surface-soft);
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+    .candidate-preference-field select:focus,
+    .candidate-preference-field > input:focus {
+        border-color: var(--hf-accent);
+        box-shadow: 0 0 0 3px var(--hf-accent-soft);
+    }
+
+.candidate-preference-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.candidate-preference-choice {
+    min-height: 38px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--hf-border);
+    border-radius: 999px;
+    color: var(--hf-muted);
+    background: var(--hf-surface-soft);
+    font-size: 12px;
+    font-weight: 700;
+    transition: .18s ease;
+}
+
+    .candidate-preference-choice:hover {
+        border-color: var(--hf-accent-border);
+        color: var(--hf-accent);
+    }
+
+    .candidate-preference-choice.is-selected {
+        border-color: var(--hf-accent-border);
+        color: var(--hf-accent);
+        background: var(--hf-accent-soft);
+    }
+
+.candidate-salary-row {
+    display: grid;
+    grid-template-columns: 92px minmax(90px, 1fr) 112px;
+    gap: 7px;
+}
+
+    .candidate-salary-row select, .candidate-salary-row input {
+        min-width: 0;
+    }
+
+.candidate-preferences-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 2px 0;
+}
+
+    .candidate-preferences-actions p {
+        margin: 0;
+        color: var(--hf-muted);
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .candidate-preferences-actions > button {
+        min-height: 46px;
+        flex: 0 0 auto;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 12px;
+        color: #fff;
+        background: linear-gradient(135deg, #6759e9, #5142c7);
+        font-size: 13px;
+        font-weight: 800;
+        box-shadow: 0 8px 20px rgba(93, 81, 216, .2);
+    }
+
+        .candidate-preferences-actions > button:disabled {
+            opacity: .6;
+            cursor: wait;
+        }
+
+.candidate-preferences-form.is-compact {
+    gap: 16px;
+}
+
+    .candidate-preferences-form.is-compact .candidate-preferences-section {
+        padding: 18px;
+        border-radius: 15px;
+    }
+
+    .candidate-preferences-form.is-compact .candidate-preferences-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .candidate-preferences-form.is-compact .candidate-preferences-section-heading {
+        margin-bottom: 16px;
+    }
+
+    .candidate-preferences-form.is-compact .candidate-preferences-actions {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+        .candidate-preferences-form.is-compact .candidate-preferences-actions > button {
+            width: 100%;
+        }
+
+@media (max-width: 700px) {
+    .candidate-preferences-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .candidate-preferences-section {
+        padding: 18px;
+    }
+
+    .candidate-preferences-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+        .candidate-preferences-actions > button {
+            width: 100%;
+        }
+
+    .candidate-salary-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+        .candidate-salary-row input {
+            grid-column: 1 / -1;
+            grid-row: 1;
+        }
+}
+
+/* Expected salary input: it is nested inside .candidate-salary-row, so the
+   direct-child input selector above does not reach it. Keep it theme-aware. */
+.candidate-preferences-form .candidate-salary-row input {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 13px;
+    border: 1px solid var(--hf-border);
+    border-radius: 12px;
+    color: var(--hf-text);
+    background: var(--hf-surface-soft);
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+    box-shadow: none;
+    appearance: textfield;
+}
+
+    .candidate-preferences-form .candidate-salary-row input::placeholder {
+        color: var(--hf-placeholder);
+        opacity: 1;
+    }
+
+    .candidate-preferences-form .candidate-salary-row input:focus {
+        border-color: var(--hf-accent);
+        box-shadow: 0 0 0 3px var(--hf-accent-soft);
+    }
+
+/* Ensure browser-native number controls follow the active page theme. */
+:root[data-theme='dark'] .candidate-preferences-form .candidate-salary-row input {
+    color: var(--hf-text);
+    background: var(--hf-surface-soft);
+    color-scheme: dark;
+}

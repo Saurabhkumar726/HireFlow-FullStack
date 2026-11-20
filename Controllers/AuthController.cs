@@ -1,4 +1,3 @@
-
 using Google.Apis.Auth;
 using HireFlow.Api.Authentication;
 using HireFlow.Api.DTOs;
@@ -20,19 +19,22 @@ namespace HireFlow.Api.Controllers
         private readonly IConfiguration _configuration;
         private readonly IPasswordResetService _passwordResetService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IEmailService _emailService;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             JwtService jwtService,
             IConfiguration configuration,
             IPasswordResetService passwordResetService,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _jwtService = jwtService;
             _configuration = configuration;
             _passwordResetService = passwordResetService;
             _logger = logger;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -57,13 +59,22 @@ namespace HireFlow.Api.Controllers
                 });
             }
 
+            var isHR = request.Role == "HR";
+
             var user = new ApplicationUser
             {
                 UserName = request.Email,
                 Email = request.Email,
                 FullName = request.FullName.Trim(),
                 AccountRole = request.Role,
-                IsActive = request.Role != "HR"
+
+                // HR accounts remain inactive until an administrator approves them.
+                IsActive = !isHR,
+
+                // Explicitly initialize the HR approval workflow.
+                HRApprovalStatus = isHR ? "Pending" : null,
+                HRDecisionAt = null,
+                HRDecisionByUserId = null
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -76,7 +87,42 @@ namespace HireFlow.Api.Controllers
                 });
             }
 
-            var message = request.Role == "HR"
+            if (isHR)
+            {
+                // Email delivery is best-effort: a mail server outage must not undo registration.
+                try
+                {
+                    await _emailService.SendHRRegistrationAcknowledgementAsync(
+                        user.Email!, user.FullName);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex,
+                        "Failed to send HR registration acknowledgement for user {UserId}.", user.Id);
+                }
+
+                var adminEmail = _configuration["Admin:Email"];
+                if (!string.IsNullOrWhiteSpace(adminEmail))
+                {
+                    try
+                    {
+                        await _emailService.SendAdminNewHRRegistrationAlertAsync(
+                            adminEmail, user.FullName, user.Email!);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex,
+                            "Failed to send new HR registration alert for user {UserId}.", user.Id);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "Admin:Email is not configured; the new HR registration alert was not sent.");
+                }
+            }
+
+            var message = isHR
                 ? "Registration successful. Your HR account is pending admin approval."
                 : "Registration successful. Please log in.";
 
@@ -89,11 +135,23 @@ namespace HireFlow.Api.Controllers
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
 
-            if (user == null || !user.IsActive)
+            if (user == null)
             {
                 return Unauthorized(new
                 {
                     message = "Invalid email or password."
+                });
+            }
+
+            // HR accounts must be active AND explicitly approved.
+            // This blocks both pending and rejected HR accounts.
+            if (!user.IsActive ||
+                (user.AccountRole == "HR" &&
+                 user.HRApprovalStatus != "Approved"))
+            {
+                return Unauthorized(new
+                {
+                    message = "Your account is pending approval or is inactive. Contact the administrator if you need assistance."
                 });
             }
 
@@ -280,7 +338,10 @@ namespace HireFlow.Api.Controllers
                     GoogleSubject = googleSubject,
                     AccountRole = "Student",
                     IsActive = true,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    HRApprovalStatus = null,
+                    HRDecisionAt = null,
+                    HRDecisionByUserId = null
                 };
 
                 var createResult = await _userManager.CreateAsync(user);

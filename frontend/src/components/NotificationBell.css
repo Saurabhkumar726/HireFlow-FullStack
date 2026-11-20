@@ -1,0 +1,185 @@
+.hf-notification-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    z-index: 30;
+}
+
+.hf-notification-bell-button {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid var(--hf-border, #e3e5ec);
+    border-radius: 12px;
+    color: var(--hf-text, #202236);
+    background: var(--hf-surface, #fff);
+    cursor: pointer;
+    transition: border-color .18s ease, transform .18s ease, background .18s ease;
+}
+
+    .hf-notification-bell-button:hover {
+        border-color: var(--hf-accent, #635bff);
+        transform: translateY(-1px);
+    }
+
+    .hf-notification-bell-button svg {
+        width: 19px;
+        height: 19px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8px;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+.hf-notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 4px;
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--hf-surface, #fff);
+    border-radius: 999px;
+    color: #fff;
+    background: #e34f67;
+    font-size: 9px;
+    font-weight: 850;
+    line-height: 1;
+}
+
+.hf-notification-popover {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    z-index: 1300;
+    width: min(390px, calc(100vw - 28px));
+    overflow: hidden;
+    border: 1px solid var(--hf-border, #e3e5ec);
+    border-radius: 17px;
+    color: var(--hf-text, #202236);
+    background: var(--hf-surface, #fff);
+    box-shadow: 0 22px 60px rgba(19, 24, 50, .2);
+}
+
+.hf-notification-popover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--hf-border, #e3e5ec);
+}
+
+    .hf-notification-popover-header > div {
+        display: grid;
+        gap: 3px;
+    }
+
+    .hf-notification-popover-header strong {
+        font-size: 14px;
+    }
+
+    .hf-notification-popover-header span {
+        color: var(--hf-muted, #777d91);
+        font-size: 11px;
+    }
+
+    .hf-notification-popover-header button {
+        border: 0;
+        color: var(--hf-accent, #635bff);
+        background: transparent;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+.hf-notification-popover-list {
+    max-height: 390px;
+    overflow-y: auto;
+}
+
+.hf-notification-popover-item {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 13px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--hf-border, #e3e5ec);
+    text-align: left;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+}
+
+    .hf-notification-popover-item:hover {
+        background: var(--hf-surface-soft, #f5f5fb);
+    }
+
+    .hf-notification-popover-item.is-unread {
+        background: color-mix(in srgb, var(--hf-accent-soft, #eeeefe) 50%, transparent);
+    }
+
+.hf-notification-dot {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.is-unread .hf-notification-dot {
+    background: var(--hf-accent, #635bff);
+}
+
+.hf-notification-popover-copy {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+    .hf-notification-popover-copy strong {
+        font-size: 12px;
+    }
+
+    .hf-notification-popover-copy > span {
+        color: var(--hf-muted, #777d91);
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .hf-notification-popover-copy small {
+        color: var(--hf-muted, #9297a8);
+        font-size: 10px;
+    }
+
+.hf-notification-popover-empty {
+    padding: 28px 18px;
+    color: var(--hf-muted, #777d91);
+    font-size: 12px;
+    text-align: center;
+}
+
+.hf-notification-popover-error {
+    margin: 10px 14px 0;
+    color: #d3485d;
+    font-size: 11px;
+}
+
+@media (max-width: 860px) {
+    .hf-notification-popover {
+        right: -52px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hf-notification-bell-button {
+        transition: none;
+    }
+}

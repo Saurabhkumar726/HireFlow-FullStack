@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import './HROverview.css'
+import SkeletonLoader from '../../components/SkeletonLoader.jsx'
 
 const API_BASE = 'http://localhost:5116/api'
 
@@ -161,7 +162,7 @@ function ApplicationsBarChart({ data, loading }) {
     return (
         <div className="hr-overview-chart-wrap">
             {loading ? (
-                <div className="hr-overview-chart-state" role="status">Loading application analytics…</div>
+                <SkeletonLoader variant="chart" />
             ) : data.every((item) => item.count === 0) ? (
                 <div className="hr-overview-chart-state">
                     <strong>No application activity yet</strong>
@@ -225,7 +226,7 @@ function ApplicationStatusChart({ statuses, total, loading }) {
     return (
         <div className="hr-overview-status-chart">
             {loading ? (
-                <div className="hr-overview-chart-state" role="status">Loading status breakdown…</div>
+                <SkeletonLoader variant="donut" />
             ) : total === 0 ? (
                 <div className="hr-overview-chart-state">
                     <strong>No applications to summarize</strong>
@@ -435,7 +436,7 @@ function HROverview() {
                         <div><h3 id="hr-recent-applicants-title">Recent applicants</h3><p>Your latest candidate submissions</p></div>
                         <Link to="/hr/applicants">View all <span aria-hidden="true">→</span></Link>
                     </div>
-                    {loading ? <div className="hr-overview-state" role="status">Loading applications…</div> : recentApplications.length === 0 ? (
+                    {loading ? <SkeletonLoader variant="application-list" count={3} /> : recentApplications.length === 0 ? (
                         <div className="hr-overview-state">
                             <span className="hr-overview-empty-icon" aria-hidden="true">♙</span>
                             <strong>No applicants yet</strong>
@@ -477,7 +478,7 @@ function HROverview() {
                         <div><h3 id="hr-upcoming-interviews-title">Upcoming interviews</h3><p>What's next on your schedule</p></div>
                         <Link to="/hr/interviews">View all <span aria-hidden="true">→</span></Link>
                     </div>
-                    {loading ? <div className="hr-overview-state" role="status">Loading interviews…</div> : upcomingInterviews.length === 0 ? (
+                    {loading ? <SkeletonLoader variant="interviews" count={3} /> : upcomingInterviews.length === 0 ? (
                         <div className="hr-overview-state">
                             <span className="hr-overview-empty-icon" aria-hidden="true">◷</span>
                             <strong>No upcoming interviews</strong>

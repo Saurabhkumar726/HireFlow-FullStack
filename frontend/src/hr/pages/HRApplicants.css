@@ -594,3 +594,163 @@ html[data-theme='dark'] .hr-applicant-button {
         }
 }
 
+
+.hr-status-under-review {
+    color: #2357a5;
+    background: #eaf2ff;
+    border-color: #cfe0ff;
+}
+
+.hr-status-interview-scheduled {
+    color: #6453c8;
+    background: #f0edff;
+    border-color: #dcd5ff;
+}
+
+.hr-status-selected {
+    color: #14784f;
+    background: #eafaf2;
+    border-color: #bcebd2;
+}
+
+.hr-status-withdrawn {
+    color: #687086;
+    background: #f0f1f5;
+    border-color: #dfe2eb;
+}
+
+html[data-theme='dark'] .hr-status-under-review {
+    color: #a9caff;
+    background: #1c2e4a;
+    border-color: #304d74;
+}
+
+html[data-theme='dark'] .hr-status-interview-scheduled {
+    color: #c0b7ff;
+    background: #292344;
+    border-color: #514879;
+}
+
+html[data-theme='dark'] .hr-status-selected {
+    color: #9ce6bf;
+    background: #183127;
+    border-color: #28553f;
+}
+
+html[data-theme='dark'] .hr-status-withdrawn {
+    color: #c1c4d3;
+    background: #282938;
+    border-color: #3a3b50;
+}
+
+/* Phase 7C — bulk selection and exports */
+.hr-applicants-bulk-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--border, #e8eaf3);
+    border-radius: 14px;
+    background: var(--surface, #fff);
+}
+
+.hr-applicants-select-all,
+.hr-applicant-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--text-secondary, #777f98);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+    .hr-applicants-select-all input,
+    .hr-applicant-select input {
+        width: 16px;
+        height: 16px;
+        accent-color: #6555e9;
+        cursor: pointer;
+    }
+
+.hr-applicant-select {
+    padding-top: 14px;
+}
+
+.hr-applicants-bulk-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hr-applicants-selected-count {
+    color: var(--text-secondary, #777f98);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.hr-applicants-bulk-actions select,
+.hr-applicants-bulk-actions button {
+    min-height: 38px;
+    padding: 0 11px;
+    border: 1px solid var(--border, #e2e5ef);
+    border-radius: 9px;
+    background: var(--surface, #fff);
+    color: var(--text-primary, #252641);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.hr-applicants-bulk-actions button {
+    color: #fff;
+    background: #6555e9;
+    border-color: #6555e9;
+    cursor: pointer;
+}
+
+    .hr-applicants-bulk-actions button.secondary {
+        color: var(--text-primary, #252641);
+        background: transparent;
+        border-color: var(--border, #e2e5ef);
+    }
+
+    .hr-applicants-bulk-actions button:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+html[data-theme='dark'] .hr-applicants-bulk-toolbar {
+    background: #191929;
+    border-color: #303047;
+}
+
+html[data-theme='dark'] .hr-applicants-bulk-actions select,
+html[data-theme='dark'] .hr-applicants-bulk-actions button.secondary {
+    color: #f1f2ff;
+    background: #191929;
+    border-color: #35354e;
+    color-scheme: dark;
+}
+
+@media (max-width: 720px) {
+    .hr-applicants-bulk-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hr-applicants-bulk-actions {
+        align-items: stretch;
+    }
+
+        .hr-applicants-bulk-actions > * {
+            flex: 1 1 120px;
+        }
+
+    .hr-applicant-select {
+        padding-top: 10px;
+    }
+}

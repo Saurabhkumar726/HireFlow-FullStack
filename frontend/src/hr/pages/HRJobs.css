@@ -723,3 +723,64 @@ html[data-theme='dark'] .hr-jobs-success {
         flex: 1;
     }
 }
+
+.hr-job-type-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+}
+
+.hr-job-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 23px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: #16633f;
+    background: #e9f8ef;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.hr-job-status-closed,
+.hr-job-status-expired {
+    color: #905015;
+    background: #fff1df;
+}
+
+.hr-job-status-pending-approval,
+.hr-job-status-requires-review {
+    color: #73520b;
+    background: #fff7d6;
+}
+
+.hr-job-reopen {
+    color: #16633f;
+    border-color: #a8d9bd;
+}
+
+@media (max-width: 620px) {
+    .hr-job-type-group {
+        justify-content: flex-start;
+    }
+}
+
+.hr-job-close {
+    color: #8b5b24;
+    border-color: #ead4b7;
+}
+
+    .hr-job-close:hover {
+        background: #fff6ea;
+    }
+
+:root[data-theme="dark"] .hr-job-close {
+    color: #f2c58f;
+    border-color: #6b4c2d;
+}
+
+    :root[data-theme="dark"] .hr-job-close:hover {
+        background: #342a20;
+    }

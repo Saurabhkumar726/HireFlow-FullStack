@@ -1,263 +1,291 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import './App.css'
+import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import JobDetails from './components/JobDetails'
+import ApplicationModal from './components/ApplicationModal'
 import Login from './components/Login'
 import StudentDashboard from './components/StudentDashboard'
 import CandidateInterviews from './components/CandidateInterviews'
 import SavedJobs from './components/SavedJobs'
-import ShareJob from './components/ShareJob'
 import HRLayout from './hr/layouts/HRLayout'
+import AdminPortal from './admin/AdminPortal'
+import Home from './pages/Home'
+import StudentHome from './pages/StudentHome'
+import CandidatePreferencesPage from './pages/CandidatePreferencesPage'
+import JobsPage from './pages/JobsPage'
+import CompaniesPage from './pages/CompaniesPage'
+import InformationPage from './pages/InformationPage'
+import SavedJobCollectionsPage from './pages/SavedJobCollectionsPage'
+import CandidateApplicationsPage from './pages/CandidateApplicationsPage'
+import NotificationsPage from './pages/NotificationsPage'
 import { useAuth } from './context/useAuth'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useSavedJobs } from './context/useSavedJobs'
+import SkeletonLoader from './components/SkeletonLoader.jsx'
 
-const API_URL = 'http://localhost:5116/api'
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116/api').replace(/\/$/, '')
 
-const formatSalary = (salary) => {
-    const amount = Number(salary)
-    return amount > 0
-        ? `₹${amount.toLocaleString('en-IN')}`
-        : 'Salary not disclosed'
+function formatSalary(salary, job = {}) {
+    const data = salary && typeof salary === 'object' ? salary : job
+    const amount = Number(data.salary ?? salary ?? 0)
+    const maximum = Number(data.salaryMax || 0)
+    const mode = String(data.salaryMode || 'Range').toLowerCase()
+    const currency = String(data.salaryCurrency || 'INR').toUpperCase()
+    const period = String(data.salaryPeriod || 'Monthly').toLowerCase()
+    if (mode === 'negotiable') return 'Salary negotiable'
+    if (mode === 'notdisclosed' || amount <= 0) return 'Salary not disclosed'
+    const format = (value) => {
+        try {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value)
+        } catch {
+            return `${currency} ${Number(value).toLocaleString('en-IN')}`
+        }
+    }
+    if (mode === 'startingat') return `From ${format(amount)} / ${period}`
+    if (maximum > amount) return `${format(amount)} – ${format(maximum)} / ${period}`
+    return `${format(amount)} / ${period}`
+}
+
+function jobIsUnavailable(job) {
+    if (!job) return true
+    if (job.isActive === false) return true
+    if (job.publicationStatus && String(job.publicationStatus).toLowerCase() !== 'published') return true
+    return Boolean(job.applicationDeadlineUtc && new Date(job.applicationDeadlineUtc).getTime() < Date.now())
+}
+
+function NotFoundPage() {
+    const navigate = useNavigate()
+    return (
+        <main className="hf-not-found">
+            <span>404</span>
+            <h1>This page isn't here.</h1>
+            <p>The link may be incorrect or the page may have moved.</p>
+            <button type="button" onClick={() => navigate('/')}>Back to HireFlow</button>
+        </main>
+    )
 }
 
 function App() {
-    const locationPath = useLocation()
-    const isHRRoute = locationPath.pathname.startsWith('/hr')
+    const location = useLocation()
     const navigate = useNavigate()
-    const isCandidateInterviewsRoute =
-        locationPath.pathname === '/candidate/interviews'
-    const isCandidateRoute = locationPath.pathname.startsWith('/candidate')
-    const isSavedJobsRoute = locationPath.pathname === '/saved-jobs'
-    const isJobDetailsRoute = /^\/jobs\/[^/]+\/?$/.test(locationPath.pathname)
-    const sharedJobId = isJobDetailsRoute
-        ? decodeURIComponent(locationPath.pathname.split('/')[2])
-        : null
+    const { user, token, isAuthenticated } = useAuth()
+    const { savedJobs, savedItems, loadingSavedJobs, savedJobsError, toggleSaved: toggleSavedJob } = useSavedJobs()
+    const pathname = location.pathname
+
+    const isAdminRoute = pathname.startsWith('/admin')
+    const isHRRoute = pathname.startsWith('/hr')
+    const isJobDetailsRoute = /^\/jobs\/[^/]+\/?$/.test(pathname)
+    const sharedJobId = isJobDetailsRoute ? decodeURIComponent(pathname.split('/')[2]) : null
+    const isCandidateInterviewsRoute = pathname === '/candidate/interviews'
+    const isCandidateHomeRoute = pathname === '/candidate/home'
+    const isCandidatePreferencesRoute = pathname === '/candidate/preferences'
+    const isCandidateApplicationsRoute = pathname === '/candidate/applications'
+    const isCandidateNotificationsRoute = pathname === '/candidate/notifications'
+    const isCandidateDashboardRoute = pathname === '/candidate' || pathname === '/candidate/dashboard'
+    const isCandidateRoute = pathname.startsWith('/candidate')
+    const isSavedJobsRoute = pathname === '/saved-jobs'
+    const isCandidateCollectionsRoute = pathname === '/candidate/collections'
+    const isJobsRoute = pathname === '/jobs'
+    const isCompaniesRoute = pathname === '/companies' || pathname.startsWith('/companies/')
+    const isInfoRoute = ['/about', '/contact', '/privacy', '/terms'].includes(pathname)
+
     const [jobs, setJobs] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
-    const [search, setSearch] = useState('')
-    const [location, setLocation] = useState('')
-    const [jobType, setJobType] = useState('All')
-    const [sortBy, setSortBy] = useState('newest')
-    const [savedJobs, setSavedJobs] = useState(() => {
-        try {
-            const saved = JSON.parse(
-                localStorage.getItem('hireflow-saved-jobs') || '[]'
-            )
-            return Array.isArray(saved) ? saved : []
-        } catch {
-            return []
-        }
-    })
-    const [selectedJob, setSelectedJob] = useState(null)
+    const [loadingJobs, setLoadingJobs] = useState(true)
+    const [jobsError, setJobsError] = useState('')
+    const [featuredJobs, setFeaturedJobs] = useState(null)
+    const [loadingFeaturedJobs, setLoadingFeaturedJobs] = useState(true)
     const [detailJob, setDetailJob] = useState(null)
+    const [detailLoading, setDetailLoading] = useState(false)
+    const [detailError, setDetailError] = useState('')
+    const [savedFeedback, setSavedFeedback] = useState('')
+
+    const [selectedJob, setSelectedJob] = useState(null)
     const [submitting, setSubmitting] = useState(false)
     const [applicationMessage, setApplicationMessage] = useState('')
-    const [mobileMenu, setMobileMenu] = useState(false)
-    const [theme, setTheme] = useState(() => {
-        try {
-            return localStorage.getItem('hireflow-theme') || 'light'
-        } catch {
-            return 'light'
-        }
-    })
+    const [applicationId, setApplicationId] = useState(null)
     const [form, setForm] = useState({
         applicantName: '',
         applicantEmail: '',
+        applicantPhoneNumber: '',
+        applicantLocation: '',
+        applicantLinkedInUrl: '',
+        applicantPortfolioUrl: '',
         resumeUrl: '',
         coverLetter: '',
+        screeningAnswers: [],
     })
-
     const [showLogin, setShowLogin] = useState(false)
+    const [loginRole, setLoginRole] = useState('Student')
     const [pendingJob, setPendingJob] = useState(null)
-    const { user, token, isAuthenticated, logout } = useAuth()
 
-    async function loadJobs() {
-        setLoading(true)
-        setError('')
+    async function loadJobs(signal) {
+        setLoadingJobs(true)
+        setJobsError('')
 
         try {
-            const response = await fetch(`${API_URL}/Jobs`)
-            if (!response.ok) throw new Error('Unable to load jobs.')
+            const response = await fetch(`${API_URL}/Jobs`, { signal })
+            if (!response.ok) throw new Error(`Job request failed (${response.status}).`)
             const data = await response.json()
+            if (!Array.isArray(data)) throw new Error('The jobs API returned an unexpected response.')
             setJobs(data)
-        } catch (err) {
-            console.error(err)
-            setError('We could not connect to the job server. Make sure the .NET API is running.')
+        } catch (error) {
+            if (error.name === 'AbortError') return
+            console.error('HireFlow jobs request failed:', error)
+            setJobsError('We could not connect to the HireFlow job service. Check that the .NET API is running and try again.')
         } finally {
-            setLoading(false)
+            if (!signal?.aborted) setLoadingJobs(false)
         }
+    }
+
+    async function loadFeaturedJobs(signal) {
+        setLoadingFeaturedJobs(true)
+        try {
+            const response = await fetch(`${API_URL}/Jobs/featured?count=6`, { signal })
+            if (!response.ok) throw new Error(`Featured jobs request failed (${response.status}).`)
+            const data = await response.json()
+            if (!Array.isArray(data)) throw new Error('The featured jobs API returned an unexpected response.')
+            setFeaturedJobs(data)
+        } catch (error) {
+            if (error.name === 'AbortError') return
+            console.warn('Featured jobs endpoint unavailable; using the public jobs feed:', error)
+            setFeaturedJobs(null)
+        } finally {
+            if (!signal?.aborted) setLoadingFeaturedJobs(false)
+        }
+    }
+
+    function retryJobData() {
+        loadJobs()
+        loadFeaturedJobs()
     }
 
     useEffect(() => {
         const controller = new AbortController()
-
-        async function fetchJobs() {
-            setLoading(true)
-            setError('')
-
-            try {
-                const response = await fetch(`${API_URL}/Jobs`, {
-                    signal: controller.signal,
-                })
-
-                if (!response.ok) {
-                    throw new Error('Unable to load jobs.')
-                }
-
-                const data = await response.json()
-                setJobs(data)
-            } catch (err) {
-                if (err.name === 'AbortError') return
-
-                console.error(err)
-                setError(
-                    'We could not connect to the job server. Make sure the .NET API is running.'
-                )
-            } finally {
-                if (!controller.signal.aborted) {
-                    setLoading(false)
-                }
-            }
-        }
-
-        fetchJobs()
-
+        Promise.resolve().then(() => {
+            if (controller.signal.aborted) return
+            loadJobs(controller.signal)
+            loadFeaturedJobs(controller.signal)
+        })
         return () => controller.abort()
+        // Jobs are loaded once for shared discovery pages. Manual retry refreshes both feeds.
     }, [])
 
-    const routedJob = sharedJobId
-        ? jobs.find((job) => String(job.id) === sharedJobId) || null
-        : null
-
-    useEffect(() => {
-        if (!mobileMenu) return
-
-        function handleMenuKeyDown(event) {
-            if (event.key === 'Escape') setMobileMenu(false)
-        }
-
-        function handleViewportResize() {
-            if (window.innerWidth > 760) setMobileMenu(false)
-        }
-
-        document.addEventListener('keydown', handleMenuKeyDown)
-        window.addEventListener('resize', handleViewportResize)
-
-        return () => {
-            document.removeEventListener('keydown', handleMenuKeyDown)
-            window.removeEventListener('resize', handleViewportResize)
-        }
-    }, [mobileMenu])
-
-    useEffect(() => {
-        try {
-            localStorage.setItem('hireflow-saved-jobs', JSON.stringify(savedJobs))
-        } catch {
-            console.warn('Could not persist saved jobs in this browser.')
-        }
-    }, [savedJobs])
-
-    useEffect(() => {
-        document.documentElement.dataset.theme = theme
-        try {
-            localStorage.setItem('hireflow-theme', theme)
-        } catch {
-            // Theme still works for the current session if storage is unavailable.
-        }
-    }, [theme])
-
-    const filteredJobs = useMemo(() => {
-        const query = search.trim().toLowerCase()
-        const place = location.trim().toLowerCase()
-
-        const result = jobs.filter((job) => {
-            const matchesSearch =
-                !query ||
-                [job.title, job.company, job.description, job.location]
-                    .some((value) => String(value || '').toLowerCase().includes(query))
-
-            const matchesLocation =
-                !place || String(job.location || '').toLowerCase().includes(place)
-
-            const matchesType =
-                jobType === 'All' ||
-                String(job.jobType || '').toLowerCase() === jobType.toLowerCase()
-
-            return matchesSearch && matchesLocation && matchesType
-        })
-
-        return [...result].sort((a, b) => {
-            if (sortBy === 'salary') return Number(b.salary) - Number(a.salary)
-            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-        })
-    }, [jobs, search, location, jobType, sortBy])
-
-    function toggleSaved(id) {
-        setSavedJobs((current) =>
-            current.includes(id)
-                ? current.filter((jobId) => jobId !== id)
-                : [...current, id]
-        )
+    function requestSignIn(role = 'Student') {
+        setLoginRole(role === 'HR' ? 'HR' : 'Student')
+        setShowLogin(true)
     }
 
-    function openApplication(job) {
-        if (!isAuthenticated || user?.role !== 'Student') {
-            if (isAuthenticated && user?.role !== 'Student') {
-                setApplicationMessage('Only Student accounts can apply for jobs.')
-                return
-            }
-
-            setPendingJob(job)
-            setShowLogin(true)
+    async function toggleSaved(jobId) {
+        if (!isAuthenticated) {
+            requestSignIn('Student')
             return
         }
+        if (String(user?.role || '').toLowerCase() !== 'student') {
+            setSavedFeedback('Saved Jobs are available to Student accounts.')
+            return
+        }
+        try {
+            const isNowSaved = await toggleSavedJob(jobId)
+            setSavedFeedback(isNowSaved ? 'Job saved to your HireFlow account.' : 'Job removed from your saved jobs.')
+        } catch (error) {
+            setSavedFeedback(error.message || 'Could not update your saved jobs. Please try again.')
+        }
+    }
 
+    async function prepareApplication(job, currentUser = user) {
         setPendingJob(null)
         setSelectedJob(job)
         setApplicationMessage('')
+        setApplicationId(null)
         setForm({
-            applicantName: user?.fullName || '',
-            applicantEmail: user?.email || '',
-            resumeUrl: user?.resumeUrl || '',
+            applicantName: currentUser?.fullName || currentUser?.FullName || '',
+            applicantEmail: currentUser?.email || currentUser?.Email || '',
+            applicantPhoneNumber: currentUser?.phoneNumber || currentUser?.PhoneNumber || '',
+            applicantLocation: currentUser?.currentLocation || currentUser?.location || '',
+            applicantLinkedInUrl: currentUser?.linkedInUrl || currentUser?.linkedinUrl || '',
+            applicantPortfolioUrl: currentUser?.portfolioUrl || '',
+            resumeUrl: currentUser?.resumeUrl || currentUser?.ResumeUrl || '',
             coverLetter: '',
+            screeningAnswers: [],
         })
+
+        const authToken = token || localStorage.getItem('hireflow-token') || ''
+        if (!authToken) return
+
+        // Reuse saved account/profile data as the application form defaults.
+        // The form remains editable; submitted values are stored as an application snapshot.
+        try {
+            const profileResponse = await fetch(`${API_URL}/Profile`, {
+                headers: { Authorization: `Bearer ${authToken}`, Accept: 'application/json' },
+            })
+            const profile = profileResponse.ok ? await profileResponse.json().catch(() => ({})) : {}
+
+            let candidateProfile = {}
+            try {
+                const candidateResponse = await fetch(`${API_URL}/CandidateProfile`, {
+                    headers: { Authorization: `Bearer ${authToken}`, Accept: 'application/json' },
+                })
+                if (candidateResponse.ok) candidateProfile = await candidateResponse.json().catch(() => ({}))
+            } catch {
+                // The base Profile response is enough to continue applying.
+            }
+
+            const employments = Array.isArray(candidateProfile.employments) ? candidateProfile.employments : []
+            const currentEmployment = employments.find(item => item.isCurrentlyWorking || item.IsCurrentlyWorking) || employments[0]
+            const jobLocation = currentEmployment?.location || currentEmployment?.Location || ''
+
+            setForm(current => ({
+                ...current,
+                applicantName: current.applicantName || profile.fullName || profile.FullName || '',
+                applicantEmail: current.applicantEmail || profile.email || profile.Email || '',
+                applicantPhoneNumber: current.applicantPhoneNumber || profile.phoneNumber || profile.PhoneNumber || '',
+                applicantLocation: current.applicantLocation || profile.currentLocation || profile.CurrentLocation || jobLocation,
+                applicantLinkedInUrl: current.applicantLinkedInUrl || profile.linkedInUrl || profile.LinkedInUrl || '',
+                applicantPortfolioUrl: current.applicantPortfolioUrl || profile.portfolioUrl || profile.PortfolioUrl || '',
+                resumeUrl: current.resumeUrl || profile.resumeUrl || profile.ResumeUrl || '',
+            }))
+        } catch (error) {
+            console.warn('Could not load all saved application profile details:', error)
+        }
     }
 
-    useEffect(() => {
-        if (!isAuthenticated || user?.role !== 'Student' || !pendingJob) return
-
-        let cancelled = false
-        const scheduleId = window.setTimeout(() => {
-            if (cancelled) return
-
-            setSelectedJob(pendingJob)
-            setApplicationMessage('')
-            setForm({
-                applicantName: user?.fullName || '',
-                applicantEmail: user?.email || '',
-                resumeUrl: user?.resumeUrl || '',
-                coverLetter: '',
-            })
-            setPendingJob(null)
-            setShowLogin(false)
-        }, 0)
-
-        return () => {
-            cancelled = true
-            window.clearTimeout(scheduleId)
+    function openApplication(job) {
+        if (jobIsUnavailable(job)) {
+            setApplicationMessage('This job is closed or its application deadline has passed. You can still review the job details, but applications are no longer being accepted.')
+            return
         }
-    }, [isAuthenticated, user, pendingJob])
+
+        if (!isAuthenticated) {
+            setPendingJob(job)
+            requestSignIn('Student')
+            return
+        }
+
+        if (String(user?.role || '').toLowerCase() !== 'student') {
+            setApplicationMessage('Only Student accounts can apply for jobs.')
+            return
+        }
+
+        void prepareApplication(job, user)
+    }
 
     async function submitApplication(event) {
         event.preventDefault()
         if (!selectedJob) return
-
         setSubmitting(true)
         setApplicationMessage('')
 
         try {
-            if (!token || user?.role !== 'Student') {
+            const authToken = token || localStorage.getItem('hireflow-token') || ''
+            let storedUser = null
+            try {
+                storedUser = JSON.parse(localStorage.getItem('hireflow-user') || 'null')
+            } catch {
+                storedUser = null
+            }
+            const currentRole = String(user?.role || storedUser?.role || '').toLowerCase()
+            if (!authToken || currentRole !== 'student') {
                 throw new Error('Please sign in with a Student account before applying.')
             }
 
@@ -265,607 +293,232 @@ function App() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${authToken}`,
                 },
                 body: JSON.stringify({
-                    jobId: selectedJob.id,
+                    jobId: selectedJob.id ?? selectedJob.Id,
                     applicantName: form.applicantName.trim(),
                     applicantEmail: form.applicantEmail.trim(),
+                    applicantPhoneNumber: form.applicantPhoneNumber.trim(),
+                    applicantLocation: form.applicantLocation.trim(),
+                    applicantLinkedInUrl: form.applicantLinkedInUrl.trim(),
+                    applicantPortfolioUrl: form.applicantPortfolioUrl.trim(),
                     resumeUrl: form.resumeUrl.trim(),
                     coverLetter: form.coverLetter.trim(),
-                    status: 'Pending',
+                    screeningAnswers: Array.isArray(form.screeningAnswers) ? form.screeningAnswers : [],
                 }),
             })
 
+            const payload = await response.json().catch(() => ({}))
             if (!response.ok) {
-                const message = await response.text()
-                throw new Error(message || 'Application submission failed.')
+                throw new Error(payload.message || payload.title || `Application submission failed (${response.status}).`)
             }
 
+            setApplicationId(payload.id || payload.Id || null)
             setApplicationMessage('success')
-        } catch (err) {
-            console.error(err)
-            setApplicationMessage(
-                'Could not submit your application. Check the API connection and try again.'
-            )
+        } catch (error) {
+            console.error('HireFlow application submit failed:', error)
+            setApplicationMessage(error.message || 'Could not submit your application. Please try again.')
         } finally {
             setSubmitting(false)
         }
     }
 
+    function handleLoginSuccess() {
+        setShowLogin(false)
+
+        let currentUser = user
+        try {
+            currentUser = JSON.parse(localStorage.getItem('hireflow-user') || 'null') || user
+        } catch {
+            // Use the context value if local storage cannot be read.
+        }
+
+        const role = String(currentUser?.role || '').toLowerCase()
+        if (pendingJob && role === 'student') {
+            void prepareApplication(pendingJob, currentUser)
+            return
+        }
+        if (pendingJob && role !== 'student') {
+            setPendingJob(null)
+            setApplicationMessage('Only Student accounts can apply for jobs.')
+            return
+        }
+
+        if (role === 'student') navigate('/candidate/home', { replace: true })
+        else if (role === 'hr') navigate('/hr', { replace: true })
+        else if (role === 'admin') navigate('/admin', { replace: true })
+    }
+
+    useEffect(() => {
+        if (!sharedJobId || jobs.some((job) => String(job.id) === String(sharedJobId)) || loadingJobs) return undefined
+
+        const controller = new AbortController()
+        Promise.resolve().then(async () => {
+            if (controller.signal.aborted) return
+            setDetailJob(null)
+            setDetailLoading(true)
+            setDetailError('')
+            try {
+                // Closed/expired published jobs are absent from the public feed,
+                // but remain readable through GET /api/Jobs/{id}.
+                const response = await fetch(`${API_URL}/Jobs/${encodeURIComponent(sharedJobId)}`, { signal: controller.signal })
+                const data = await response.json().catch(() => null)
+                if (!response.ok) throw new Error(data?.message || data?.title || `Job details request failed (${response.status}).`)
+                if (!data || typeof data !== 'object') throw new Error('The job details response was not valid.')
+                setDetailJob(data)
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    setDetailJob(null)
+                    setDetailError(error.message || 'This job could not be found.')
+                }
+            } finally {
+                if (!controller.signal.aborted) setDetailLoading(false)
+            }
+        })
+
+        return () => controller.abort()
+    }, [sharedJobId, jobs, loadingJobs])
+
+    const routedJob = sharedJobId
+        ? jobs.find((job) => String(job.id) === String(sharedJobId)) || (String(detailJob?.id) === String(sharedJobId) ? detailJob : null)
+        : null
+
+    useEffect(() => {
+        const robotsMeta = document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'), { name: 'robots' }))
+        const isPrivatePage = isCandidateRoute || isSavedJobsRoute || isHRRoute || isAdminRoute
+        robotsMeta.setAttribute('content', isPrivatePage ? 'noindex,nofollow' : 'index,follow')
+
+        // HR and Admin layouts manage their own document titles.
+        if (isHRRoute || isAdminRoute) return
+
+        const routeMeta = {
+            '/': ['HireFlow — Where Careers Find Their Flow', 'Discover meaningful job opportunities, explore companies hiring, and move your career forward with HireFlow.'],
+            '/jobs': ['Find Jobs | HireFlow', 'Search current job opportunities by title, skill, location, company, and work preference.'],
+            '/companies': ['Companies Hiring | HireFlow', 'Discover companies represented in current HireFlow job listings.'],
+            '/about': ['About HireFlow', 'Learn about HireFlow and our approach to clearer job discovery and recruitment.'],
+            '/contact': ['Contact HireFlow', 'Get help with job discovery, applications, employer onboarding, and HireFlow.'],
+            '/privacy': ['Privacy Policy Draft | HireFlow', 'Review the current HireFlow privacy policy draft.'],
+            '/terms': ['Terms of Service Draft | HireFlow', 'Review the current HireFlow terms of service draft.'],
+            '/candidate/home': ['Find Your Next Role | HireFlow', 'Explore job opportunities and companies on HireFlow.'],
+            '/candidate/preferences': ['Job Preferences | HireFlow', 'Personalize job recommendations using your preferred roles, skills, locations, and work preferences.'],
+            '/candidate/applications': ['My Applications | HireFlow', 'Track submitted applications, review recruiter updates, and manage applications.'],
+            '/candidate/notifications': ['Notifications | HireFlow', 'Review your latest application and interview notifications.'],
+            '/saved-jobs': ['Saved Jobs | HireFlow', 'Review opportunities you have saved on HireFlow.'],
+        }
+        const [title, description] = isJobDetailsRoute && routedJob
+            ? [`${routedJob.title || 'Job Details'} | HireFlow`, `Explore the ${routedJob.title || 'job opportunity'} at ${routedJob.company || 'this company'} on HireFlow.`]
+            : routeMeta[pathname] || ['HireFlow', 'Discover job opportunities and companies with HireFlow.']
+        document.title = title
+        const descriptionMeta = document.querySelector('meta[name="description"]')
+        if (descriptionMeta) descriptionMeta.setAttribute('content', description)
+    }, [pathname, isJobDetailsRoute, routedJob, isCandidateRoute, isSavedJobsRoute, isHRRoute, isAdminRoute])
+
+
+    if (isAdminRoute) {
+        // AdminPortal owns the isolated /admin/login and protected /admin/dashboard routes.
+        return <AdminPortal />
+    }
+
+    if (isHRRoute) {
+        // The existing HR workspace and its sidebar are preserved as a separate workspace.
+        return <HRLayout />
+    }
+
+    let page
+
+    if (isCandidateInterviewsRoute) {
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <CandidateInterviews />
+            : <Navigate to="/" replace />
+    } else if (isCandidateHomeRoute) {
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <StudentHome jobs={jobs} loading={loadingJobs} error={jobsError} onRetry={retryJobData} savedJobs={savedJobs} onToggleSaved={toggleSaved} onApply={openApplication} onSignIn={requestSignIn} user={user} />
+            : <Navigate to="/" replace />
+    } else if (isCandidatePreferencesRoute) {
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <CandidatePreferencesPage />
+            : <Navigate to="/" replace />
+    } else if (isCandidateApplicationsRoute) {
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <CandidateApplicationsPage />
+            : <Navigate to="/" replace />
+    } else if (isCandidateNotificationsRoute) {
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <NotificationsPage />
+            : <Navigate to="/" replace />
+    } else if (isCandidateDashboardRoute) {
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <StudentDashboard />
+            : <Navigate to="/" replace />
+    } else if (isCandidateCollectionsRoute) {
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <SavedJobCollectionsPage />
+            : <Navigate to="/" replace />
+    } else if (isCandidateRoute) {
+        // Preserve legacy candidate sub-routes until each new page is implemented.
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <StudentDashboard />
+            : <Navigate to="/" replace />
+    } else if (isSavedJobsRoute) {
+        page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
+            ? <SavedJobs savedItems={savedItems} loading={loadingSavedJobs} error={savedJobsError} onToggleSaved={toggleSaved} onViewDetails={(job) => navigate(`/jobs/${job.id}`)} onApply={openApplication} onManageCollections={(jobId) => navigate(`/candidate/collections?job=${encodeURIComponent(jobId)}`)} />
+            : <Navigate to="/" replace />
+    } else if (isJobDetailsRoute) {
+        page = routedJob ? (
+            <JobDetails job={routedJob} onBack={() => navigate('/jobs')} onApply={() => openApplication(routedJob)} formatSalary={formatSalary} />
+        ) : loadingJobs || detailLoading || !detailError ? (
+            <SkeletonLoader variant="job-details" />
+        ) : (
+            <main className="hf-not-found"><span>404</span><h1>Job not found.</h1><p>{detailError || 'This opportunity may have been removed or the link may be invalid.'}</p><button type="button" onClick={() => navigate('/jobs')}>Browse jobs</button></main>
+        )
+    } else if (isJobsRoute) {
+        page = <JobsPage jobs={jobs} loading={loadingJobs} error={jobsError} onRetry={retryJobData} savedJobs={savedJobs} onToggleSaved={toggleSaved} onApply={openApplication} />
+    } else if (isCompaniesRoute) {
+        page = <CompaniesPage jobs={jobs} loading={loadingJobs} />
+    } else if (isInfoRoute) {
+        page = <InformationPage />
+    } else if (pathname === '/') {
+        page = <Home jobs={jobs} featuredJobs={featuredJobs} loading={loadingJobs || loadingFeaturedJobs} error={jobsError} onRetry={retryJobData} savedJobs={savedJobs} onToggleSaved={toggleSaved} onApply={openApplication} onSignIn={requestSignIn} user={user} />
+    } else {
+        page = <NotFoundPage />
+    }
+
     return (
-        <div className="site-shell">
-            <div className="announcement">
-                <span className="announcement-dot" />
-                Your next career move starts here
-                <span className="announcement-arrow">↗</span>
-            </div>
+        <div className="hf-app-shell">
+            <Navbar onSignIn={requestSignIn} savedJobsCount={savedJobs.length} />
+            {page}
+            {savedFeedback && <div className="hf-saved-feedback" role="status"><span>{savedFeedback}</span><button type="button" onClick={() => setSavedFeedback('')} aria-label="Dismiss">×</button></div>}
+            <Footer />
 
-            <header className="navbar">
-                <a className="brand" href="/" aria-label="HireFlow home">
-                    <span className="brand-mark">H</span>
-                    <span>hire<span className="brand-accent">flow</span></span>
-                </a>
+            <ApplicationModal
+                job={selectedJob}
+                form={form}
+                onChange={setForm}
+                submitting={submitting}
+                message={applicationMessage}
+                onSubmit={submitApplication}
+                applicationId={applicationId}
+                onViewApplications={() => {
+                    setSelectedJob(null)
+                    setApplicationMessage('')
+                    navigate('/candidate/applications')
+                }}
+                onBrowseJobs={() => {
+                    setSelectedJob(null)
+                    setApplicationMessage('')
+                    navigate('/jobs')
+                }}
+                onClose={() => {
+                    if (!submitting) {
+                        setSelectedJob(null)
+                        setApplicationMessage('')
+                        setApplicationId(null)
+                    }
+                }}
+            />
 
-                <div className="nav-actions">
-                    <button
-                        className="theme-toggle"
-                        type="button"
-                        onClick={() => setTheme((current) => current === 'light' ? 'dark' : 'light')}
-                        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                        title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                    >
-                        <span aria-hidden="true">{theme === 'light' ? '☾' : '☀'}</span>
-                        <span className="theme-toggle-label">{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>
-                    </button>
-                    <button
-                        className="mobile-toggle"
-                        type="button"
-                        onClick={() => setMobileMenu((current) => !current)}
-                        aria-label={mobileMenu ? 'Close navigation' : 'Open navigation'}
-                        aria-controls="primary-navigation"
-                        aria-expanded={mobileMenu}
-                    >
-                        {mobileMenu ? '✕' : '☰'}
-                    </button>
-                </div>
-
-                <nav
-                    id="primary-navigation"
-                    className={`nav-links ${mobileMenu ? 'nav-open' : ''}`}
-                    aria-label="Main navigation"
-                >
-                    {!isHRRoute && (
-                        <>
-                            <a href="/#jobs" onClick={() => setMobileMenu(false)}>
-                                Find jobs
-                            </a>
-
-                            <a href="/#categories" onClick={() => setMobileMenu(false)}>
-                                Categories
-                            </a>
-
-                            {isAuthenticated && user?.role === 'Student' && (
-                                <button
-                                    type="button"
-                                    className="saved-jobs-nav"
-                                    onClick={() => {
-                                        setMobileMenu(false)
-                                        navigate('/saved-jobs')
-                                    }}
-                                >
-                                    Saved Jobs ({savedJobs.length})
-                                </button>
-                            )}
-
-                            <a href="/#about" onClick={() => setMobileMenu(false)}>
-                                About
-                            </a>
-                        </>
-                    )}
-                    {isAuthenticated ? (
-                        <>
-                            <button
-                                type="button"
-                                className="nav-signin"
-                                onClick={() => {
-                                    setMobileMenu(false)
-
-                                    if (user?.role === 'HR') {
-                                        navigate('/hr')
-                                    } else if (user?.role === 'Student') {
-                                        navigate('/candidate')
-                                    } else {
-                                        navigate('/')
-                                    }
-                                }}
-                            >
-                                {user?.fullName || 'Dashboard'}
-                            </button>
-
-                            <button
-                                type="button"
-                                className="nav-cta"
-                                onClick={() => {
-                                    logout()
-                                    setMobileMenu(false)
-                                }}
-                            >
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        <button
-                            type="button"
-                            className="nav-signin"
-                            onClick={() => {
-                                setShowLogin(true)
-                                setMobileMenu(false)
-                            }}
-                        >
-                            Sign in
-                        </button>
-                    )}
-                    {!isHRRoute && (
-                        <a
-                            className="nav-cta"
-                            href="/#jobs"
-                            onClick={() => setMobileMenu(false)}
-                        >
-                            Get started <span>↗</span>
-                        </a>
-                    )}
-                </nav>
-            </header>
-
-            {isHRRoute ? (
-                <HRLayout />
-            ) : isCandidateInterviewsRoute ? (
-                isAuthenticated && user?.role === 'Student' ? (
-                    <CandidateInterviews />
-                ) : (
-                    <Navigate to="/" replace />
-                )
-            ) : isCandidateRoute ? (
-                isAuthenticated && user?.role === 'Student' ? (
-                    <StudentDashboard />
-                ) : (
-                    <Navigate to="/" replace />
-                )
-            ) : isSavedJobsRoute ? (
-                isAuthenticated && user?.role === 'Student' ? (
-                    <>
-                        <SavedJobs
-                            jobs={jobs}
-                            savedJobs={savedJobs}
-                            onToggleSaved={toggleSaved}
-                            onViewDetails={(job) => navigate(`/jobs/${job.id}`)}
-                            onApply={openApplication}
-                        />
-                        <Footer />
-                    </>
-                ) : (
-                    <Navigate to="/" replace />
-                )
-            ) : isJobDetailsRoute ? (
-                <>
-                    {loading ? (
-                        <div className="status-panel">
-                            <div className="loading-spinner" />
-                            <p>Loading job details...</p>
-                        </div>
-                    ) : routedJob ? (
-                        <JobDetails
-                            job={routedJob}
-                            onBack={() => navigate('/#jobs')}
-                            onApply={() => openApplication(routedJob)}
-                            formatSalary={formatSalary}
-                        />
-                    ) : (
-                        <main className="job-details-page">
-                            <div className="job-details-wrap">
-                                <h1>Job not found</h1>
-                                <p>This job may have been removed or the link may be invalid.</p>
-                                <button
-                                    className="job-details-back"
-                                    onClick={() => navigate('/#jobs')}
-                                >
-                                    ← Back to jobs
-                                </button>
-                            </div>
-                        </main>
-                    )}
-                    <Footer />
-                </>
-            ) : (
-                <>
-                    {detailJob ? (
-                        <JobDetails
-                            job={detailJob}
-                            onBack={() => {
-                                setDetailJob(null)
-                                window.setTimeout(() => document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' }), 0)
-                            }}
-                            onApply={() => openApplication(detailJob)}
-                            formatSalary={formatSalary}
-                        />
-                    ) : (
-                        <main>
-                            <section className="hero" id="home">
-                                <div className="hero-glow hero-glow-one" />
-                                <div className="hero-glow hero-glow-two" />
-
-                                <div className="hero-content">
-                                    <div className="hero-badge">
-                                        <span className="badge-sparkle">✳</span>
-                                        A better way to find your next role
-                                    </div>
-
-                                    <h1>
-                                        Work that fits
-                                        <br />
-                                        your <span className="gradient-text">ambition.</span>
-                                    </h1>
-
-                                    <p className="hero-description">
-                                        Discover meaningful opportunities, connect with great companies,
-                                        and build a career you're excited about.
-                                    </p>
-
-                                    <div className="hero-actions">
-                                        <a className="button-primary" href="#jobs">Explore opportunities <span>↗</span></a>
-                                        <a className="button-secondary" href="#about"><span className="play-icon">▶</span> How it works</a>
-                                    </div>
-
-                                    <div className="hero-proof">
-                                        <div className="avatar-stack" aria-hidden="true">
-                                            <span>A</span><span>R</span><span>S</span><span>+</span>
-                                        </div>
-                                        <div>
-                                            <div className="proof-stars">★★★★★</div>
-                                            <p>Built for people ready to grow</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="hero-visual" aria-hidden="true">
-                                    <div className="visual-orbit orbit-one" />
-                                    <div className="visual-orbit orbit-two" />
-                                    <div className="visual-center">
-                                        <span className="center-symbol">H</span>
-                                        <span className="center-caption">YOUR NEXT CHAPTER</span>
-                                    </div>
-                                    <div className="float-card float-card-top">
-                                        <span className="float-icon float-icon-purple">↗</span>
-                                        <div><strong>New possibilities</strong><small>Start exploring today</small></div>
-                                    </div>
-                                    <div className="float-card float-card-bottom">
-                                        <span className="float-icon float-icon-green">✓</span>
-                                        <div><strong>Career growth</strong><small>One opportunity at a time</small></div>
-                                    </div>
-                                    <div className="visual-spark spark-one">✳</div>
-                                    <div className="visual-spark spark-two">✦</div>
-                                </div>
-
-                                <div className="hero-bottom-label">
-                                    <span>DISCOVER</span><i /> <span>CONNECT</span><i /> <span>GROW</span>
-                                </div>
-                            </section>
-
-                            <section className="search-section" aria-label="Search jobs">
-                                <div className="search-panel">
-                                    <label className="search-field">
-                                        <span className="field-icon">⌕</span>
-                                        <span className="field-content">
-                                            <span className="field-label">What are you looking for?</span>
-                                            <input
-                                                value={search}
-                                                onChange={(event) => setSearch(event.target.value)}
-                                                placeholder="Job title, company or keyword"
-                                            />
-                                        </span>
-                                    </label>
-
-                                    <div className="search-divider" />
-
-                                    <label className="search-field location-field">
-                                        <span className="field-icon">⌖</span>
-                                        <span className="field-content">
-                                            <span className="field-label">Where?</span>
-                                            <input
-                                                value={location}
-                                                onChange={(event) => setLocation(event.target.value)}
-                                                placeholder="City or remote"
-                                            />
-                                        </span>
-                                    </label>
-
-                                    <button className="search-button" onClick={() => {
-                                        document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' })
-                                    }}>
-                                        Search jobs <span>→</span>
-                                    </button>
-                                </div>
-                                <p className="search-hint">
-                                    <span>✦</span> Try “Developer”, “Remote” or “Full-time”
-                                </p>
-                            </section>
-
-                            <section className="trust-strip" aria-label="HireFlow benefits">
-                                <div><span className="trust-icon">◎</span><span>Opportunities that matter</span></div>
-                                <div><span className="trust-icon">↗</span><span>Simple job discovery</span></div>
-                                <div><span className="trust-icon">✳</span><span>Built for your next step</span></div>
-                            </section>
-
-                            <section className="categories-section section-wrap" id="categories">
-                                <div className="section-heading">
-                                    <div>
-                                        <p className="eyebrow">FIND YOUR DIRECTION</p>
-                                        <h2>Explore by <span>category.</span></h2>
-                                        <p className="section-description">Start with the kind of opportunity you're looking for.</p>
-                                    </div>
-                                    <a className="text-link" href="#jobs">Browse all jobs <span>↗</span></a>
-                                </div>
-
-                                <div className="category-grid">
-                                    {[
-                                        { name: 'All opportunities', type: 'All', symbol: '✳', color: 'lavender' },
-                                        { name: 'Full-time', type: 'Full-time', symbol: '▣', color: 'mint' },
-                                        { name: 'Part-time', type: 'Part-time', symbol: '◷', color: 'peach' },
-                                        { name: 'Internships', type: 'Internship', symbol: '✦', color: 'blue' },
-                                    ].map((category) => (
-                                        <button
-                                            key={category.name}
-                                            className={`category-card ${jobType === category.type ? 'category-active' : ''}`}
-                                            onClick={() => {
-                                                setJobType(category.type)
-                                                document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' })
-                                            }}
-                                        >
-                                            <span className={`category-symbol ${category.color}`}>{category.symbol}</span>
-                                            <span className="category-name">{category.name}</span>
-                                            <span className="category-arrow">↗</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
-
-                            <section className="jobs-section" id="jobs">
-                                <div className="section-wrap">
-                                    <div className="section-heading jobs-heading">
-                                        <div>
-                                            <p className="eyebrow">YOUR NEXT OPPORTUNITY</p>
-                                            <h2>Featured <span>jobs.</span></h2>
-                                            <p className="section-description">
-                                                Real opportunities, loaded directly from HireFlow.
-                                            </p>
-                                        </div>
-                                        <div className="jobs-count">
-                                            <strong>{loading ? '—' : filteredJobs.length.toString().padStart(2, '0')}</strong>
-                                            <span>{filteredJobs.length === 1 ? 'open position' : 'open positions'}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="filter-toolbar">
-                                        <div className="filter-chips">
-                                            {['All', 'Full-time', 'Part-time', 'Internship'].map((type) => (
-                                                <button
-                                                    key={type}
-                                                    onClick={() => setJobType(type)}
-                                                    className={`filter-chip ${jobType === type ? 'filter-chip-active' : ''}`}
-                                                >
-                                                    {type}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <label className="sort-select">
-                                            <span>Sort by</span>
-                                            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-                                                <option value="newest">Most recent</option>
-                                                <option value="salary">Highest salary</option>
-                                            </select>
-                                        </label>
-                                    </div>
-
-                                    {loading && (
-                                        <div className="status-panel">
-                                            <div className="loading-spinner" />
-                                            <p>Finding opportunities for you...</p>
-                                        </div>
-                                    )}
-
-                                    {error && (
-                                        <div className="status-panel error-panel">
-                                            <span className="status-symbol">!</span>
-                                            <h3>We couldn't load the jobs</h3>
-                                            <p>{error}</p>
-                                            <button className="button-primary" onClick={loadJobs}>Try again ↻</button>
-                                        </div>
-                                    )}
-
-                                    {!loading && !error && filteredJobs.length === 0 && (
-                                        <div className="status-panel">
-                                            <span className="status-symbol">⌕</span>
-                                            <h3>No matching jobs found</h3>
-                                            <p>Try another keyword or reset your filters.</p>
-                                            <button className="button-secondary" onClick={() => {
-                                                setSearch('')
-                                                setLocation('')
-                                                setJobType('All')
-                                            }}>Clear filters</button>
-                                        </div>
-                                    )}
-
-                                    {!loading && !error && filteredJobs.length > 0 && (
-                                        <div className="jobs-grid">
-                                            {filteredJobs.map((job, index) => (
-                                                <article className="job-card" key={job.id}>
-                                                    <div className="job-card-head">
-                                                        <div className={`company-avatar company-color-${index % 4}`}>
-                                                            {job.company?.trim().charAt(0).toUpperCase() || 'H'}
-                                                        </div>
-                                                        <div className="job-card-quick-actions">
-                                                            <button
-                                                                type="button"
-                                                                className={`save-button ${savedJobs.includes(job.id) ? 'is-saved' : ''}`}
-                                                                onClick={() => toggleSaved(job.id)}
-                                                                aria-label={savedJobs.includes(job.id) ? 'Unsave job' : 'Save job'}
-                                                                title={savedJobs.includes(job.id) ? 'Unsave job' : 'Save job'}
-                                                            >
-                                                                {savedJobs.includes(job.id) ? '♥' : '♡'}
-                                                            </button>
-                                                            <ShareJob job={job} />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="job-card-labels">
-                                                        <span className="job-type-label">{job.jobType || 'Opportunity'}</span>
-                                                        {job.location?.toLowerCase().includes('remote') && (
-                                                            <span className="remote-label">Remote</span>
-                                                        )}
-                                                    </div>
-
-                                                    <h3 className="job-title">{job.title}</h3>
-                                                    <p className="job-company">{job.company}</p>
-
-                                                    <p className="job-summary">
-                                                        {job.description || 'Explore this opportunity and take the next step in your career.'}
-                                                    </p>
-
-                                                    <div className="job-card-meta">
-                                                        <span>⌖ {job.location || 'Location flexible'}</span>
-                                                        <strong>{formatSalary(job.salary)}{Number(job.salary) > 0 ? <small> / month</small> : null}</strong>
-                                                    </div>
-
-                                                    <div className="job-card-footer">
-                                                        <span className="job-posted">
-                                                            {job.createdAt
-                                                                ? new Date(job.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                                                                : 'Recently posted'}
-                                                        </span>
-                                                        <div className="job-card-actions">
-                                                            <button className="details-link" onClick={() => navigate(`/jobs/${job.id}`)}>
-                                                                View details
-                                                            </button>
-                                                            <button className="apply-link" onClick={() => openApplication(job)}>
-                                                                Apply now <span>↗</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </article>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    <div className="jobs-bottom">
-                                        <span>Showing {filteredJobs.length} of {jobs.length} opportunities</span>
-                                        <button onClick={loadJobs} className="refresh-link">Refresh listings ↻</button>
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section className="about-section section-wrap" id="about">
-                                <div className="about-visual">
-                                    <div className="about-card about-card-main">
-                                        <span className="about-star">✳</span>
-                                        <p className="about-card-label">YOUR CAREER</p>
-                                        <h3>Small steps.<br />Big possibilities.</h3>
-                                        <div className="about-progress"><span /></div>
-                                        <p className="about-progress-label">Your next chapter starts with one application.</p>
-                                    </div>
-                                    <div className="about-mini-card">
-                                        <span>↗</span><div><strong>Keep moving forward</strong><small>Your next opportunity awaits</small></div>
-                                    </div>
-                                </div>
-                                <div className="about-copy">
-                                    <p className="eyebrow">MORE THAN A JOB SEARCH</p>
-                                    <h2>Your future deserves <span>a better starting point.</span></h2>
-                                    <p className="section-description">
-                                        Finding the right role shouldn't feel complicated. HireFlow
-                                        brings opportunities into one place so you can focus on what
-                                        matters: finding work that matches your goals.
-                                    </p>
-                                    <a href="#jobs" className="button-primary">Find your opportunity <span>↗</span></a>
-                                    <div className="about-points">
-                                        <div><span>✓</span> Explore available roles</div>
-                                        <div><span>✓</span> Compare opportunities at a glance</div>
-                                        <div><span>✓</span> Apply directly through HireFlow</div>
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section className="final-cta">
-                                <div className="cta-decoration cta-decoration-one" />
-                                <div className="cta-decoration cta-decoration-two" />
-                                <p className="eyebrow">YOUR NEXT CHAPTER STARTS NOW</p>
-                                <h2>Ready to find your <span>next move?</span></h2>
-                                <p>Explore the opportunities waiting for you.</p>
-                                <a href="#jobs" className="cta-button">Explore open positions <span>↗</span></a>
-                            </section>
-                        </main>
-                    )}
-
-                    <Footer />
-                </>
-            )}
-
-            {selectedJob && (
-                <div className="modal-backdrop" onClick={() => !submitting && setSelectedJob(null)}>
-                    <div className="application-modal" role="dialog" aria-modal="true" aria-labelledby="application-title" onClick={(event) => event.stopPropagation()}>
-                        <button className="modal-close" onClick={() => setSelectedJob(null)} disabled={submitting} aria-label="Close">×</button>
-
-                        {applicationMessage === 'success' ? (
-                            <div className="application-success">
-                                <div className="success-icon">✓</div>
-                                <p className="eyebrow">APPLICATION SUBMITTED</p>
-                                <h2>You're one step closer.</h2>
-                                <p>Your application for <strong>{selectedJob.title}</strong> at {selectedJob.company} has been received.</p>
-                                <button className="button-primary" onClick={() => setSelectedJob(null)}>Done</button>
-                            </div>
-                        ) : (
-                            <>
-                                <p className="eyebrow">TAKE THE NEXT STEP</p>
-                                <h2 id="application-title">Apply for this role.</h2>
-                                <p className="modal-job-name">{selectedJob.title} <span>at {selectedJob.company}</span></p>
-
-                                <form className="application-form" onSubmit={submitApplication}>
-                                    <label>
-                                        Full name
-                                        <input required maxLength={100} value={form.applicantName} onChange={(event) => setForm({ ...form, applicantName: event.target.value })} placeholder="Your full name" />
-                                    </label>
-                                    <label>
-                                        Email address
-                                        <input type="email" required maxLength={254} value={form.applicantEmail} onChange={(event) => setForm({ ...form, applicantEmail: event.target.value })} placeholder="you@example.com" />
-                                    </label>
-                                    <label>
-                                        Resume URL
-                                        <input type="text" required maxLength={2048} value={form.resumeUrl} onChange={(event) => setForm({ ...form, resumeUrl: event.target.value })} placeholder="/Uploads/resumes/your-resume.pdf or a shareable URL" />
-                                        <small>Upload your resume in My Resume first, or paste a shareable resume link.</small>
-                                    </label>
-                                    <label>
-                                        Cover letter <span className="optional-label">Optional</span>
-                                        <textarea maxLength={3000} rows={4} value={form.coverLetter} onChange={(event) => setForm({ ...form, coverLetter: event.target.value })} placeholder="Tell the employer why you're interested..." />
-                                    </label>
-
-                                    {applicationMessage && <p className="form-error">{applicationMessage}</p>}
-
-                                    <button className="button-primary submit-application" disabled={submitting}>
-                                        {submitting ? 'Submitting...' : 'Submit application →'}
-                                    </button>
-                                    <p className="form-privacy">Your details will be sent to HireFlow for this application.</p>
-                                </form>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {showLogin && (
-                <Login
-                    onClose={() => setShowLogin(false)}
-                    onSuccess={() => setShowLogin(false)}
-                />
-            )}
+            {showLogin && <Login key={loginRole} initialRole={loginRole} onClose={() => setShowLogin(false)} onSuccess={handleLoginSuccess} />}
         </div>
     )
 }

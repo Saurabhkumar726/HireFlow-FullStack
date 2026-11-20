@@ -20,6 +20,15 @@ namespace HireFlow.Api.Services
             string interviewType,
             string? meetingLink,
             string? notes);
+
+        Task SendHRRegistrationAcknowledgementAsync(string recipientEmail, string fullName);
+
+        Task SendAdminNewHRRegistrationAlertAsync(string recipientEmail, string fullName, string hrEmail);
+
+        Task SendHRApprovalAsync(string recipientEmail, string fullName);
+
+        Task SendHRRejectionAsync(string recipientEmail, string fullName, string? reason);
+        Task SendNotificationEmailAsync(string recipientEmail, string subject, string htmlBody);
     }
 
     public class EmailService : IEmailService
@@ -280,6 +289,160 @@ namespace HireFlow.Api.Services
                 appPassword);
 
             await smtpClient.SendMailAsync(message);
+        }
+
+        public async Task SendHRRegistrationAcknowledgementAsync(
+            string recipientEmail,
+            string fullName)
+        {
+            var safeName = WebUtility.HtmlEncode(fullName);
+            var body = BuildAccountEmail(
+                "Your HireFlow employer registration is under review",
+                $"<p>Hello {safeName},</p>" +
+                "<p>Thank you for registering with HireFlow. Your employer account is currently under review by our admin team.</p>" +
+                "<p>We'll email you when a decision has been made. You don't need to register again.</p>");
+
+            await SendHtmlEmailAsync(
+                recipientEmail,
+                "HireFlow employer registration received",
+                body);
+        }
+
+        public async Task SendAdminNewHRRegistrationAlertAsync(
+            string recipientEmail,
+            string fullName,
+            string hrEmail)
+        {
+            var safeName = WebUtility.HtmlEncode(fullName);
+            var safeEmail = WebUtility.HtmlEncode(hrEmail);
+            var body = BuildAccountEmail(
+                "New employer registration requires review",
+                $"<p>A new HR/employer account has registered and is awaiting review.</p>" +
+                $"<p><strong>Name:</strong> {safeName}<br /><strong>Email:</strong> {safeEmail}</p>" +
+                "<p>Sign in to the HireFlow admin portal to review this registration.</p>");
+
+            await SendHtmlEmailAsync(
+                recipientEmail,
+                "HireFlow: new HR registration awaiting review",
+                body);
+        }
+
+        public async Task SendHRApprovalAsync(
+            string recipientEmail,
+            string fullName)
+        {
+            var safeName = WebUtility.HtmlEncode(fullName);
+            var loginUrl = BuildFrontendUrl("EmailSettings:LoginPath", "/login");
+            var dashboardUrl = BuildFrontendUrl("EmailSettings:HRDashboardPath", "/hrhome/hr");
+            var safeLoginUrl = WebUtility.HtmlEncode(loginUrl);
+            var safeDashboardUrl = WebUtility.HtmlEncode(dashboardUrl);
+
+            var body = BuildAccountEmail(
+                "Your HireFlow employer account is approved",
+                $"<p>Hello {safeName},</p>" +
+                "<p>Good news — your HireFlow employer account has been approved.</p>" +
+                $"<p><a href=\"{safeLoginUrl}\">Sign in to HireFlow</a> to get started.</p>" +
+                $"<p>Once signed in, open your <a href=\"{safeDashboardUrl}\">HR dashboard</a> to complete your company setup and post your first job.</p>");
+
+            await SendHtmlEmailAsync(
+                recipientEmail,
+                "Your HireFlow employer account has been approved",
+                body);
+        }
+
+        public async Task SendHRRejectionAsync(
+            string recipientEmail,
+            string fullName,
+            string? reason)
+        {
+            var safeName = WebUtility.HtmlEncode(fullName);
+            var safeReason = WebUtility.HtmlEncode(
+                string.IsNullOrWhiteSpace(reason)
+                    ? "After reviewing the information provided, we are unable to approve the employer account at this time. Please contact support if you need clarification."
+                    : reason.Trim());
+
+            var body = BuildAccountEmail(
+                "Update about your HireFlow employer registration",
+                $"<p>Hello {safeName},</p>" +
+                "<p>Thank you for your interest in HireFlow. Unfortunately, we are unable to approve your employer registration at this time.</p>" +
+                $"<p><strong>Reason provided:</strong><br />{safeReason}</p>" +
+                "<p>If you believe this decision was made in error or need assistance, contact <a href=\"mailto:support@hireflow.com\">support@hireflow.com</a>.</p>");
+
+            await SendHtmlEmailAsync(
+                recipientEmail,
+                "Update on your HireFlow employer registration",
+                body);
+        }
+
+        public Task SendNotificationEmailAsync(
+            string recipientEmail,
+            string subject,
+            string htmlBody)
+        {
+            return SendHtmlEmailAsync(recipientEmail, subject, htmlBody);
+        }
+
+        private async Task SendHtmlEmailAsync(
+            string recipientEmail,
+            string subject,
+            string htmlBody)
+        {
+            if (!MailAddress.TryCreate(recipientEmail, out _))
+            {
+                throw new ArgumentException("The recipient email address is invalid.", nameof(recipientEmail));
+            }
+
+            var senderEmail = GetRequiredSetting("EmailSettings:SenderEmail");
+            var senderName = GetRequiredSetting("EmailSettings:SenderName");
+            var smtpServer = GetRequiredSetting("EmailSettings:SmtpServer");
+            var smtpPortText = GetRequiredSetting("EmailSettings:SmtpPort");
+            var appPassword = GetRequiredSetting("EmailSettings:AppPassword");
+
+            if (!int.TryParse(smtpPortText, out var smtpPort) || smtpPort is < 1 or > 65535)
+            {
+                throw new InvalidOperationException("The SMTP port configuration is invalid.");
+            }
+
+            using var message = new MailMessage
+            {
+                From = new MailAddress(senderEmail, senderName),
+                Subject = subject,
+                IsBodyHtml = true,
+                Body = htmlBody
+            };
+            message.To.Add(new MailAddress(recipientEmail));
+
+            using var smtpClient = CreateSmtpClient(senderEmail, smtpServer, smtpPort, appPassword);
+            await smtpClient.SendMailAsync(message);
+        }
+
+        private string BuildAccountEmail(string heading, string content)
+        {
+            var safeHeading = WebUtility.HtmlEncode(heading);
+            var safeSenderName = WebUtility.HtmlEncode(
+                _configuration["EmailSettings:SenderName"] ?? "HireFlow");
+
+            return $"""
+                <!DOCTYPE html>
+                <html><body style="margin:0;padding:24px;background:#f4f5f9;font-family:Arial,Helvetica,sans-serif;color:#202337;line-height:1.6">
+                  <div style="max-width:620px;margin:0 auto;background:#fff;border:1px solid #e3e5ee;border-radius:12px;overflow:hidden">
+                    <div style="background:#6557e8;color:#fff;padding:22px 26px"><h1 style="margin:0;font-size:24px">HireFlow</h1></div>
+                    <div style="padding:26px"><h2 style="margin-top:0">{safeHeading}</h2>{content}
+                      <p style="margin-top:28px">Best regards,<br /><strong>{safeSenderName}</strong></p>
+                      <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
+                      <p style="font-size:12px;color:#777;margin-bottom:0">This is an automated message from HireFlow. Please do not reply directly to this email.</p>
+                    </div>
+                  </div>
+                </body></html>
+                """;
+        }
+
+        private string BuildFrontendUrl(string settingKey, string defaultPath)
+        {
+            var baseUrl = (_configuration["EmailSettings:FrontendBaseUrl"] ?? "http://localhost:5173").TrimEnd('/');
+            var path = _configuration[settingKey];
+            if (string.IsNullOrWhiteSpace(path)) path = defaultPath;
+            return $"{baseUrl}/{path.TrimStart('/')}";
         }
 
         private SmtpClient CreateSmtpClient(

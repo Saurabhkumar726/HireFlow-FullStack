@@ -1,6 +1,6 @@
-
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
+import { useTheme } from '../../context/ThemeContext'
 
 import HRSidebar from '../components/HRSidebar'
 import HRCreateJob from '../pages/HRCreateJob'
@@ -9,7 +9,11 @@ import HRApplicants from '../pages/HRApplicants'
 import HRApplicantDetails from '../pages/HRApplicantDetails'
 import HRProfile from '../pages/HRProfile'
 import HRInterviews from '../pages/HRInterviews'
+import HRScreeningQuestions from '../pages/HRScreeningQuestions'
 import HROverview from '../pages/HROverview'
+import HRCompanyProfile from '../pages/HRCompanyProfile'
+import NotificationsPage from '../../pages/NotificationsPage'
+import NotificationBell from '../../components/NotificationBell'
 
 import './HRLayout.css'
 
@@ -55,20 +59,36 @@ const pageTitles = [
         description: 'Review applications for your jobs.',
     },
     {
+        match: /^\/hr\/screening-questions\/?$/,
+        title: 'Screening Questions',
+        description: 'Create and manage questions candidates answer when applying to your jobs.',
+    },
+    {
         match: /^\/hr\/interviews\/?$/,
         title: 'Interviews',
         description: 'Organize your interview workflow.',
+    },
+    {
+        match: /^\/hr\/notifications\/?$/,
+        title: 'Notifications',
+        description: 'Stay up to date with applications and interview activity.',
     },
     {
         match: /^\/hr\/profile\/?$/,
         title: 'My Profile',
         description: 'Review and manage your account information.',
     },
+    {
+        match: /^\/hr\/company\/?$/,
+        title: 'Company Profile',
+        description: 'Manage the public profile for your organization.',
+    },
 ]
 
 function HRLayout() {
     const { pathname } = useLocation()
     const { user, isAuthenticated } = useAuth()
+    const { theme, toggleTheme } = useTheme()
 
     if (!isAuthenticated) {
         return <Navigate to="/" replace />
@@ -111,9 +131,24 @@ function HRLayout() {
             return <HRProfile />
         }
 
+        // Company Profile
+        if (normalizedPath === '/hr/company') {
+            return <HRCompanyProfile />
+        }
+
+        // Job screening questions
+        if (normalizedPath === '/hr/screening-questions') {
+            return <HRScreeningQuestions />
+        }
+
         // Interviews
         if (normalizedPath === '/hr/interviews') {
             return <HRInterviews />
+        }
+
+        // Notifications
+        if (normalizedPath === '/hr/notifications') {
+            return <NotificationsPage />
         }
 
         // Applicant list
@@ -204,7 +239,11 @@ function HRLayout() {
 
                     <div className="hr-page-account">
                         <span className="hr-account-status" />
-                        <span>HR Workspace</span>
+                        <span className="hr-page-account-label">HR Workspace</span>
+                        <NotificationBell className="hr-notification-bell" />
+                        <button className="hr-theme-toggle" type="button" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+                            {theme === 'dark' ? '☀' : '☾'}
+                        </button>
                     </div>
                 </div>
 

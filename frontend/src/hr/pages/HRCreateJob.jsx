@@ -2,7 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
+import CityLocationAutocomplete from '../../components/CityLocationAutocomplete'
 import './HRCreateJob.css'
+import SkeletonLoader from '../../components/SkeletonLoader.jsx'
 
 const API_BASE_URL = 'http://localhost:5116/api'
 
@@ -13,6 +15,7 @@ const EMPTY_FORM = {
     jobType: 'Full-time',
     salary: '',
     description: '',
+    requireResume: false,
 }
 
 function getApiUrl(path) {
@@ -124,6 +127,7 @@ function HRCreateJob({ mode = 'create', jobId }) {
                             ? ''
                             : String(data.salary),
                     description: data.description ?? '',
+                    requireResume: Boolean(data.requireResume ?? data.RequireResume ?? false),
                 })
             } catch (err) {
                 if (!cancelled) {
@@ -144,11 +148,11 @@ function HRCreateJob({ mode = 'create', jobId }) {
     }, [isExistingJobMode, jobId, token])
 
     function handleChange(event) {
-        const { name, value } = event.target
+        const { name, value, type, checked } = event.target
 
         setForm((previous) => ({
             ...previous,
-            [name]: value,
+            [name]: type === 'checkbox' ? checked : value,
         }))
 
         setError('')
@@ -206,6 +210,7 @@ function HRCreateJob({ mode = 'create', jobId }) {
                 jobType: form.jobType,
                 salary: salaryValue,
                 description: form.description.trim(),
+                requireResume: Boolean(form.requireResume),
             }
 
             const endpoint = isEditMode
@@ -283,9 +288,7 @@ function HRCreateJob({ mode = 'create', jobId }) {
                     </div>
                 </div>
 
-                <div className="hr-form-alert">
-                    Loading job details...
-                </div>
+                <SkeletonLoader variant="form" count={5} />
             </section>
         )
     }
@@ -377,15 +380,15 @@ function HRCreateJob({ mode = 'create', jobId }) {
                         <label htmlFor="location">
                             Location <span>*</span>
                         </label>
-                        <input
+                        <CityLocationAutocomplete
                             id="location"
                             name="location"
-                            type="text"
                             value={form.location}
-                            onChange={handleChange}
+                            onChange={value => setForm(current => ({ ...current, location: value }))}
                             placeholder="e.g. Remote, Indore"
                             required
                             disabled={isViewMode || saving}
+                            ariaLabel="Job location"
                         />
                     </div>
 
@@ -440,6 +443,23 @@ function HRCreateJob({ mode = 'create', jobId }) {
                             required
                             disabled={isViewMode || saving}
                         />
+                    </div>
+
+                    <div className="hr-form-field hr-form-field-full hr-resume-requirement">
+                        <label className="hr-resume-requirement-label" htmlFor="requireResume">
+                            <input
+                                id="requireResume"
+                                name="requireResume"
+                                type="checkbox"
+                                checked={Boolean(form.requireResume)}
+                                onChange={handleChange}
+                                disabled={isViewMode || saving}
+                            />
+                            <span>Require candidates to attach a resume</span>
+                        </label>
+                        <span className="hr-field-hint">
+                            When enabled, candidates must provide a resume before they can submit an application.
+                        </span>
                     </div>
                 </div>
 

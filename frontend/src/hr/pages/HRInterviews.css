@@ -794,3 +794,218 @@ html[data-theme="dark"] .hr-interviews .hi-modal-close:hover:not(:disabled) {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* Phase 7E / 7F — candidate decisions and interview evaluation */
+.hi-candidate-response,
+.hi-feedback-panel {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid var(--border, #e8eaf3);
+    border-radius: 13px;
+    background: var(--surface-soft, #f8f8fc);
+    color: var(--text-primary, #252641);
+}
+
+.hi-candidate-response-head,
+.hi-feedback-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+    .hi-candidate-response-head strong,
+    .hi-feedback-heading strong {
+        font-size: 13px;
+    }
+
+.hi-candidate-response-status {
+    padding: 5px 9px;
+    border-radius: 999px;
+    color: #6453c8;
+    background: #f0edff;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+    .hi-candidate-response-status.accepted,
+    .hi-candidate-response-status.rescheduleapproved {
+        color: #14784f;
+        background: #eafaf2;
+    }
+
+    .hi-candidate-response-status.declined,
+    .hi-candidate-response-status.rescheduledeclined {
+        color: #bd3544;
+        background: #fff0f1;
+    }
+
+.hi-candidate-response p {
+    margin: 9px 0 0;
+    color: var(--text-secondary, #777f98);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.hi-candidate-response-note-input,
+.hi-feedback-form > label,
+.hi-feedback-rating-grid label,
+.hi-feedback-text-grid label {
+    display: grid;
+    gap: 6px;
+    color: var(--text-secondary, #777f98);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.hi-candidate-response-note-input {
+    margin-top: 12px;
+}
+
+.hi-candidate-response textarea,
+.hi-feedback-form textarea,
+.hi-feedback-form select {
+    width: 100%;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--border, #e2e5ef);
+    border-radius: 9px;
+    background: var(--surface, #fff);
+    color: var(--text-primary, #252641);
+    font: inherit;
+    font-size: 12px;
+}
+
+.hi-candidate-response-actions,
+.hi-feedback-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+    .hi-candidate-response-actions button,
+    .hi-feedback-actions button {
+        min-height: 36px;
+        padding: 0 12px;
+        border: 1px solid #6555e9;
+        border-radius: 9px;
+        color: #fff;
+        background: #6555e9;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+        .hi-candidate-response-actions button.secondary,
+        .hi-feedback-actions button.secondary {
+            color: var(--text-primary, #252641);
+            background: transparent;
+            border-color: var(--border, #e2e5ef);
+        }
+
+        .hi-candidate-response-actions button:disabled,
+        .hi-feedback-actions button:disabled {
+            opacity: .55;
+            cursor: wait;
+        }
+
+.hi-candidate-response-error {
+    display: block;
+    margin-top: 8px;
+    color: #bd3544;
+}
+
+.hi-feedback-heading p {
+    margin: 5px 0 0;
+    color: var(--text-secondary, #777f98);
+    font-size: 11px;
+}
+
+.hi-feedback-rating-grid {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 10px;
+}
+
+.hi-feedback-form {
+    display: grid;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.hi-feedback-text-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 12px;
+}
+
+.hi-feedback-summary {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: var(--surface, #fff);
+    font-size: 11px;
+}
+
+    .hi-feedback-summary span {
+        font-weight: 800;
+    }
+
+    .hi-feedback-summary p {
+        margin: 6px 0 0;
+        color: var(--text-secondary, #777f98);
+    }
+
+.hi-feedback-message {
+    margin: 10px 0 0;
+    padding: 9px 11px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+    .hi-feedback-message.is-error {
+        color: #bd3544;
+        background: #fff0f1;
+    }
+
+    .hi-feedback-message.is-success {
+        color: #14784f;
+        background: #eafaf2;
+    }
+
+html[data-theme='dark'] .hi-candidate-response,
+html[data-theme='dark'] .hi-feedback-panel {
+    color: #f1f2ff;
+    background: #191929;
+    border-color: #303047;
+}
+
+    html[data-theme='dark'] .hi-candidate-response p,
+    html[data-theme='dark'] .hi-feedback-heading p,
+    html[data-theme='dark'] .hi-feedback-summary p {
+        color: #aeb7d2;
+    }
+
+    html[data-theme='dark'] .hi-feedback-form textarea,
+    html[data-theme='dark'] .hi-feedback-form select,
+    html[data-theme='dark'] .hi-candidate-response textarea,
+    html[data-theme='dark'] .hi-candidate-response-actions button.secondary,
+    html[data-theme='dark'] .hi-feedback-actions button.secondary {
+        color: #f1f2ff;
+        background: #191929;
+        border-color: #35354e;
+        color-scheme: dark;
+    }
+
+@media (max-width: 760px) {
+    .hi-feedback-rating-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .hi-feedback-text-grid {
+        grid-template-columns: minmax(0,1fr);
+    }
+}

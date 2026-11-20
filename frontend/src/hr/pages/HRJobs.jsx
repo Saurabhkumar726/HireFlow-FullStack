@@ -4,21 +4,38 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import ConfirmDialog from '../components/ConfirmDialog';
 import './HRJobs.css';
+import SkeletonLoader from '../../components/SkeletonLoader.jsx'
 
-const API_URL = 'http://localhost:5116/api';
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116/api').replace(/\/$/, '');
 
-function formatSalary(salary) {
-    const amount = Number(salary);
+function formatSalary(salary, job = {}) {
+    const amount = Number(salary ?? job.salary ?? 0);
+    const maximum = Number(job.salaryMax ?? 0);
+    const mode = String(job.salaryMode ?? 'Range').toLowerCase();
+    const currency = String(job.salaryCurrency ?? 'INR').toUpperCase();
+    const period = String(job.salaryPeriod ?? 'Monthly').toLowerCase();
 
-    if (!Number.isFinite(amount) || amount <= 0) {
-        return 'Salary not disclosed';
-    }
+    if (mode === 'negotiable') return 'Salary negotiable';
+    if (mode === 'notdisclosed' || !Number.isFinite(amount) || amount <= 0) return 'Salary not disclosed';
 
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0,
-    }).format(amount);
+    const format = (value) => {
+        try {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+        } catch {
+            return `${currency} ${Number(value).toLocaleString('en-IN')}`;
+        }
+    };
+
+    if (mode === 'startingat') return `From ${format(amount)} / ${period}`;
+    if (maximum > amount) return `${format(amount)} – ${format(maximum)} / ${period}`;
+    return `${format(amount)} / ${period}`;
+}
+
+function getJobStatus(job) {
+    if (job.isActive === false) return 'Closed';
+    if (job.applicationDeadlineUtc && new Date(job.applicationDeadlineUtc).getTime() < Date.now()) return 'Expired';
+    if (job.publicationStatus && String(job.publicationStatus).toLowerCase() !== 'published') return job.publicationStatus;
+    return 'Published';
 }
 
 function formatDate(date) {
@@ -151,12 +168,12 @@ function HRJobs() {
         });
     }, [ownedJobs, search, typeFilter]);
 
-    // Open the custom dialog; do not use window.confirm().
+    // Open a close-posting confirmation. Closing preserves applications and history.
     function handleDelete(job) {
         const id = getJobId(job);
 
         if (id == null) {
-            setError('This job has no valid ID and cannot be deleted.');
+            setError('This job has no valid ID and cannot be closed.');
             return;
         }
 
@@ -170,14 +187,14 @@ function HRJobs() {
         setJobToDelete(job);
     }
 
-    // Delete only after the user confirms in ConfirmDialog.
+    // Close only after the user confirms in ConfirmDialog.
     async function confirmDeleteJob() {
         if (!jobToDelete || deletingId != null) return;
 
         const id = getJobId(jobToDelete);
 
         if (id == null) {
-            setError('This job has no valid ID and cannot be deleted.');
+            setError('This job has no valid ID and cannot be closed.');
             setJobToDelete(null);
             return;
         }
@@ -194,12 +211,14 @@ function HRJobs() {
 
         try {
             const response = await fetch(
-                `${API_URL}/Jobs/${encodeURIComponent(id)}`,
+                `${API_URL}/Jobs/${encodeURIComponent(id)}/availability`,
                 {
-                    method: 'DELETE',
+                    method: 'PUT',
                     headers: {
+                        'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
+                    body: JSON.stringify({ isActive: false }),
                 }
             );
 
@@ -211,24 +230,60 @@ function HRJobs() {
                     data.title ||
                     (response.status === 404
                         ? 'Job not found, or you do not own this job.'
-                        : `Unable to delete job (${response.status}).`)
+                        : `Unable to close job (${response.status}).`)
                 );
             }
 
-            setJobs((previous) =>
-                previous.filter(
-                    (item) => String(getJobId(item)) !== String(id)
-                )
-            );
+            setJobs((previous) => previous.map((item) =>
+                String(getJobId(item)) === String(id) ? { ...item, isActive: false } : item
+            ));
 
-            setNotice('Job deleted successfully.');
+            setNotice('Job closed successfully. Existing applications and their history have been preserved.');
             setJobToDelete(null);
         } catch (err) {
             setError(
                 err.message ||
-                'Something went wrong while deleting this job.'
+                'Something went wrong while closing this job.'
             );
             setJobToDelete(null);
+        } finally {
+            setDeletingId(null);
+        }
+    }
+
+    async function reopenJob(job) {
+        const id = getJobId(job);
+        if (id == null) {
+            setError('This job has no valid ID and cannot be reopened.');
+            return;
+        }
+        if (!token) {
+            setError('Your session is missing. Please log in again.');
+            return;
+        }
+
+        setDeletingId(id);
+        setError('');
+        setNotice('');
+        try {
+            const response = await fetch(`${API_URL}/Jobs/${encodeURIComponent(id)}/availability`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ isActive: true }),
+            });
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.message || data.title || `Unable to reopen job (${response.status}).`);
+            }
+            setJobs((previous) => previous.map((item) =>
+                String(getJobId(item)) === String(id) ? { ...item, isActive: true } : item
+            ));
+            setNotice('Job reopened successfully.');
+        } catch (err) {
+            setError(err.message || 'Something went wrong while reopening this job.');
         } finally {
             setDeletingId(null);
         }
@@ -349,11 +404,7 @@ function HRJobs() {
             )}
 
             {loading ? (
-                <div className="hr-jobs-state" role="status">
-                    <span className="hr-jobs-spinner" />
-                    <h3>Loading your jobs...</h3>
-                    <p>Connecting to the HireFlow API.</p>
-                </div>
+                <SkeletonLoader variant="job-list" count={5} />
             ) : !error && currentUserId == null ? (
                 <div className="hr-jobs-state">
                     <div className="hr-jobs-state-icon">!</div>
@@ -409,6 +460,8 @@ function HRJobs() {
                         const description =
                             job.description ?? job.Description ?? '';
                         const createdAt = job.createdAt ?? job.CreatedAt;
+                        const status = getJobStatus(job);
+                        const deadline = job.applicationDeadlineUtc ?? job.ApplicationDeadlineUtc;
 
                         return (
                             <article
@@ -429,9 +482,10 @@ function HRJobs() {
                                                 </p>
                                             </div>
 
-                                            <span className="hr-job-type">
-                                                {getJobType(job)}
-                                            </span>
+                                            <div className="hr-job-type-group">
+                                                <span className="hr-job-type">{getJobType(job)}</span>
+                                                <span className={`hr-job-status hr-job-status-${status.toLowerCase().replace(/[^a-z]+/g, '-')}`}>{status}</span>
+                                            </div>
                                         </div>
 
                                         <div className="hr-job-meta">
@@ -442,15 +496,15 @@ function HRJobs() {
 
                                             <span>
                                                 <span aria-hidden="true">₹</span>
-                                                {formatSalary(
-                                                    job.salary ?? job.Salary
-                                                )}
+                                                {formatSalary(job.salary ?? job.Salary, job)}
                                             </span>
 
                                             <span>
                                                 <span aria-hidden="true">◷</span>
                                                 Posted {formatDate(createdAt)}
                                             </span>
+                                            {(job.workMode || job.WorkMode) && <span>{job.workMode ?? job.WorkMode}</span>}
+                                            {deadline && <span>Apply by {formatDate(deadline)}</span>}
                                         </div>
 
                                         {description && (
@@ -478,18 +532,15 @@ function HRJobs() {
                                         Edit
                                     </Link>
 
-                                    <button
-                                        type="button"
-                                        className="hr-job-action hr-job-delete"
-                                        onClick={() => handleDelete(job)}
-                                        disabled={
-                                            deletingId != null || !token
-                                        }
-                                    >
-                                        {String(deletingId) === String(id)
-                                            ? 'Deleting...'
-                                            : 'Delete'}
-                                    </button>
+                                    {job.isActive === false ? (
+                                        <button type="button" className="hr-job-action hr-job-reopen" onClick={() => reopenJob(job)} disabled={deletingId != null || !token}>
+                                            {String(deletingId) === String(id) ? 'Updating...' : 'Reopen'}
+                                        </button>
+                                    ) : (
+                                        <button type="button" className="hr-job-action hr-job-close" onClick={() => handleDelete(job)} disabled={deletingId != null || !token}>
+                                            {String(deletingId) === String(id) ? 'Updating...' : 'Close job'}
+                                        </button>
+                                    )}
                                 </div>
                             </article>
                         );
@@ -504,14 +555,14 @@ function HRJobs() {
                 </p>
             )}
 
-            {/* Custom confirmation dialog replaces the browser popup. */}
+            {/* Closing a job preserves its applications and recruitment history. */}
             <ConfirmDialog
                 open={jobToDelete !== null}
-                title="Delete job posting?"
-                message={`Are you sure you want to delete "${deletingJobTitle}"? This action cannot be undone.`}
-                confirmText="Delete Job"
-                cancelText="Keep Job"
-                danger={true}
+                title="Close job posting?"
+                message={`Are you sure you want to close "${deletingJobTitle}"? It will disappear from active job search, while existing applications and history remain available.`}
+                confirmText="Close Job"
+                cancelText="Keep Published"
+                danger={false}
                 loading={deletingId != null}
                 onConfirm={confirmDeleteJob}
                 onCancel={cancelDeleteJob}

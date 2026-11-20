@@ -1,10 +1,17 @@
-/* Shared HR workspace layout. Keep page spacing consistent across every HR route. */
+/*
+ * Shared HR workspace layout.
+ * Theme variables are mapped from HireFlow's global --surface/--text tokens
+ * so every HR page and form uses the active light/dark palette consistently.
+ */
 .hr-workspace {
+	--hr-page-bg: var(--page, #f8f9fc);
 	--hr-sidebar-bg: var(--surface, #ffffff);
+	--hr-card: var(--surface, #ffffff);
+	--hr-bg: var(--surface-soft, #fafafe);
 	--hr-border: var(--border, #e7e8ee);
 	--hr-text: var(--text, #202233);
-	--hr-muted: var(--muted, #777b8c);
-	--hr-hover: var(--surface-hover, #f5f5fc);
+	--hr-muted: var(--text-muted, #777b8c);
+	--hr-hover: var(--surface-soft, #f5f5fc);
 	--hr-active-bg: #efefff;
 	--hr-active-border: #e3e2ff;
 	--hr-accent: #6258db;
@@ -12,8 +19,10 @@
 	align-items: stretch;
 	width: 100%;
 	min-height: calc(100vh - 100px);
-	background: var(--background, #f8f9fc);
+	background: var(--hr-page-bg);
 	color: var(--hr-text);
+	color-scheme: light;
+	transition: background-color 180ms ease, color 180ms ease;
 }
 
 	.hr-workspace,
@@ -92,7 +101,6 @@
 	background: #29ad78;
 }
 
-/* One consistent content boundary prevents pages adding their own extra gutters. */
 .hr-page-content {
 	width: 100%;
 	min-width: 0;
@@ -104,7 +112,7 @@
 		min-width: 0;
 	}
 
-	/* HRProfile previously added another 28px gutter inside the already padded layout. */
+	/* HRProfile previously added an extra gutter inside the padded layout. */
 	.hr-page-content > .hr-profile {
 		width: 100%;
 		max-width: none;
@@ -121,7 +129,7 @@
 	padding: 32px 20px;
 	border: 1px solid var(--hr-border);
 	border-radius: 18px;
-	background: var(--hr-sidebar-bg);
+	background: var(--hr-card);
 	text-align: center;
 }
 
@@ -153,16 +161,47 @@
 	line-height: 1.8;
 }
 
+.hr-theme-toggle {
+	display: inline-grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border: 1px solid var(--hr-border);
+	border-radius: 10px;
+	background: var(--hr-bg);
+	color: var(--hr-text);
+	font-size: 17px;
+	line-height: 1;
+	cursor: pointer;
+	transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+	.hr-theme-toggle:hover {
+		border-color: var(--hr-accent);
+		background: var(--hr-hover);
+	}
+
+	.hr-theme-toggle:focus-visible {
+		outline: 3px solid color-mix(in srgb, var(--hr-accent) 35%, transparent);
+		outline-offset: 2px;
+	}
+
+/* Dark theme: map every HR surface token to the global dark palette. */
 html[data-theme='dark'] .hr-workspace {
-	--hr-sidebar-bg: var(--surface, #171923);
-	--hr-border: var(--border, #303342);
-	--hr-text: var(--text, #f2f3fa);
-	--hr-muted: var(--muted, #a1a5b7);
-	--hr-hover: var(--surface-hover, #232635);
+	--hr-page-bg: var(--page, #11111b);
+	--hr-sidebar-bg: var(--surface, #191927);
+	--hr-card: var(--surface, #191927);
+	--hr-bg: var(--surface-soft, #151522);
+	--hr-border: var(--border, #333247);
+	--hr-text: var(--text, #f1f0ff);
+	--hr-muted: var(--text-muted, #b0aec7);
+	--hr-hover: #222239;
 	--hr-active-bg: #2b2850;
 	--hr-active-border: #403b70;
 	--hr-accent: #aaa3ff;
-	background: var(--background, #11131c);
+	background: var(--hr-page-bg);
+	color: var(--hr-text);
+	color-scheme: dark;
 }
 
 html[data-theme='dark'] .hr-placeholder-icon,
@@ -222,5 +261,12 @@ html[data-theme='dark'] .hr-sidebar-avatar {
 
 	.hr-page-eyebrow {
 		margin-bottom: 9px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hr-workspace,
+	.hr-theme-toggle {
+		transition: none !important;
 	}
 }

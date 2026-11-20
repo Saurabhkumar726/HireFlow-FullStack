@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Identity;
 
 namespace HireFlow.Api.Authentication;
@@ -12,6 +13,15 @@ public class ApplicationUser : IdentityUser
     public bool IsActive { get; set; } = true;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // HR registration and approval workflow
+    // Existing users default to Approved only when they are not HR.
+    public string? HRApprovalStatus { get; set; }
+
+    public DateTime? HRDecisionAt { get; set; }
+
+    // Admin user ID who approved or rejected this HR account.
+    public string? HRDecisionByUserId { get; set; }
 
     // Profile picture and resume
     public string? ProfilePictureUrl { get; set; }

@@ -32,5 +32,14 @@ namespace HireFlow.Api.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
+
+        // Candidate response workflow (Phase 7E).
+        [Required, MaxLength(30)]
+        public string CandidateResponseStatus { get; set; } = "Pending";
+        public DateTime? CandidateResponseAtUtc { get; set; }
+        [MaxLength(1000)] public string? CandidateResponseNote { get; set; }
+        public DateTime? ProposedScheduledAtUtc { get; set; }
+
+        public List<InterviewFeedback> FeedbackEntries { get; set; } = new();
     }
 }
