@@ -5,6 +5,8 @@ import { useAuth } from '../context/useAuth'
 import CityLocationAutocomplete from '../components/CityLocationAutocomplete'
 import './CandidateApplicationsPage.css'
 import SkeletonLoader from '../components/SkeletonLoader.jsx'
+import OfferLetterModal from '../components/OfferLetterModal.jsx'
+import SkillQuizModal from '../components/SkillQuizModal.jsx'
 
 const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116/api').replace(/\/$/, '')
 const PROGRESS_STAGES = ['Pending', 'Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected']
@@ -280,8 +282,11 @@ export default function CandidateApplicationsPage() {
     const [notice, setNotice] = useState('')
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('All')
+    const [viewMode, setViewMode] = useState('table') // 'table' or 'kanban'
     const [editingId, setEditingId] = useState(null)
     const [withdrawalApplication, setWithdrawalApplication] = useState(null)
+    const [activeOfferModal, setActiveOfferModal] = useState(null)
+    const [activeQuizApp, setActiveQuizApp] = useState(null)
     const [reloadKey, setReloadKey] = useState(0)
 
     const loadApplications = useCallback(async (signal) => {
@@ -360,6 +365,28 @@ export default function CandidateApplicationsPage() {
                 {error && <div className="candidate-application-alert candidate-application-alert-error" role="alert">{error}<button type="button" onClick={() => setReloadKey((value) => value + 1)}>Retry</button></div>}
                 {notice && <div className="candidate-application-alert candidate-application-alert-success" role="status">{notice}<button type="button" onClick={() => setNotice('')} aria-label="Dismiss">×</button></div>}
 
+                <div className="candidate-applications-view-bar">
+                    <div className="candidate-view-toggle-group">
+                        <button
+                            type="button"
+                            className={`candidate-view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                            onClick={() => setViewMode('table')}
+                        >
+                            📋 List View
+                        </button>
+                        <button
+                            type="button"
+                            className={`candidate-view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+                            onClick={() => setViewMode('kanban')}
+                        >
+                            📊 Visual Pipeline Kanban
+                        </button>
+                    </div>
+                    <Link to="/candidate/calendar" className="candidate-view-link">
+                        📅 Placement Calendar & Document Vault →
+                    </Link>
+                </div>
+
                 <div className="candidate-applications-toolbar">
                     <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by job or company" aria-label="Search applications" />
                     <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Filter applications by status">
@@ -377,6 +404,44 @@ export default function CandidateApplicationsPage() {
                         <p>{applications.length ? 'Try another search or status filter.' : 'When you apply for a job, its progress and recruiter updates will appear here.'}</p>
                         <Link to="/jobs" className="candidate-application-button">Explore jobs →</Link>
                     </section>
+                ) : viewMode === 'kanban' ? (
+                    <div className="candidate-kanban-board">
+                        {['Pending', 'Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected'].map((stage) => {
+                            const stageApps = filteredApplications.filter((app) => normalizeStatus(readField(app, 'status', 'Status')) === stage)
+                            return (
+                                <div key={stage} className="candidate-kanban-col">
+                                    <div className="candidate-kanban-col-header">
+                                        <h4>{stage === 'Pending' ? 'Applied' : stage}</h4>
+                                        <span className="candidate-kanban-count">{stageApps.length}</span>
+                                    </div>
+                                    <div className="candidate-kanban-cards">
+                                        {stageApps.map((app) => {
+                                            const job = getJob(app)
+                                            return (
+                                                <div key={app.id} className="candidate-kanban-card">
+                                                    <h5>{job.title || 'Job Opportunity'}</h5>
+                                                    <span className="candidate-kanban-company">{job.company || 'Employer'}</span>
+                                                    <small className="candidate-kanban-date">Applied {formatDate(app.createdAtUtc || app.CreatedAtUtc)}</small>
+                                                    {app.offer && (
+                                                        <button
+                                                            type="button"
+                                                            className="candidate-kanban-offer-pill"
+                                                            onClick={() => setActiveOfferModal(app)}
+                                                        >
+                                                            🎉 View Offer
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )
+                                        })}
+                                        {stageApps.length === 0 && (
+                                            <div className="candidate-kanban-empty-col">No applications in this stage</div>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
                 ) : (
                     <div className="candidate-applications-list">
                         {filteredApplications.map((application) => {
@@ -400,9 +465,54 @@ export default function CandidateApplicationsPage() {
                                         {PROGRESS_STAGES.map((stage, index) => {
                                             const currentIndex = PROGRESS_STAGES.indexOf(status)
                                             const complete = currentIndex >= index && currentIndex >= 0
-                                            return <div className={`candidate-application-progress-step ${complete ? 'is-complete' : ''}`} key={stage}><span>{complete ? '✓' : index + 1}</span><small>{stage === 'Pending' ? 'New' : stage}</small></div>
+                                            const isCurrent = currentIndex === index
+                                            return (
+                                                <div className={`candidate-application-progress-step ${complete ? 'is-complete' : ''} ${isCurrent ? 'is-current' : ''}`} key={stage}>
+                                                    <span className="candidate-progress-node">{complete && !isCurrent ? '✓' : index + 1}</span>
+                                                    <small>{stage === 'Pending' ? 'New' : stage}</small>
+                                                </div>
+                                            )
                                         })}
                                     </div>
+
+                                    {application.offer && (
+                                        <div className={`candidate-offer-alert offer-${(application.offer.candidateDecision || 'pending').toLowerCase()}`}>
+                                            <div className="candidate-offer-alert-left">
+                                                <span className="candidate-offer-icon">🎉</span>
+                                                <div>
+                                                    <strong>Official Employment Offer Extended!</strong>
+                                                    <p>
+                                                        {application.offer.candidateDecision === 'Accepted'
+                                                            ? '✓ You accepted this offer on ' + formatDate(application.offer.respondedAtUtc, true)
+                                                            : application.offer.candidateDecision === 'Declined'
+                                                                ? '✕ You declined this offer.'
+                                                                : `${application.offer.baseSalary} · Joining ${application.offer.joiningDate}`}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="candidate-offer-review-btn"
+                                                onClick={() => setActiveOfferModal(application)}
+                                            >
+                                                {application.offer.candidateDecision ? 'View Offer Letter 📄' : 'Review & Respond to Offer 📜'}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {application.assessment ? (
+                                        <div className="candidate-app-assessment-badge">
+                                            <span>🎯 Verified Skill Score: <strong>{application.assessment.score}%</strong> ({application.assessment.tier})</span>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="candidate-app-quiz-link"
+                                            onClick={() => setActiveQuizApp(application)}
+                                        >
+                                            🧠 Take 5-Min Skill Assessment
+                                        </button>
+                                    )}
 
                                     {(status === 'Rejected' && readField(application, 'rejectionReason', 'RejectionReason')) && <p className="candidate-application-reason"><strong>Recruiter update:</strong> {readField(application, 'rejectionReason', 'RejectionReason')}</p>}
                                     {(status === 'Withdrawn' && readField(application, 'withdrawalReason', 'WithdrawalReason')) && <p className="candidate-application-reason"><strong>Withdrawal reason:</strong> {readField(application, 'withdrawalReason', 'WithdrawalReason')}</p>}
@@ -456,6 +566,31 @@ export default function CandidateApplicationsPage() {
                         setWithdrawalApplication(null)
                         setNotice(message)
                         setError('')
+                        setReloadKey((value) => value + 1)
+                    }}
+                />
+            )}
+
+            {activeOfferModal && (
+                <OfferLetterModal
+                    application={activeOfferModal}
+                    initialOffer={activeOfferModal.offer}
+                    isHr={false}
+                    onClose={() => setActiveOfferModal(null)}
+                    onOfferResponded={() => {
+                        setNotice('Offer response successfully submitted!')
+                        setReloadKey((value) => value + 1)
+                    }}
+                />
+            )}
+
+            {activeQuizApp && (
+                <SkillQuizModal
+                    job={activeQuizApp.job || { id: activeQuizApp.jobId, title: 'Technical Role' }}
+                    applicationId={activeQuizApp.id}
+                    onClose={() => setActiveQuizApp(null)}
+                    onQuizCompleted={() => {
+                        setNotice('Skill assessment recorded on your application!')
                         setReloadKey((value) => value + 1)
                     }}
                 />

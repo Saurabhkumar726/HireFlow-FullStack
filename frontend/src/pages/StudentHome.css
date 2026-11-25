@@ -43,15 +43,23 @@
 }
 
 .candidate-home-dashboard-link {
-    padding: 11px 14px;
+    padding: 11px 16px;
     border: 1px solid var(--hf-border);
-    border-radius: 11px;
+    border-radius: 12px;
     color: var(--hf-text);
     background: var(--hf-surface);
     font-size: 12px;
     font-weight: 750;
     white-space: nowrap;
+    box-shadow: var(--hf-shadow-xs, 0 1px 3px rgba(0, 0, 0, .04));
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
+
+    .candidate-home-dashboard-link:hover {
+        transform: translateY(-1px);
+        border-color: var(--hf-accent-border, rgba(93, 81, 216, .28));
+        box-shadow: var(--hf-shadow-sm, 0 2px 8px rgba(0, 0, 0, .06));
+    }
 
     .candidate-home-dashboard-link span {
         color: var(--hf-accent);
@@ -97,17 +105,18 @@
         min-height: 48px;
         padding: 0 14px;
         border: 1px solid var(--hf-border);
-        border-radius: 11px;
-        outline: 0;
+        border-radius: 12px;
         color: var(--hf-text);
-        background: var(--hf-surface-soft);
+        background: var(--hf-surface);
         font: inherit;
         font-size: 13px;
+        transition: border-color .18s ease, box-shadow .18s ease;
     }
 
         .candidate-home-search-form input:focus {
             border-color: var(--hf-accent);
             box-shadow: 0 0 0 3px var(--hf-accent-soft);
+            outline: none;
         }
 
     .candidate-home-search-form button {

@@ -1,0 +1,726 @@
+/* ============================================================
+   HireFlow Offer Letter Modal Styles
+   ============================================================ */
+
+.hf-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    background: rgba(14, 15, 23, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.hf-offer-modal {
+    background: var(--hf-surface, #ffffff);
+    color: var(--hf-text, #1f2037);
+    border: 1px solid var(--hf-border, #e5e8f2);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 960px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.hf-offer-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--hf-surface, #ffffff);
+    border-bottom: 1px solid var(--hf-border, #e5e8f2);
+    gap: 16px;
+}
+
+.hf-offer-header-left h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 3px 0 0;
+    color: var(--hf-text, #1f2037);
+}
+
+.hf-offer-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--hf-accent, #6366f1);
+}
+
+.hf-offer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hf-offer-btn-print {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--hf-surface-soft, #f7f8fd);
+    border: 1px solid var(--hf-border, #e5e8f2);
+    color: var(--hf-text, #1f2037);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+    .hf-offer-btn-print:hover {
+        background: var(--hf-accent, #6366f1);
+        color: #ffffff;
+        border-color: var(--hf-accent, #6366f1);
+    }
+
+.hf-offer-btn-close {
+    background: transparent;
+    border: none;
+    color: var(--hf-muted, #70728a);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+    .hf-offer-btn-close:hover {
+        color: var(--hf-text, #1f2037);
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+.hf-offer-alert {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+    .hf-offer-alert.error {
+        background: #fef2f2;
+        color: #dc2626;
+        border-bottom: 1px solid #fecaca;
+    }
+
+/* Body layout */
+.hf-offer-modal-body {
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    overflow-y: auto;
+    max-height: calc(92vh - 70px);
+}
+
+    /* When only the sheet is displayed (candidate mode) */
+    .hf-offer-modal-body:has(.hf-offer-edit-form:not(*)) {
+        grid-template-columns: 1fr;
+    }
+
+.hf-offer-sheet-wrapper:only-child {
+    grid-column: 1 / -1;
+}
+
+/* Edit form */
+.hf-offer-edit-form {
+    padding: 20px;
+    background: var(--hf-surface-soft, #f8f9fd);
+    border-right: 1px solid var(--hf-border, #e5e8f2);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+    .hf-offer-edit-form h3 {
+        margin: 0 0 4px;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--hf-text, #1f2037);
+    }
+
+    .hf-offer-edit-form label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--hf-muted, #70728a);
+    }
+
+    .hf-offer-edit-form input,
+    .hf-offer-edit-form textarea {
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--hf-border, #e5e8f2);
+        background: var(--hf-surface, #ffffff);
+        color: var(--hf-text, #1f2037);
+        font-size: 12.5px;
+    }
+
+.hf-offer-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.hf-offer-submit-btn {
+    margin-top: 6px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #10b981;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
+    transition: all 0.18s ease;
+}
+
+    .hf-offer-submit-btn:hover:not(:disabled) {
+        background: #059669;
+        transform: translateY(-1px);
+    }
+
+/* Sheet Wrapper */
+.hf-offer-sheet-wrapper {
+    padding: 24px;
+    background: #474a59;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Paper Sheet (Always clean white letterhead) */
+.hf-offer-sheet {
+    background: #ffffff !important;
+    color: #111827 !important;
+    width: 100%;
+    max-width: 620px;
+    padding: 36px 40px;
+    border-radius: 4px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+    font-family: 'Georgia', serif;
+    font-size: 12.5px;
+    line-height: 1.6;
+    position: relative;
+    box-sizing: border-box;
+}
+
+    .hf-offer-sheet,
+    .hf-offer-sheet * {
+        color: #111827 !important;
+    }
+
+.hf-sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #111827;
+    margin-bottom: 20px;
+    gap: 12px;
+}
+
+.hf-sheet-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hf-sheet-logo-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: #111827 !important;
+    color: #ffffff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    font-family: -apple-system, sans-serif;
+}
+
+.hf-sheet-company {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.hf-sheet-sub {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #4b5563 !important;
+}
+
+.hf-sheet-meta {
+    text-align: right;
+    font-size: 11px;
+    color: #4b5563 !important;
+    font-family: -apple-system, sans-serif;
+}
+
+.hf-sheet-salutation {
+    margin-bottom: 16px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.hf-sheet-body p {
+    margin: 0 0 12px;
+}
+
+.hf-sheet-section-title {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 4px;
+    margin: 18px 0 10px;
+}
+
+.hf-sheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px;
+    font-size: 12px;
+}
+
+    .hf-sheet-table th,
+    .hf-sheet-table td {
+        padding: 7px 10px;
+        border: 1px solid #e5e7eb;
+        text-align: left;
+    }
+
+    .hf-sheet-table th {
+        background: #f9fafb !important;
+        width: 38%;
+        font-weight: 700;
+        color: #374151 !important;
+    }
+
+.hf-sheet-terms {
+    background: #f9fafb !important;
+    border-left: 3px solid #111827;
+    padding: 10px 14px;
+    margin: 14px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+    .hf-sheet-terms h4 {
+        margin: 0 0 4px;
+        font-size: 11.5px;
+        font-weight: 750;
+        text-transform: uppercase;
+    }
+
+    .hf-sheet-terms p {
+        margin: 0;
+        font-size: 11.5px;
+        color: #4b5563 !important;
+    }
+
+.hf-sheet-stamp {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    padding: 10px 24px;
+    font-size: 22px;
+    font-weight: 900;
+    font-family: -apple-system, sans-serif;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+    .hf-sheet-stamp.accepted {
+        border: 4px double #059669;
+        color: #059669 !important;
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .hf-sheet-stamp.declined {
+        border: 4px double #dc2626;
+        color: #dc2626 !important;
+        background: rgba(220, 38, 38, 0.08);
+    }
+
+.hf-sheet-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    gap: 20px;
+}
+
+.hf-sheet-signature {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+}
+
+.hf-sig-line {
+    font-family: -apple-system, sans-serif;
+    color: #9ca3af !important;
+    margin-bottom: 4px;
+}
+
+.hf-digital-sig {
+    color: #059669 !important;
+    font-weight: 750;
+    font-style: italic;
+}
+
+/* Candidate Action Bar */
+.hf-candidate-action-bar {
+    width: 100%;
+    max-width: 620px;
+    margin-top: 16px;
+}
+
+.hf-decision-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.hf-btn-decline {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid #e5e8f2;
+    background: #ffffff;
+    color: #ef4444;
+    font-weight: 750;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+    .hf-btn-decline:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+    }
+
+.hf-btn-accept {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    transition: all 0.18s ease;
+}
+
+    .hf-btn-accept:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+    }
+
+.hf-decline-box {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+    .hf-decline-box p {
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #374151;
+    }
+
+    .hf-decline-box textarea {
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        font-size: 12.5px;
+        box-sizing: border-box;
+    }
+
+.hf-decline-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.hf-btn-cancel-decline {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.hf-btn-confirm-decline {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+/* Celebration State */
+.hf-offer-celebration {
+    padding: 60px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.hf-celeb-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+    animation: bounce 0.6s infinite alternate;
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-8px);
+    }
+}
+
+.hf-offer-celebration h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 850;
+    color: #10b981;
+}
+
+.hf-offer-celebration p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--hf-muted, #70728a);
+}
+
+/* ============================================================
+   RESPONSIVENESS (Mobile & Tablet)
+   ============================================================ */
+@media (max-width: 800px) {
+    .hf-offer-modal-body {
+        grid-template-columns: 1fr;
+    }
+
+    .hf-offer-edit-form {
+        border-right: none;
+        border-bottom: 1px solid var(--hf-border, #e5e8f2);
+    }
+}
+
+@media (max-width: 480px) {
+    .hf-offer-sheet {
+        padding: 20px 16px;
+    }
+
+    .hf-sheet-header {
+        flex-direction: column;
+    }
+
+    .hf-sheet-meta {
+        text-align: left;
+    }
+
+    .hf-sheet-footer {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .hf-decision-buttons {
+        flex-direction: column;
+    }
+
+    .hf-btn-decline,
+    .hf-btn-accept {
+        width: 100%;
+    }
+}
+
+/* ============================================================
+   PRINT STYLES (Only the paper letterhead prints!)
+   ============================================================ */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 10mm 14mm;
+    }
+
+    /* 1. Root and ALL ancestor containers must remain visible block elements without backgrounds, borders, or scrollbars */
+    body,
+    html,
+    #root,
+    .hf-app-shell,
+    .hr-workspace,
+    .hr-main,
+    .hr-page-content,
+    .hr-applicant-details,
+    .candidate-applications-shell,
+    .candidate-applications-content,
+    .hf-modal-backdrop,
+    .hf-offer-modal,
+    .hf-offer-modal-body,
+    .hf-offer-sheet-wrapper {
+        display: block !important;
+        position: static !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        border: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        z-index: auto !important;
+    }
+
+    /* 2. Completely hide all non-offer UI, sidebars, headers, action buttons, forms, and background widgets */
+    header,
+    footer,
+    nav,
+    aside,
+    .hr-sidebar,
+    .hr-page-heading,
+    .hr-page-account,
+    .hr-applicant-back,
+    .hr-applicant-details-heading,
+    .hr-applicant-heading-actions,
+    .hr-applicant-details-alert,
+    .hr-applicant-details-grid,
+    .candidate-applications-header,
+    .candidate-applications-tabs,
+    .candidate-applications-grid,
+    .candidate-applications-empty,
+    .hf-navbar,
+    .hf-footer,
+    .hf-ai-agent-container,
+    .hf-ai-trigger-btn,
+    .hf-saved-feedback,
+    .no-print,
+    .hf-offer-modal-header,
+    .hf-offer-edit-form,
+    .hf-candidate-action-bar,
+    .hf-ai-agent-wrap,
+    .hf-ai-agent-root,
+    .hf-ai-agent-fab {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* 3. The letterhead paper sheet itself */
+    .hf-offer-sheet,
+    #hf-printable-offer {
+        display: block !important;
+        visibility: visible !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 24px 28px !important;
+        box-shadow: none !important;
+        border: 1.5px solid #0f172a !important;
+        border-radius: 4px !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-family: 'Times New Roman', Times, Georgia, serif !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+        .hf-offer-sheet *,
+        #hf-printable-offer * {
+            visibility: visible !important;
+            color: #0f172a !important;
+            background-color: transparent !important;
+        }
+
+    .hf-sheet-header {
+        border-bottom: 2px solid #0f172a !important;
+        padding-bottom: 14px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .hf-sheet-logo-badge {
+        background: #0f172a !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .hf-sheet-table {
+        border: 1px solid #0f172a !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin: 16px 0 !important;
+    }
+
+        .hf-sheet-table th,
+        .hf-sheet-table td {
+            border: 1px solid #cbd5e1 !important;
+            padding: 8px 12px !important;
+        }
+
+        .hf-sheet-table th {
+            background: #f8fafc !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+    .hf-sheet-terms {
+        background: #f8fafc !important;
+        border-left: 3px solid #0f172a !important;
+        padding: 10px 14px !important;
+        margin: 16px 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .hf-sheet-footer {
+        border-top: 1px solid #cbd5e1 !important;
+        margin-top: 32px !important;
+        padding-top: 20px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .hf-sheet-stamp {
+        border: 2px solid currentColor !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}

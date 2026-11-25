@@ -70,30 +70,50 @@ namespace HireFlow.Api.Controllers
             if (user == null)
                 return NotFound(new { message = "Student account not found." });
 
-            var uploadDirectory = Path.Combine(
+            var uploadRootDirectory = Path.Combine(
                 _environment.ContentRootPath,
                 "Uploads",
                 "Resumes");
 
-            Directory.CreateDirectory(uploadDirectory);
+            Directory.CreateDirectory(uploadRootDirectory);
 
-            var storedFileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-            var filePath = Path.Combine(uploadDirectory, storedFileName);
+            // Keep each upload in its own unpredictable folder so two users with
+            // the same name (or repeated uploads) never overwrite one another.
+            // The actual file name remains readable in the URL and in the UI.
+            var uploadVersionDirectory = Path.Combine(
+                uploadRootDirectory,
+                Guid.NewGuid().ToString("N"));
 
-            await using (var stream = new FileStream(
-                filePath,
-                FileMode.CreateNew,
-                FileAccess.Write,
-                FileShare.None,
-                81920,
-                useAsync: true))
+            Directory.CreateDirectory(uploadVersionDirectory);
+
+            var storedFileName = BuildResumeFileName(user.FullName, extension);
+            var filePath = Path.Combine(uploadVersionDirectory, storedFileName);
+
+            try
             {
+                await using var stream = new FileStream(
+                    filePath,
+                    FileMode.CreateNew,
+                    FileAccess.Write,
+                    FileShare.None,
+                    81920,
+                    useAsync: true);
+
                 await file.CopyToAsync(stream, cancellationToken);
+            }
+            catch
+            {
+                if (System.IO.File.Exists(filePath))
+                    System.IO.File.Delete(filePath);
+
+                DeleteEmptyDirectoryTree(uploadVersionDirectory, uploadRootDirectory);
+                throw;
             }
 
             var relativePath = Path.Combine(
                     "Uploads",
                     "Resumes",
+                    Path.GetFileName(uploadVersionDirectory),
                     storedFileName)
                 .Replace('\\', '/');
 
@@ -105,7 +125,10 @@ namespace HireFlow.Api.Controllers
 
             if (!updateResult.Succeeded)
             {
-                System.IO.File.Delete(filePath);
+                if (System.IO.File.Exists(filePath))
+                    System.IO.File.Delete(filePath);
+
+                DeleteEmptyDirectoryTree(uploadVersionDirectory, uploadRootDirectory);
 
                 return BadRequest(new
                 {
@@ -114,7 +137,8 @@ namespace HireFlow.Api.Controllers
                 });
             }
 
-            DeleteOwnedResume(previousResumeUrl, uploadDirectory);
+            // Delete the previous resume only after the database points to the new file.
+            DeleteOwnedResume(previousResumeUrl, uploadRootDirectory);
 
             return Ok(new
             {
@@ -153,6 +177,7 @@ namespace HireFlow.Api.Controllers
             // Clear the profile record first, then remove the owned file.
             user.ResumeUrl = null;
             user.ResumeLastUpdatedAt = DateTime.UtcNow;
+
             var updateResult = await _userManager.UpdateAsync(user);
 
             if (!updateResult.Succeeded)
@@ -164,12 +189,12 @@ namespace HireFlow.Api.Controllers
                 });
             }
 
-            var uploadDirectory = Path.Combine(
+            var uploadRootDirectory = Path.Combine(
                 _environment.ContentRootPath,
                 "Uploads",
                 "Resumes");
 
-            DeleteOwnedResume(previousResumeUrl, uploadDirectory);
+            DeleteOwnedResume(previousResumeUrl, uploadRootDirectory);
 
             return Ok(new
             {
@@ -179,14 +204,35 @@ namespace HireFlow.Api.Controllers
             });
         }
 
+        private static string BuildResumeFileName(string? fullName, string extension)
+        {
+            var nameParts = (fullName ?? string.Empty)
+                .Trim()
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(part => new string(
+                    part.Where(char.IsLetterOrDigit).ToArray()))
+                .Where(part => !string.IsNullOrWhiteSpace(part))
+                .Take(8);
+
+            var safeName = string.Join("_", nameParts);
+
+            if (string.IsNullOrWhiteSpace(safeName))
+                safeName = "Candidate";
+
+            if (safeName.Length > 80)
+                safeName = safeName[..80].Trim('_');
+
+            return $"{safeName}_Resume{extension.ToLowerInvariant()}";
+        }
+
         private static void DeleteOwnedResume(
             string? storedUrl,
-            string uploadDirectory)
+            string uploadRootDirectory)
         {
             if (string.IsNullOrWhiteSpace(storedUrl))
                 return;
 
-            var normalized = storedUrl.Replace('\\', '/');
+            var normalized = storedUrl.Replace('\\', '/').TrimStart('/');
             const string expectedPrefix = "Uploads/Resumes/";
             var markerIndex = normalized.IndexOf(
                 expectedPrefix,
@@ -195,24 +241,59 @@ namespace HireFlow.Api.Controllers
             if (markerIndex < 0)
                 return;
 
-            var remainder = normalized[(markerIndex + expectedPrefix.Length)..];
-            var fileName = Path.GetFileName(remainder);
+            var relativePath = normalized[(markerIndex + expectedPrefix.Length)..];
+            var segments = relativePath.Split('/');
 
-            if (string.IsNullOrWhiteSpace(fileName) ||
-                fileName != remainder ||
-                fileName is "." or "..")
+            if (segments.Length == 0 ||
+                segments.Any(segment =>
+                    string.IsNullOrWhiteSpace(segment) ||
+                    segment is "." or ".." ||
+                    segment.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0))
+            {
                 return;
+            }
 
-            var root = Path.GetFullPath(uploadDirectory);
-            var fullPath = Path.GetFullPath(Path.Combine(root, fileName));
+            var root = Path.GetFullPath(uploadRootDirectory);
+            var rootPrefix = Path.TrimEndingDirectorySeparator(root) + Path.DirectorySeparatorChar;
+            var fullPath = Path.GetFullPath(Path.Combine(
+                root,
+                Path.Combine(segments)));
 
+            // Ensure the resolved file remains inside Uploads/Resumes.
             if (!fullPath.StartsWith(
-                    root + Path.DirectorySeparatorChar,
+                    rootPrefix,
                     StringComparison.OrdinalIgnoreCase))
+            {
                 return;
+            }
 
             if (System.IO.File.Exists(fullPath))
                 System.IO.File.Delete(fullPath);
+
+            var containingDirectory = Path.GetDirectoryName(fullPath);
+            if (!string.IsNullOrWhiteSpace(containingDirectory))
+                DeleteEmptyDirectoryTree(containingDirectory, root);
+        }
+
+        private static void DeleteEmptyDirectoryTree(
+            string directoryPath,
+            string uploadRootDirectory)
+        {
+            var root = Path.GetFullPath(uploadRootDirectory);
+            var rootPrefix = Path.TrimEndingDirectorySeparator(root) + Path.DirectorySeparatorChar;
+            var currentDirectory = Path.GetFullPath(directoryPath);
+
+            while (currentDirectory.StartsWith(
+                       rootPrefix,
+                       StringComparison.OrdinalIgnoreCase) &&
+                   Directory.Exists(currentDirectory))
+            {
+                if (Directory.EnumerateFileSystemEntries(currentDirectory).Any())
+                    break;
+
+                Directory.Delete(currentDirectory);
+                currentDirectory = Path.GetDirectoryName(currentDirectory) ?? string.Empty;
+            }
         }
     }
 }

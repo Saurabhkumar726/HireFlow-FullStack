@@ -16,13 +16,24 @@ import StudentHome from './pages/StudentHome'
 import CandidatePreferencesPage from './pages/CandidatePreferencesPage'
 import JobsPage from './pages/JobsPage'
 import CompaniesPage from './pages/CompaniesPage'
+import TrendsPage from './pages/TrendsPage'
 import InformationPage from './pages/InformationPage'
 import SavedJobCollectionsPage from './pages/SavedJobCollectionsPage'
 import CandidateApplicationsPage from './pages/CandidateApplicationsPage'
 import NotificationsPage from './pages/NotificationsPage'
+import ResumeBuilderPage from './pages/ResumeBuilderPage'
+import PublicPortfolioPage from './pages/PublicPortfolioPage'
+import InterviewStudioPage from './pages/InterviewStudioPage'
+import CandidateSkillsPage from './pages/CandidateSkillsPage'
+import PlacementCalendarPage from './pages/PlacementCalendarPage'
+import CandidateOffersPage from './pages/CandidateOffersPage'
+import CandidateCommunityPage from './pages/CandidateCommunityPage'
 import { useAuth } from './context/useAuth'
 import { useSavedJobs } from './context/useSavedJobs'
 import SkeletonLoader from './components/SkeletonLoader.jsx'
+import HireFlowAiAgent from './components/HireFlowAiAgent'
+import LiveToastContainer from './components/LiveToastContainer'
+import { useLiveEvents } from './utils/useLiveEvents'
 
 const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116/api').replace(/\/$/, '')
 
@@ -71,6 +82,7 @@ function App() {
     const navigate = useNavigate()
     const { user, token, isAuthenticated } = useAuth()
     const { savedJobs, savedItems, loadingSavedJobs, savedJobsError, toggleSaved: toggleSavedJob } = useSavedJobs()
+    const { toasts, dismissToast } = useLiveEvents()
     const pathname = location.pathname
 
     const isAdminRoute = pathname.startsWith('/admin')
@@ -86,8 +98,16 @@ function App() {
     const isCandidateRoute = pathname.startsWith('/candidate')
     const isSavedJobsRoute = pathname === '/saved-jobs'
     const isCandidateCollectionsRoute = pathname === '/candidate/collections'
+    const isCandidateResumeBuilderRoute = pathname === '/candidate/resume-builder'
+    const isCandidatePortfolioRoute = pathname === '/candidate/portfolio' || pathname.startsWith('/p/')
+    const isCandidatePrepRoute = pathname === '/candidate/prep'
+    const isCandidateSkillsRoute = pathname === '/candidate/skills'
+    const isCandidateCalendarRoute = pathname === '/candidate/calendar'
+    const isCandidateOffersRoute = pathname === '/candidate/offers'
+    const isCandidateCommunityRoute = pathname === '/candidate/community'
     const isJobsRoute = pathname === '/jobs'
     const isCompaniesRoute = pathname === '/companies' || pathname.startsWith('/companies/')
+    const isTrendsRoute = pathname === '/trends'
     const isInfoRoute = ['/about', '/contact', '/privacy', '/terms'].includes(pathname)
 
     const [jobs, setJobs] = useState([])
@@ -422,7 +442,13 @@ function App() {
 
     if (isHRRoute) {
         // The existing HR workspace and its sidebar are preserved as a separate workspace.
-        return <HRLayout />
+        return (
+            <>
+                <HRLayout />
+                <HireFlowAiAgent />
+                <LiveToastContainer toasts={toasts} onDismiss={dismissToast} />
+            </>
+        )
     }
 
     let page
@@ -455,6 +481,20 @@ function App() {
         page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
             ? <SavedJobCollectionsPage />
             : <Navigate to="/" replace />
+    } else if (isCandidateResumeBuilderRoute) {
+        page = <ResumeBuilderPage />
+    } else if (isCandidatePortfolioRoute) {
+        page = <PublicPortfolioPage />
+    } else if (isCandidatePrepRoute) {
+        page = <InterviewStudioPage />
+    } else if (isCandidateSkillsRoute) {
+        page = <CandidateSkillsPage />
+    } else if (isCandidateCalendarRoute) {
+        page = <PlacementCalendarPage />
+    } else if (isCandidateOffersRoute) {
+        page = <CandidateOffersPage />
+    } else if (isCandidateCommunityRoute) {
+        page = <CandidateCommunityPage />
     } else if (isCandidateRoute) {
         // Preserve legacy candidate sub-routes until each new page is implemented.
         page = isAuthenticated && String(user?.role || '').toLowerCase() === 'student'
@@ -476,6 +516,8 @@ function App() {
         page = <JobsPage jobs={jobs} loading={loadingJobs} error={jobsError} onRetry={retryJobData} savedJobs={savedJobs} onToggleSaved={toggleSaved} onApply={openApplication} />
     } else if (isCompaniesRoute) {
         page = <CompaniesPage jobs={jobs} loading={loadingJobs} />
+    } else if (isTrendsRoute) {
+        page = <TrendsPage />
     } else if (isInfoRoute) {
         page = <InformationPage />
     } else if (pathname === '/') {
@@ -490,6 +532,7 @@ function App() {
             {page}
             {savedFeedback && <div className="hf-saved-feedback" role="status"><span>{savedFeedback}</span><button type="button" onClick={() => setSavedFeedback('')} aria-label="Dismiss">×</button></div>}
             <Footer />
+            <HireFlowAiAgent />
 
             <ApplicationModal
                 job={selectedJob}
@@ -519,6 +562,7 @@ function App() {
             />
 
             {showLogin && <Login key={loginRole} initialRole={loginRole} onClose={() => setShowLogin(false)} onSuccess={handleLoginSuccess} />}
+            <LiveToastContainer toasts={toasts} onDismiss={dismissToast} />
         </div>
     )
 }

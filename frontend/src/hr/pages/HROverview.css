@@ -1,11 +1,11 @@
 
 .hr-overview {
-    --hro-surface: var(--surface, #ffffff);
-    --hro-border: var(--border, #e7e9f2);
-    --hro-text: var(--text, #20213b);
-    --hro-muted: var(--muted, #737b95);
-    --hro-accent: #6555e9;
-    --hro-accent-hover: #5142d2;
+    --hro-surface: var(--hf-surface, #ffffff);
+    --hro-border: var(--hf-border, #e7e9f2);
+    --hro-text: var(--hf-text, #20213b);
+    --hro-muted: var(--hf-muted, #737b95);
+    --hro-accent: var(--hf-accent, #6555e9);
+    --hro-accent-hover: var(--hf-accent-strong, #5142d2);
     width: 100%;
     min-width: 0;
     color: var(--hro-text);
@@ -1034,4 +1034,289 @@ html[data-theme='dark'] .hr-overview-chart-gridline {
         padding-left: 7px;
         font-size: 10px;
     }
+}
+
+/* Hiring Pipeline Funnel */
+.hr-funnel-panel {
+    margin-top: 24px;
+}
+
+.hr-funnel-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 10px 0 18px;
+}
+
+.hr-funnel-row {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+}
+
+.hr-funnel-label-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+    .hr-funnel-label-col strong {
+        font-size: 13px;
+        font-weight: 750;
+        color: var(--hro-text, #252641);
+    }
+
+    .hr-funnel-label-col span {
+        font-size: 11px;
+        color: var(--hro-muted, #777f98);
+    }
+
+.hr-funnel-bar-track {
+    width: 100%;
+    height: 32px;
+    background: rgba(118, 101, 238, 0.06);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.hr-funnel-bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 12px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 42px;
+}
+
+.hr-funnel-pct {
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.hr-funnel-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hro-border, #e8eaf3);
+}
+
+.hr-funnel-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: rgba(118, 101, 238, 0.04);
+    border: 1px solid var(--hro-border, #e8eaf3);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+    .hr-funnel-stat span {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--hro-muted, #777f98);
+    }
+
+    .hr-funnel-stat strong {
+        font-size: 20px;
+        font-weight: 850;
+        color: var(--hro-text, #252641);
+    }
+
+    .hr-funnel-stat small {
+        font-size: 11px;
+        color: var(--hro-muted, #777f98);
+    }
+
+@media (max-width: 640px) {
+    .hr-funnel-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .hr-funnel-stats-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+html[data-theme='dark'] .hr-funnel-label-col strong {
+    color: #f1f2fc;
+}
+
+html[data-theme='dark'] .hr-funnel-bar-track {
+    background: #1b1c2e;
+}
+
+html[data-theme='dark'] .hr-funnel-stat {
+    background: #1b1c2e;
+    border-color: #2b2c44;
+}
+
+    html[data-theme='dark'] .hr-funnel-stat strong {
+        color: #f1f2fc;
+    }
+
+/* Funnel Job Requisition Selector */
+.hr-funnel-filter-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.hr-funnel-job-select {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--hro-border, #e5e8f2);
+    background: var(--surface, #ffffff);
+    color: var(--hro-text, #252641);
+    font-size: 12.5px;
+    font-weight: 650;
+    cursor: pointer;
+    outline: none;
+}
+
+.hr-funnel-label-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.hr-funnel-dropoff-tag {
+    font-size: 10px;
+    font-weight: 800;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    padding: 1px 5px;
+    border-radius: 4px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+html[data-theme='dark'] .hr-funnel-dropoff-tag {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Live Recruitment Activity Feed */
+.hr-live-activity-box {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hro-border, #e5e8f2);
+}
+
+.hr-live-act-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+    .hr-live-act-header h4 {
+        margin: 0;
+        font-size: 13.5px;
+        font-weight: 800;
+        color: var(--hro-text, #252641);
+    }
+
+.hr-live-pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: hrPulse 1.8s infinite;
+}
+
+@keyframes hrPulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.hr-live-act-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hr-live-act-item {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--surface-soft, #f8f9fe);
+    border-radius: 8px;
+    font-size: 12.5px;
+    border: 1px solid var(--hro-border, #e5e8f2);
+}
+
+.hr-live-act-time {
+    font-size: 11px;
+    color: #94a3b8;
+    font-family: monospace;
+    flex-shrink: 0;
+}
+
+.hr-live-act-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+    .hr-live-act-body strong {
+        font-size: 12.5px;
+        color: var(--hro-text, #252641);
+    }
+
+    .hr-live-act-body p {
+        margin: 0;
+        color: var(--hro-muted, #777f98);
+        font-size: 12px;
+    }
+
+/* Dark mode overrides */
+html[data-theme='dark'] .hr-funnel-job-select {
+    background: #1b1c2e;
+    border-color: #2b2c44;
+    color: #f1f2fc;
+}
+
+html[data-theme='dark'] .hr-live-activity-box {
+    border-top-color: #2b2c44;
+}
+
+html[data-theme='dark'] .hr-live-act-header h4 {
+    color: #ffffff;
+}
+
+html[data-theme='dark'] .hr-live-act-item {
+    background: #191a2a;
+    border-color: #2b2c44;
+}
+
+html[data-theme='dark'] .hr-live-act-body strong {
+    color: #ffffff;
 }

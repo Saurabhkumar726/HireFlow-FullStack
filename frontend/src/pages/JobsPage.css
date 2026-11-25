@@ -43,10 +43,16 @@
     margin-top: 27px;
     padding: 12px;
     border: 1px solid var(--hf-border);
-    border-radius: 16px;
+    border-radius: 18px;
     background: var(--hf-surface);
-    box-shadow: 0 12px 40px rgba(35,32,92,.06);
+    box-shadow: 0 12px 36px rgba(35, 32, 92, .06);
+    transition: border-color .2s ease, box-shadow .2s ease;
 }
+
+    .hf-jobs-searchbar:focus-within {
+        border-color: var(--hf-accent-border);
+        box-shadow: 0 16px 40px -6px rgba(93, 81, 216, .16), 0 0 0 3px var(--hf-accent-soft);
+    }
 
     .hf-jobs-searchbar label {
         display: flex;
@@ -74,15 +80,23 @@
         }
 
     .hf-jobs-searchbar button {
-        min-height: 43px;
-        padding: 0 20px;
+        min-height: 44px;
+        padding: 0 22px;
         border: 0;
-        border-radius: 11px;
+        border-radius: 12px;
         color: #fff;
-        background: var(--hf-accent);
+        background: linear-gradient(135deg, #6f63e9, #5546cb);
         font-size: 11px;
         font-weight: 800;
+        box-shadow: 0 6px 16px rgba(85, 70, 203, .25);
+        cursor: pointer;
+        transition: transform .18s ease, box-shadow .18s ease;
     }
+
+        .hf-jobs-searchbar button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(85, 70, 203, .35);
+        }
 
 .hf-jobs-layout {
     display: grid;
@@ -97,10 +111,11 @@
     top: 98px;
     display: flex;
     flex-direction: column;
-    padding: 19px;
+    padding: 22px;
     border: 1px solid var(--hf-border);
-    border-radius: 17px;
+    border-radius: 18px;
     background: var(--hf-surface);
+    box-shadow: var(--hf-shadow-xs, 0 2px 8px rgba(0, 0, 0, .03));
 }
 
 .hf-filter-header {
@@ -161,14 +176,21 @@
 
     .hf-filter-group select, .hf-filter-group input {
         width: 100%;
-        min-height: 39px;
-        padding: 0 10px;
+        min-height: 40px;
+        padding: 0 12px;
         border: 1px solid var(--hf-border);
-        border-radius: 9px;
+        border-radius: 10px;
         color: var(--hf-text);
         background: var(--hf-surface);
-        font-size: 10px;
+        font-size: 11px;
+        transition: border-color .18s ease, box-shadow .18s ease;
     }
+
+        .hf-filter-group select:focus, .hf-filter-group input:focus {
+            border-color: var(--hf-accent);
+            box-shadow: 0 0 0 3px var(--hf-accent-soft);
+            outline: none;
+        }
 
 .hf-filter-note {
     margin-top: 18px;

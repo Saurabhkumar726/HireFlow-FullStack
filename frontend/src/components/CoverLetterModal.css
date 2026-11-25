@@ -1,0 +1,307 @@
+/* ============================================================
+   HireFlow Cover Letter & Pitch Generator Modal
+   Full Light & Dark Mode Theming
+   ============================================================ */
+
+.hf-cl-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.hf-cl-card {
+    --modal-bg: #ffffff;
+    --modal-soft: #f8fafc;
+    --border-color: #e2e8f0;
+    --border-subtle: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --preview-bg: #f8fafc;
+    --preview-border: #cbd5e1;
+    --preview-text: #0f172a;
+    --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: var(--modal-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html[data-theme='dark'] .hf-cl-card,
+:root[data-theme='dark'] .hf-cl-card,
+.dark .hf-cl-card {
+    --modal-bg: #111827;
+    --modal-soft: #1f2937;
+    --border-color: #374151;
+    --border-subtle: #4b5563;
+    --text-primary: #f3f4f6;
+    --text-secondary: #cbd5e1;
+    --text-muted: #9ca3af;
+    --input-bg: #111827;
+    --input-border: #374151;
+    --input-text: #ffffff;
+    --preview-bg: #0f172a;
+    --preview-border: #334155;
+    --preview-text: #f1f5f9;
+    --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.hf-cl-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hf-cl-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #10b981;
+    margin-bottom: 0.25rem;
+}
+
+.hf-cl-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.hf-cl-header p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.hf-cl-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    transition: color 0.15s;
+}
+
+    .hf-cl-close-btn:hover {
+        color: var(--text-primary);
+    }
+
+.hf-cl-toolbar {
+    padding: 1rem 1.5rem;
+    background: var(--modal-soft);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.hf-cl-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+    .hf-cl-inputs label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .hf-cl-inputs input {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 0.5rem;
+        color: var(--input-text);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+        .hf-cl-inputs input:focus {
+            border-color: #2563eb;
+        }
+
+.hf-cl-tones {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.hf-cl-tone-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.hf-cl-tone-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.hf-cl-tone-btn {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-secondary);
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.785rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+    .hf-cl-tone-btn:hover {
+        border-color: #2563eb;
+        color: #2563eb;
+    }
+
+    .hf-cl-tone-btn.active {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #ffffff;
+    }
+
+.hf-cl-tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--modal-soft);
+}
+
+.hf-cl-tab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+    .hf-cl-tab:hover {
+        color: var(--text-primary);
+    }
+
+    .hf-cl-tab.active {
+        color: #2563eb;
+        border-bottom-color: #2563eb;
+        background: rgba(37, 99, 235, 0.08);
+    }
+
+.hf-cl-content {
+    padding: 1.25rem 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.hf-cl-preview-text {
+    width: 100%;
+    background: var(--preview-bg);
+    border: 1px solid var(--preview-border);
+    border-radius: 0.5rem;
+    color: var(--preview-text);
+    padding: 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.825rem;
+    line-height: 1.6;
+    resize: none;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+    .hf-cl-preview-text:focus {
+        border-color: #2563eb;
+    }
+
+.hf-cl-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hf-cl-footer-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.hf-cl-copy-btn {
+    background: #10b981;
+    color: #ffffff;
+    border: none;
+    padding: 0.55rem 1.1rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+    .hf-cl-copy-btn:hover {
+        opacity: 0.9;
+    }
+
+.hf-cl-print-btn {
+    background: var(--modal-soft);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.55rem 1.1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+    .hf-cl-print-btn:hover {
+        border-color: var(--border-subtle);
+    }
+
+.hf-cl-done-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 0.55rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+    .hf-cl-done-btn:hover {
+        color: var(--text-primary);
+        border-color: var(--border-subtle);
+    }

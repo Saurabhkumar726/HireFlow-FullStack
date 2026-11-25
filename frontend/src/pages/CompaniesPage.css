@@ -36,18 +36,25 @@
     }
 
 .hf-company-search {
-    width: min(440px,100%);
+    width: min(440px, 100%);
     min-height: 48px;
     display: flex;
     align-items: center;
     gap: 11px;
     margin-top: 25px;
-    padding: 0 14px;
+    padding: 0 16px;
     border: 1px solid var(--hf-border);
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--hf-surface);
     color: var(--hf-accent);
+    box-shadow: var(--hf-shadow-xs, 0 1px 3px rgba(0, 0, 0, .03));
+    transition: border-color .18s ease, box-shadow .18s ease;
 }
+
+    .hf-company-search:focus-within {
+        border-color: var(--hf-accent);
+        box-shadow: 0 0 0 3px var(--hf-accent-soft);
+    }
 
     .hf-company-search span {
         font-size: 20px;
@@ -64,7 +71,7 @@
 
 .hf-company-directory-grid {
     display: grid;
-    grid-template-columns: repeat(3,minmax(0,1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 15px;
 }
 
@@ -73,16 +80,18 @@
     flex-direction: column;
     align-items: flex-start;
     min-height: 205px;
-    padding: 21px;
+    padding: 22px;
     border: 1px solid var(--hf-border);
-    border-radius: 17px;
+    border-radius: 18px;
     background: var(--hf-surface);
-    transition: transform .18s ease,border-color .18s ease;
+    box-shadow: var(--hf-shadow-xs, 0 2px 8px rgba(0, 0, 0, .03));
+    transition: transform .22s cubic-bezier(0.16, 1, 0.3, 1), border-color .22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
     .hf-company-directory-card:hover {
-        transform: translateY(-2px);
+        transform: translateY(-4px);
         border-color: var(--hf-accent-border);
+        box-shadow: var(--hf-shadow-md, 0 12px 28px rgba(0, 0, 0, .08));
     }
 
 .hf-company-profile-mark {

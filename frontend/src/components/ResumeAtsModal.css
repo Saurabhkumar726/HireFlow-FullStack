@@ -1,0 +1,367 @@
+/* ============================================================
+   HireFlow Resume ATS & Match Modal
+   Full Light & Dark Mode Theming
+   ============================================================ */
+
+.hf-ats-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.hf-ats-card {
+    --modal-bg: #ffffff;
+    --modal-soft: #f8fafc;
+    --border-color: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --recs-bg: #eef2ff;
+    --recs-border: #c7d2fe;
+    --recs-title: #3730a3;
+    --recs-text: #312e81;
+    --score-ring-bg: #f8fafc;
+    --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background: var(--modal-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html[data-theme='dark'] .hf-ats-card,
+:root[data-theme='dark'] .hf-ats-card,
+.dark .hf-ats-card {
+    --modal-bg: #111827;
+    --modal-soft: #1f2937;
+    --border-color: #374151;
+    --text-primary: #f3f4f6;
+    --text-secondary: #cbd5e1;
+    --text-muted: #9ca3af;
+    --input-bg: #1f2937;
+    --input-border: #374151;
+    --input-text: #ffffff;
+    --recs-bg: #1e1b4b;
+    --recs-border: #3730a3;
+    --recs-title: #a5b4fc;
+    --recs-text: #e0e7ff;
+    --score-ring-bg: #0f172a;
+    --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.hf-ats-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hf-ats-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2563eb;
+    margin-bottom: 0.25rem;
+}
+
+html[data-theme='dark'] .hf-ats-badge,
+:root[data-theme='dark'] .hf-ats-badge,
+.dark .hf-ats-badge {
+    color: #3b82f6;
+}
+
+.hf-ats-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.hf-ats-header p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.hf-ats-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    transition: color 0.15s;
+}
+
+    .hf-ats-close-btn:hover {
+        color: var(--text-primary);
+    }
+
+.hf-ats-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.hf-ats-job-selector label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.hf-ats-job-selector select,
+.hf-ats-job-selector textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    color: var(--input-text);
+    padding: 0.65rem 0.85rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+    .hf-ats-job-selector select:focus,
+    .hf-ats-job-selector textarea:focus {
+        border-color: #2563eb;
+    }
+
+.hf-ats-or {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0.75rem 0;
+    position: relative;
+}
+
+.hf-ats-analyze-btn {
+    margin-top: 0.85rem;
+    width: 100%;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .hf-ats-analyze-btn:hover:not(:disabled) {
+        background: #1d4ed8;
+    }
+
+    .hf-ats-analyze-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+.hf-ats-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.hf-ats-score-banner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: var(--modal-soft);
+    border: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+}
+
+.hf-ats-score-ring {
+    min-width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--score-ring-bg);
+    border: 4px solid #2563eb;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hf-ats-score-val {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #2563eb;
+    line-height: 1;
+}
+
+html[data-theme='dark'] .hf-ats-score-val,
+:root[data-theme='dark'] .hf-ats-score-val,
+.dark .hf-ats-score-val {
+    color: #60a5fa;
+}
+
+.hf-ats-score-lbl {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.hf-ats-score-meta h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.hf-ats-score-meta p {
+    margin: 0.35rem 0 0 0;
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.hf-ats-keywords-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .hf-ats-keywords-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hf-ats-kw-box {
+    background: var(--modal-soft);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.85rem;
+}
+
+    .hf-ats-kw-box h4 {
+        margin: 0 0 0.65rem 0;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+.hf-ats-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.hf-ats-pill-green {
+    font-size: 0.75rem;
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+}
+
+html[data-theme='dark'] .hf-ats-pill-green,
+:root[data-theme='dark'] .hf-ats-pill-green,
+.dark .hf-ats-pill-green {
+    color: #34d399;
+}
+
+.hf-ats-pill-add {
+    font-size: 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px dashed rgba(239, 68, 68, 0.4);
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+html[data-theme='dark'] .hf-ats-pill-add,
+:root[data-theme='dark'] .hf-ats-pill-add,
+.dark .hf-ats-pill-add {
+    color: #f87171;
+}
+
+.hf-ats-pill-add:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-style: solid;
+}
+
+.hf-ats-recs {
+    background: var(--recs-bg);
+    border: 1px solid var(--recs-border);
+    padding: 0.85rem 1.15rem;
+    border-radius: 0.5rem;
+}
+
+    .hf-ats-recs h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--recs-title);
+    }
+
+    .hf-ats-recs ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        font-size: 0.825rem;
+        color: var(--recs-text);
+        line-height: 1.5;
+    }
+
+.hf-ats-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.hf-ats-done-btn {
+    background: var(--modal-soft);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+    .hf-ats-done-btn:hover {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+    }

@@ -1,0 +1,730 @@
+/* ============================================================
+   HireFlow Candidate Community, Recruiter Chat & Alumni Network
+   Full Light & Dark Mode Theming
+   ============================================================ */
+
+.hf-comm-page {
+    --page-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --card-soft: #f1f5f9;
+    --border-color: #e2e8f0;
+    --border-subtle: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --accent-blue: #2563eb;
+    --accent-blue-hover: #1d4ed8;
+    --chat-sidebar-bg: #f8fafc;
+    --chat-main-bg: #ffffff;
+    --bubble-recruiter-bg: #f1f5f9;
+    --bubble-recruiter-border: #e2e8f0;
+    --bubble-recruiter-text: #0f172a;
+    --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    min-height: 100vh;
+    background: var(--page-bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html[data-theme='dark'] .hf-comm-page,
+:root[data-theme='dark'] .hf-comm-page,
+.dark .hf-comm-page {
+    --page-bg: #0f172a;
+    --card-bg: #1e293b;
+    --card-soft: #0f172a;
+    --border-color: #334155;
+    --border-subtle: #475569;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --input-bg: #0f172a;
+    --input-border: #334155;
+    --input-text: #ffffff;
+    --chat-sidebar-bg: #0f172a;
+    --chat-main-bg: #0f172a;
+    --bubble-recruiter-bg: #1e293b;
+    --bubble-recruiter-border: #334155;
+    --bubble-recruiter-text: #f1f5f9;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+}
+
+.hf-comm-header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 2rem 1.5rem 1.5rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.hf-comm-header-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+}
+
+.hf-comm-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+    .hf-comm-breadcrumbs a {
+        color: var(--accent-blue);
+        text-decoration: none;
+    }
+
+.hf-comm-header h1 {
+    margin: 0;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.hf-comm-header p {
+    margin: 0.35rem 0 0 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.hf-comm-container {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.hf-comm-tabs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.hf-comm-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.65rem 1.15rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+    .hf-comm-tab:hover {
+        color: var(--text-primary);
+        background: var(--card-soft);
+    }
+
+    .hf-comm-tab.active {
+        background: var(--accent-blue);
+        color: #ffffff;
+    }
+
+/* Chat Card */
+.hf-comm-chat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    height: 600px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: all 0.2s ease;
+}
+
+@media (max-width: 700px) {
+    .hf-comm-chat-card {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+}
+
+.hf-comm-chat-sidebar {
+    background: var(--chat-sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+    .hf-comm-chat-sidebar h3 {
+        margin: 0;
+        padding: 1.25rem 1rem;
+        font-size: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+.hf-comm-contacts-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.hf-comm-contact-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+}
+
+    .hf-comm-contact-btn:hover {
+        background: var(--card-soft);
+    }
+
+    .hf-comm-contact-btn.active {
+        background: var(--card-soft);
+        border-left: 3px solid var(--accent-blue);
+    }
+
+.hf-comm-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.hf-comm-contact-meta strong {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.hf-comm-contact-meta small {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.hf-comm-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    margin-left: auto;
+}
+
+/* Chat Main */
+.hf-comm-chat-main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--chat-main-bg);
+}
+
+.hf-comm-chat-topbar {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+}
+
+    .hf-comm-chat-topbar h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+    }
+
+    .hf-comm-chat-topbar small {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+    }
+
+.hf-comm-verified-hr {
+    font-size: 0.7rem;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    font-weight: 700;
+}
+
+html[data-theme='dark'] .hf-comm-verified-hr,
+:root[data-theme='dark'] .hf-comm-verified-hr,
+.dark .hf-comm-verified-hr {
+    color: #34d399;
+}
+
+.hf-comm-messages-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: var(--chat-main-bg);
+}
+
+.hf-comm-msg-row {
+    display: flex;
+}
+
+    .hf-comm-msg-row.candidate {
+        justify-content: flex-end;
+    }
+
+    .hf-comm-msg-row.recruiter {
+        justify-content: flex-start;
+    }
+
+.hf-comm-bubble {
+    max-width: 75%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.hf-comm-msg-row.candidate .hf-comm-bubble {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border-bottom-right-radius: 0.15rem;
+}
+
+.hf-comm-msg-row.recruiter .hf-comm-bubble {
+    background: var(--bubble-recruiter-bg);
+    border: 1px solid var(--bubble-recruiter-border);
+    color: var(--bubble-recruiter-text);
+    border-bottom-left-radius: 0.15rem;
+}
+
+.hf-comm-bubble p {
+    margin: 0;
+}
+
+.hf-comm-time {
+    display: block;
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.hf-comm-chat-input-bar {
+    padding: 0.85rem 1.25rem;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.75rem;
+}
+
+    .hf-comm-chat-input-bar input {
+        flex: 1;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 0.5rem;
+        color: var(--input-text);
+        padding: 0.6rem 0.85rem;
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+        .hf-comm-chat-input-bar input:focus {
+            border-color: var(--accent-blue);
+        }
+
+.hf-comm-send-btn {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+    .hf-comm-send-btn:hover {
+        background: var(--accent-blue-hover);
+    }
+
+/* Tab 2: Discussions */
+.hf-comm-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.75rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.2s ease;
+}
+
+.hf-comm-post-creator {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+    .hf-comm-post-creator h3 {
+        margin: 0 0 0.85rem 0;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+    }
+
+.hf-comm-new-post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+    .hf-comm-new-post-form input,
+    .hf-comm-new-post-form textarea {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 0.5rem;
+        color: var(--input-text);
+        padding: 0.65rem 0.85rem;
+        font-size: 0.85rem;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+        .hf-comm-new-post-form input:focus,
+        .hf-comm-new-post-form textarea:focus {
+            border-color: var(--accent-blue);
+        }
+
+.hf-comm-post-btn {
+    align-self: flex-start;
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 0.55rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+    .hf-comm-post-btn:hover {
+        background: var(--accent-blue-hover);
+    }
+
+.hf-comm-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.hf-comm-post-item {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    gap: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.hf-comm-upvote-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    height: fit-content;
+    transition: all 0.15s;
+}
+
+    .hf-comm-upvote-btn.active {
+        background: rgba(37, 99, 235, 0.12);
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+    }
+
+.hf-comm-post-body {
+    flex: 1;
+}
+
+.hf-comm-post-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.hf-comm-post-company {
+    background: var(--accent-blue);
+    color: #ffffff;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    font-weight: 700;
+}
+
+.hf-comm-post-author {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.hf-comm-post-meta small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.hf-comm-post-text {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* Tab 3: Alumni */
+.hf-comm-alumni-intro h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.hf-comm-alumni-intro p {
+    margin: 0.25rem 0 1.25rem 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.hf-comm-alumni-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.hf-comm-alumni-card {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.hf-comm-alumni-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .hf-comm-alumni-header h4 {
+        margin: 0;
+        font-size: 1.05rem;
+        color: var(--text-primary);
+    }
+
+.hf-comm-alumni-year {
+    font-size: 0.75rem;
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+.hf-comm-alumni-role {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.hf-comm-alumni-domain {
+    font-size: 0.785rem;
+    color: var(--text-muted);
+}
+
+.hf-comm-alumni-college {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.hf-comm-referral-btn {
+    margin-top: auto;
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 0.55rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .hf-comm-referral-btn:hover {
+        background: var(--accent-blue-hover);
+    }
+
+/* Referral Modal */
+.hf-comm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    z-index: 100;
+}
+
+.hf-comm-modal-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 580px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    color: var(--text-primary);
+}
+
+.hf-comm-modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+    .hf-comm-modal-header h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        color: var(--text-primary);
+    }
+
+    .hf-comm-modal-header p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+.hf-comm-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+    .hf-comm-modal-close:hover {
+        color: var(--text-primary);
+    }
+
+.hf-comm-modal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.hf-comm-modal-hint {
+    margin: 0;
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+}
+
+.hf-comm-modal-preview {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    color: var(--input-text);
+    padding: 0.85rem;
+    font-size: 0.825rem;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+    .hf-comm-modal-preview:focus {
+        border-color: var(--accent-blue);
+    }
+
+.hf-comm-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.hf-comm-modal-cancel {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+    .hf-comm-modal-cancel:hover {
+        color: var(--text-primary);
+        border-color: var(--border-subtle);
+    }
+
+.hf-comm-modal-send {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .hf-comm-modal-send:hover {
+        background: var(--accent-blue-hover);
+    }
+
+.hf-comm-modal-success {
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.hf-comm-success-icon {
+    display: inline-flex;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+}

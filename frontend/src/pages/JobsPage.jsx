@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import './JobsPage.css'
 import JobCollectionPicker from '../components/JobCollectionPicker'
+import ShareJob from '../components/ShareJob'
 import CityLocationAutocomplete from '../components/CityLocationAutocomplete'
 import SkeletonLoader from '../components/SkeletonLoader.jsx'
 
@@ -340,7 +341,7 @@ export default function JobsPage({ jobs = [], loading = false, error = '', onRet
                         return <article className="hf-job-row" key={job.id}>
                             <span className="hf-job-row-mark">{companyInitials(job.company)}</span>
                             <div className="hf-job-row-main">
-                                <div className="hf-job-row-top"><div><span className="hf-job-row-company">{job.company || 'Company not specified'}</span><h3>{job.title || 'Job opportunity'}</h3></div><div className="hf-job-row-save-actions"><button type="button" className={`hf-job-row-save ${isSaved ? 'is-saved' : ''}`} onClick={() => onToggleSaved(job.id)} aria-label={isSaved ? 'Remove saved job' : 'Save job'} aria-pressed={isSaved}>♡</button><JobCollectionPicker jobId={job.id} isSaved={isSaved} /></div></div>
+                                <div className="hf-job-row-top"><div><span className="hf-job-row-company">{job.company || 'Company not specified'}</span><h3>{job.title || 'Job opportunity'}</h3></div><div className="hf-job-row-save-actions"><ShareJob job={job} /><button type="button" className={`hf-job-row-save ${isSaved ? 'is-saved' : ''}`} onClick={() => onToggleSaved(job.id)} aria-label={isSaved ? 'Remove saved job' : 'Save job'} aria-pressed={isSaved}>♡</button><JobCollectionPicker jobId={job.id} isSaved={isSaved} /></div></div>
                                 <div className="hf-job-row-tags"><span>{job.jobType || 'Opportunity'}</span><span>{workModeOf(job)}</span><span>{job.location || 'Location not specified'}</span><span>{experienceLabel(job)}</span></div>
                                 <p>{String(job.description || '').slice(0, 190)}{String(job.description || '').length > 190 ? '…' : ''}</p>
                                 <div className="hf-job-row-bottom"><strong>{salaryText(job)}</strong><div><Link to={`/jobs/${job.id}`}>View details</Link><button type="button" onClick={() => onApply(job)}>Apply now ↗</button></div></div>

@@ -1,0 +1,492 @@
+/* ============================================================
+   HireFlow Placement Calendar & Vault
+   Full Light & Dark Mode Theming
+   ============================================================ */
+
+.hf-cal-page {
+    --page-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --card-soft: #f1f5f9;
+    --border-color: #e2e8f0;
+    --border-subtle: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --accent-blue: #2563eb;
+    --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    min-height: 100vh;
+    background: var(--page-bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html[data-theme='dark'] .hf-cal-page,
+:root[data-theme='dark'] .hf-cal-page,
+.dark .hf-cal-page {
+    --page-bg: #0f172a;
+    --card-bg: #1e293b;
+    --card-soft: #0f172a;
+    --border-color: #334155;
+    --border-subtle: #475569;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --input-bg: #0f172a;
+    --input-border: #334155;
+    --input-text: #ffffff;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+}
+
+.hf-cal-header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 2rem 1.5rem 1.5rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.hf-cal-header-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+}
+
+.hf-cal-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+    .hf-cal-breadcrumbs a {
+        color: var(--accent-blue);
+        text-decoration: none;
+    }
+
+.hf-cal-header h1 {
+    margin: 0;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.hf-cal-header p {
+    margin: 0.35rem 0 0 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.hf-cal-container {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.hf-cal-tabs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.hf-cal-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.65rem 1.15rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+    .hf-cal-tab:hover {
+        color: var(--text-primary);
+        background: var(--card-soft);
+    }
+
+    .hf-cal-tab.active {
+        background: var(--accent-blue);
+        color: #ffffff;
+    }
+
+.hf-cal-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.75rem;
+    box-shadow: var(--card-shadow);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Tab 1: Drives List */
+.hf-cal-drives-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.hf-cal-drive-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.2s ease;
+}
+
+    .hf-cal-drive-card:hover {
+        border-color: var(--border-subtle);
+    }
+
+.hf-cal-drive-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hf-cal-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    margin-bottom: 0.5rem;
+}
+
+    .hf-cal-badge.green {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    .hf-cal-badge.amber {
+        background: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+    }
+
+    .hf-cal-badge.blue {
+        background: rgba(59, 130, 246, 0.15);
+        color: #2563eb;
+    }
+
+html[data-theme='dark'] .hf-cal-badge.green,
+:root[data-theme='dark'] .hf-cal-badge.green,
+.dark .hf-cal-badge.green {
+    color: #34d399;
+}
+
+html[data-theme='dark'] .hf-cal-badge.amber,
+:root[data-theme='dark'] .hf-cal-badge.amber,
+.dark .hf-cal-badge.amber {
+    color: #fbbf24;
+}
+
+html[data-theme='dark'] .hf-cal-badge.blue,
+:root[data-theme='dark'] .hf-cal-badge.blue,
+.dark .hf-cal-badge.blue {
+    color: #60a5fa;
+}
+
+.hf-cal-drive-top h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.hf-cal-drive-top h4 {
+    margin: 0.25rem 0 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.hf-cal-sync-btn {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.5rem 0.85rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+    .hf-cal-sync-btn:hover {
+        background: var(--accent-blue);
+        color: #ffffff;
+        border-color: var(--accent-blue);
+    }
+
+.hf-cal-timeline-strip {
+    display: flex;
+    align-items: center;
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    padding: 0.85rem 1.25rem;
+    border-radius: 0.5rem;
+    gap: 1rem;
+}
+
+@media (max-width: 650px) {
+    .hf-cal-timeline-strip {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .hf-cal-timeline-arrow {
+        display: none;
+    }
+}
+
+.hf-cal-timeline-milestone {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+    .hf-cal-timeline-milestone span {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    .hf-cal-timeline-milestone strong {
+        font-size: 0.85rem;
+        color: var(--text-primary);
+    }
+
+.hf-cal-timeline-arrow {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.hf-cal-drive-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Tab 2: Vault */
+.hf-cal-vault-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+    .hf-cal-vault-top h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: var(--text-primary);
+    }
+
+    .hf-cal-vault-top p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+.hf-cal-bundle-btn {
+    background: #10b981;
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 1.15rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+    .hf-cal-bundle-btn:hover {
+        opacity: 0.9;
+    }
+
+.hf-cal-vault-form {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 1.75rem;
+    background: var(--card-soft);
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+}
+
+@media (max-width: 700px) {
+    .hf-cal-vault-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hf-cal-vault-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.hf-cal-vault-form input,
+.hf-cal-vault-form select {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    color: var(--input-text);
+    padding: 0.6rem 0.85rem;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+    .hf-cal-vault-form input:focus,
+    .hf-cal-vault-form select:focus {
+        border-color: var(--accent-blue);
+    }
+
+.hf-cal-add-doc-btn {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+    .hf-cal-add-doc-btn:hover {
+        opacity: 0.9;
+    }
+
+.hf-cal-docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.hf-cal-doc-card {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.hf-cal-doc-icon {
+    font-size: 1.8rem;
+}
+
+.hf-cal-doc-info {
+    flex: 1;
+}
+
+    .hf-cal-doc-info h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+
+    .hf-cal-doc-info small {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+.hf-cal-doc-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #10b981;
+    margin-top: 4px;
+}
+
+.hf-cal-del-doc-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.15s;
+}
+
+    .hf-cal-del-doc-btn:hover {
+        color: #ef4444;
+    }
+
+.hf-cal-empty-vault {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+    .hf-cal-empty-vault span {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+/* Tab 3: Alerts */
+.hf-cal-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-top: 1.25rem;
+}
+
+.hf-cal-activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.hf-cal-act-icon {
+    font-size: 1.5rem;
+}
+
+.hf-cal-act-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.hf-cal-act-info small {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}

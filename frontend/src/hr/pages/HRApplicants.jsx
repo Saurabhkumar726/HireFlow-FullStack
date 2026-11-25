@@ -3,10 +3,30 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './HRApplicants.css'
 import SkeletonLoader from '../../components/SkeletonLoader.jsx'
+import BulkResumeScreenModal from '../../components/BulkResumeScreenModal.jsx'
 
 const API_BASE = 'http://localhost:5116/api'
 const EDITABLE_STATUSES = ['Pending', 'Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected', 'Rejected']
 const FILTER_STATUSES = [...EDITABLE_STATUSES, 'Withdrawn']
+
+const KANBAN_STAGES = [
+    { key: 'Pending', label: 'Pending', badgeClass: 'pending' },
+    { key: 'Under Review', label: 'Under Review', badgeClass: 'under-review' },
+    { key: 'Shortlisted', label: 'Shortlisted', badgeClass: 'shortlisted' },
+    { key: 'Interview Scheduled', label: 'Interview Scheduled', badgeClass: 'interview-scheduled' },
+    { key: 'Selected', label: 'Selected / Hired', badgeClass: 'selected' },
+    { key: 'Rejected', label: 'Rejected', badgeClass: 'rejected' },
+]
+
+function getNextStage(currentStatus) {
+    switch (currentStatus) {
+        case 'Pending': return 'Under Review'
+        case 'Under Review': return 'Shortlisted'
+        case 'Shortlisted': return 'Interview Scheduled'
+        case 'Interview Scheduled': return 'Selected'
+        default: return null
+    }
+}
 
 function getApplicationId(application) {
     const value =
@@ -124,6 +144,8 @@ function HRApplicants() {
     const [applications, setApplications] = useState([])
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('All')
+    const [viewMode, setViewMode] = useState('table') // 'table' | 'kanban'
+    const [draggingAppId, setDraggingAppId] = useState(null)
     const [loading, setLoading] = useState(true)
     const [updatingId, setUpdatingId] = useState(null)
     const [error, setError] = useState('')
@@ -132,6 +154,7 @@ function HRApplicants() {
     const [selectedIds, setSelectedIds] = useState([])
     const [bulkStatus, setBulkStatus] = useState('Under Review')
     const [bulkBusy, setBulkBusy] = useState(false)
+    const [showBulkScreenModal, setShowBulkScreenModal] = useState(false)
 
     const loadApplications = useCallback(async (signal) => {
         try {
@@ -205,6 +228,14 @@ function HRApplicants() {
             controller.abort()
         }
     }, [loadApplications, reloadKey])
+
+    useEffect(() => {
+        function onLiveEvent() {
+            setReloadKey((current) => current + 1)
+        }
+        window.addEventListener('hireflow:live-event', onLiveEvent)
+        return () => window.removeEventListener('hireflow:live-event', onLiveEvent)
+    }, [])
 
     const filteredApplications = useMemo(() => {
         const term = search.trim().toLowerCase()
@@ -342,11 +373,14 @@ function HRApplicants() {
     )
 
     useEffect(() => {
-        const availableIds = new Set(applications
-            .filter((item) => !['Selected', 'Withdrawn'].includes(String(getStatus(item))))
-            .map(getApplicationId)
-            .filter((id) => id !== null))
-        setSelectedIds((current) => current.filter((id) => availableIds.has(id)))
+        const timer = setTimeout(() => {
+            const availableIds = new Set(applications
+                .filter((item) => !['Selected', 'Withdrawn'].includes(String(getStatus(item))))
+                .map(getApplicationId)
+                .filter((id) => id !== null))
+            setSelectedIds((current) => current.filter((id) => availableIds.has(id)))
+        }, 0)
+        return () => clearTimeout(timer)
     }, [applications])
 
     const refreshApplications = useCallback(() => {
@@ -432,6 +466,39 @@ function HRApplicants() {
         }
     }
 
+    function handleDragStart(e, application) {
+        const id = getApplicationId(application)
+        if (!id) return
+        setDraggingAppId(id)
+        e.dataTransfer.setData('text/plain', String(id))
+        e.dataTransfer.effectAllowed = 'move'
+    }
+
+    function handleDragEnd() {
+        setDraggingAppId(null)
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = 'move'
+    }
+
+    function handleDrop(e, targetStatus) {
+        e.preventDefault()
+        const idStr = e.dataTransfer.getData('text/plain')
+        setDraggingAppId(null)
+        if (!idStr) return
+
+        const targetId = Number(idStr)
+        const app = applications.find((item) => getApplicationId(item) === targetId)
+        if (!app) return
+
+        const currentStatus = getStatus(app)
+        if (currentStatus === targetStatus) return
+
+        void updateStatus(app, targetStatus)
+    }
+
     return (
         <section className="hr-applicants">
             <div className="hr-applicants-intro">
@@ -496,13 +563,15 @@ function HRApplicants() {
             )}
 
             <div className="hr-applicants-toolbar">
-                <input
-                    type="search"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search by applicant, email, or job title…"
-                    aria-label="Search applications"
-                />
+                <div className="hr-applicants-search-wrap">
+                    <input
+                        type="search"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Search by applicant, email, or job title…"
+                        aria-label="Search applications"
+                    />
+                </div>
 
                 <select
                     value={statusFilter}
@@ -516,23 +585,68 @@ function HRApplicants() {
                         </option>
                     ))}
                 </select>
+
+                <div className="hr-view-mode-toggle" role="radiogroup" aria-label="View mode">
+                    <button
+                        type="button"
+                        className={`hr-view-mode-btn ${viewMode === 'table' ? 'active' : ''}`}
+                        onClick={() => setViewMode('table')}
+                        title="List View"
+                        aria-pressed={viewMode === 'table'}
+                    >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                        <span>List</span>
+                    </button>
+                    <button
+                        type="button"
+                        className={`hr-view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+                        onClick={() => setViewMode('kanban')}
+                        title="Kanban Pipeline Board"
+                        aria-pressed={viewMode === 'kanban'}
+                    >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="5" height="18" rx="1"></rect>
+                            <rect x="10" y="3" width="5" height="12" rx="1"></rect>
+                            <rect x="17" y="3" width="5" height="15" rx="1"></rect>
+                        </svg>
+                        <span>Kanban</span>
+                    </button>
+                </div>
+
+                <button
+                    type="button"
+                    className="hr-btn-screener-tool"
+                    onClick={() => setShowBulkScreenModal(true)}
+                    title="Screen and rank candidate resumes with AI"
+                >
+                    ⚡ Bulk Resume Screener
+                </button>
             </div>
 
-            <div className="hr-applicants-bulk-toolbar">
-                <label className="hr-applicants-select-all">
-                    <input type="checkbox" checked={allVisibleSelected} onChange={toggleVisibleSelection} disabled={!selectableApplications.length || bulkBusy} />
-                    <span>Select visible ({selectableApplications.length})</span>
-                </label>
-                <div className="hr-applicants-bulk-actions">
-                    <span className="hr-applicants-selected-count">{selectedIds.length} selected</span>
-                    <select aria-label="Bulk application status" value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value)} disabled={bulkBusy}>
-                        {EDITABLE_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
-                    </select>
-                    <button type="button" onClick={runBulkStatusUpdate} disabled={bulkBusy || selectedIds.length === 0}>{bulkBusy ? 'Updating…' : 'Apply to selected'}</button>
-                    <button type="button" className="secondary" onClick={() => exportApplications('csv')}>Export CSV</button>
-                    <button type="button" className="secondary" onClick={() => exportApplications('xlsx')}>Export Excel</button>
+            {viewMode === 'table' && (
+                <div className="hr-applicants-bulk-toolbar">
+                    <label className="hr-applicants-select-all">
+                        <input type="checkbox" checked={allVisibleSelected} onChange={toggleVisibleSelection} disabled={!selectableApplications.length || bulkBusy} />
+                        <span>Select visible ({selectableApplications.length})</span>
+                    </label>
+                    <div className="hr-applicants-bulk-actions">
+                        <span className="hr-applicants-selected-count">{selectedIds.length} selected</span>
+                        <select aria-label="Bulk application status" value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value)} disabled={bulkBusy}>
+                            {EDITABLE_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+                        </select>
+                        <button type="button" onClick={runBulkStatusUpdate} disabled={bulkBusy || selectedIds.length === 0}>{bulkBusy ? 'Updating…' : 'Apply to selected'}</button>
+                        <button type="button" className="secondary" onClick={() => exportApplications('csv')}>Export CSV</button>
+                        <button type="button" className="secondary" onClick={() => exportApplications('xlsx')}>Export Excel</button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {loading ? (
                 <SkeletonLoader variant="application-list" count={5} />
@@ -561,6 +675,106 @@ function HRApplicants() {
                             Clear filters
                         </button>
                     )}
+                </div>
+            ) : viewMode === 'kanban' ? (
+                <div className="hr-kanban-board" role="region" aria-label="Kanban application pipeline">
+                    {KANBAN_STAGES.map((stage) => {
+                        const stageApps = filteredApplications.filter((item) => getStatus(item) === stage.key)
+                        return (
+                            <div
+                                key={stage.key}
+                                className="hr-kanban-column"
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, stage.key)}
+                            >
+                                <div className="hr-kanban-column-header">
+                                    <div className="hr-kanban-title-row">
+                                        <span className={`hr-kanban-dot hr-status-dot-${stage.badgeClass}`}></span>
+                                        <h3>{stage.label}</h3>
+                                    </div>
+                                    <span className="hr-kanban-count-pill">{stageApps.length}</span>
+                                </div>
+
+                                <div className="hr-kanban-card-list">
+                                    {stageApps.length === 0 ? (
+                                        <div className="hr-kanban-empty-slot">
+                                            <span>Drop here</span>
+                                        </div>
+                                    ) : (
+                                        stageApps.map((application, index) => {
+                                            const applicationId = getApplicationId(application)
+                                            const status = String(getStatus(application))
+                                            const name = getApplicantName(application)
+                                            const email = getApplicantEmail(application)
+                                            const isUpdating = updatingId === applicationId
+                                            const isFinal = ['Selected', 'Withdrawn'].includes(status)
+                                            const nextStage = getNextStage(status)
+
+                                            return (
+                                                <article
+                                                    key={applicationId ?? `kanban-${index}`}
+                                                    className={`hr-kanban-card ${isUpdating ? 'is-updating' : ''} ${draggingAppId === applicationId ? 'is-dragging' : ''}`}
+                                                    draggable={!isFinal && !isUpdating && applicationId !== null}
+                                                    onDragStart={(e) => handleDragStart(e, application)}
+                                                    onDragEnd={handleDragEnd}
+                                                >
+                                                    <div className="hr-kanban-card-top">
+                                                        <div className="hr-kanban-avatar">
+                                                            {name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div className="hr-kanban-info">
+                                                            <h4>{name}</h4>
+                                                            <span className="hr-kanban-email" title={email}>{email}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="hr-kanban-job-badge" title={getJobTitle(application)}>
+                                                        💼 {getJobTitle(application)}
+                                                    </div>
+
+                                                    {application.assessment && (
+                                                        <div className="hr-kanban-quiz-chip">
+                                                            🎯 Quiz: {application.assessment.score}% ({application.assessment.tier})
+                                                        </div>
+                                                    )}
+                                                    {application.offer && (
+                                                        <div className={`hr-kanban-offer-chip status-${(application.offer.candidateDecision || 'pending').toLowerCase()}`}>
+                                                            📄 Offer: {application.offer.candidateDecision || 'Sent'}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="hr-kanban-meta">
+                                                        <span>📅 {formatDate(getAppliedDate(application))}</span>
+                                                        {applicationId && <span>#{applicationId}</span>}
+                                                    </div>
+
+                                                    <div className="hr-kanban-actions">
+                                                        {applicationId ? (
+                                                            <Link to={`/hr/applicants/${applicationId}`} className="hr-kanban-view-btn">
+                                                                Details ↗
+                                                            </Link>
+                                                        ) : null}
+
+                                                        {nextStage && !isFinal && (
+                                                            <button
+                                                                type="button"
+                                                                className="hr-kanban-advance-btn"
+                                                                disabled={isUpdating}
+                                                                onClick={() => updateStatus(application, nextStage)}
+                                                                title={`Move to ${nextStage}`}
+                                                            >
+                                                                {isUpdating ? '…' : `Advance →`}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </article>
+                                            )
+                                        })
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    })}
                 </div>
             ) : (
                 <div className="hr-applicants-list">
@@ -616,7 +830,7 @@ function HRApplicants() {
                                     </span>
 
                                     <div className="hr-applicant-actions">
-                                        {applicationId !== null ? (
+                                        {applicationId && Number(applicationId) > 0 ? (
                                             <Link
                                                 to={`/hr/applicants/${applicationId}`}
                                                 className="hr-applicant-button"
@@ -676,6 +890,13 @@ function HRApplicants() {
                 Showing {filteredApplications.length} of {applications.length}{' '}
                 applications
             </div>
+
+            {showBulkScreenModal && (
+                <BulkResumeScreenModal
+                    job={applications[0]?.job || { id: 1, title: 'Engineering & Product Roles' }}
+                    onClose={() => setShowBulkScreenModal(false)}
+                />
+            )}
         </section>
     )
 }

@@ -1,0 +1,764 @@
+/* ============================================================
+   HireFlow AI Interview Studio & Speech Coach
+   Full Light & Dark Mode Theming
+   ============================================================ */
+
+.hf-studio-page {
+    --page-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --card-soft: #f1f5f9;
+    --border-color: #e2e8f0;
+    --border-subtle: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --accent-blue: #2563eb;
+    --accent-blue-hover: #1d4ed8;
+    --accent-green: #10b981;
+    --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    min-height: 100vh;
+    background: var(--page-bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html[data-theme='dark'] .hf-studio-page,
+:root[data-theme='dark'] .hf-studio-page,
+.dark .hf-studio-page {
+    --page-bg: #0f172a;
+    --card-bg: #1e293b;
+    --card-soft: #0f172a;
+    --border-color: #334155;
+    --border-subtle: #475569;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --input-bg: #0f172a;
+    --input-border: #334155;
+    --input-text: #ffffff;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.hf-studio-header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 2rem 1.5rem 1.5rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.hf-studio-header-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+}
+
+.hf-studio-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+    .hf-studio-breadcrumbs a {
+        color: var(--accent-blue);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+.hf-studio-header h1 {
+    margin: 0;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.hf-studio-header p {
+    margin: 0.35rem 0 0 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.hf-studio-container {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.hf-studio-tabs {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.hf-studio-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.65rem 1.15rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+    .hf-studio-tab:hover {
+        color: var(--text-primary);
+        background: var(--card-soft);
+    }
+
+    .hf-studio-tab.active {
+        background: var(--accent-blue);
+        color: #ffffff;
+    }
+
+.hf-studio-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.75rem;
+    box-shadow: var(--card-shadow);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Tab 1: Mock Interview */
+.hf-studio-role-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+    .hf-studio-role-bar label {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .hf-studio-role-bar input {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 0.5rem;
+        color: var(--input-text);
+        padding: 0.65rem 0.85rem;
+        font-size: 0.9rem;
+    }
+
+.hf-studio-primary-btn {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+
+    .hf-studio-primary-btn:hover:not(:disabled) {
+        background: var(--accent-blue-hover);
+    }
+
+.hf-studio-q-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    overflow-x: auto;
+}
+
+.hf-studio-q-pill {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.45rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+    .hf-studio-q-pill.active {
+        background: rgba(37, 99, 235, 0.15);
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+        font-weight: 700;
+    }
+
+.hf-studio-current-q-box {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.hf-studio-q-tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--accent-blue);
+    margin-bottom: 0.35rem;
+    display: block;
+}
+
+.hf-studio-current-q-box h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.hf-studio-answer-box label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.hf-studio-hint {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.hf-studio-answer-box textarea {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    color: var(--input-text);
+    padding: 0.85rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.hf-studio-evaluate-btn {
+    margin-top: 0.85rem;
+    width: 100%;
+    background: var(--accent-green);
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .hf-studio-evaluate-btn:hover:not(:disabled) {
+        background: #059669;
+    }
+
+    .hf-studio-evaluate-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+/* Evaluation Card */
+.hf-studio-eval-results {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.hf-studio-score-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+}
+
+.hf-studio-score-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 3px solid var(--accent-green);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-green);
+    font-weight: 800;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+    .hf-studio-score-circle small {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+.hf-studio-score-card h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+}
+
+.hf-studio-score-card p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.hf-studio-eval-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 650px) {
+    .hf-studio-eval-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hf-studio-eval-box {
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+    .hf-studio-eval-box.good {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .hf-studio-eval-box.tips {
+        background: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .hf-studio-eval-box h5 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.85rem;
+    }
+
+    .hf-studio-eval-box.good h5 {
+        color: #10b981;
+    }
+
+    .hf-studio-eval-box.tips h5 {
+        color: #f59e0b;
+    }
+
+    .hf-studio-eval-box ul {
+        margin: 0;
+        padding-left: 1.2rem;
+        font-size: 0.825rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+.hf-studio-ideal-template {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+    .hf-studio-ideal-template h5 {
+        margin: 0 0 0.35rem 0;
+        color: #6366f1;
+        font-size: 0.85rem;
+    }
+
+    .hf-studio-ideal-template p {
+        margin: 0;
+        font-size: 0.825rem;
+        line-height: 1.5;
+        color: var(--text-secondary);
+    }
+
+/* Tab 2: Speech Coach */
+.hf-studio-speech-intro h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.hf-studio-speech-intro p {
+    margin: 0.25rem 0 1.25rem 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.hf-studio-speech-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.hf-studio-stat-card {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.hf-studio-stat-val {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent-blue);
+    line-height: 1;
+}
+
+.hf-studio-stat-lbl {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 0.35rem 0 0.25rem 0;
+    font-weight: 600;
+}
+
+.hf-studio-stat-card small {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+    .hf-studio-stat-card small.optimal {
+        color: #10b981;
+    }
+
+    .hf-studio-stat-card small.warning {
+        color: #f59e0b;
+    }
+
+.hf-studio-speech-controls {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.hf-studio-rec-btn {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+    .hf-studio-rec-btn.recording {
+        background: #ef4444;
+        animation: pulse 1.5s infinite;
+    }
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.hf-studio-clear-btn {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.65rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+    .hf-studio-clear-btn:hover {
+        color: var(--text-primary);
+        border-color: var(--border-subtle);
+    }
+
+.hf-studio-speech-input-area textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    color: var(--input-text);
+    padding: 0.85rem;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.hf-studio-filler-breakdown {
+    margin-top: 1rem;
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+    .hf-studio-filler-breakdown h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+    }
+
+.hf-studio-filler-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.hf-studio-filler-tag {
+    font-size: 0.75rem;
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 0.25rem 0.55rem;
+    border-radius: 9999px;
+    font-weight: 600;
+}
+
+/* Tab 3: Company Question Bank */
+.hf-studio-bank-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+    .hf-studio-bank-filters label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .hf-studio-bank-filters select {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 0.5rem;
+        color: var(--input-text);
+        padding: 0.65rem 0.85rem;
+        font-size: 0.85rem;
+    }
+
+.hf-studio-bank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.hf-studio-bank-item {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: border 0.15s;
+}
+
+    .hf-studio-bank-item.mastered {
+        border-color: var(--accent-green);
+        background: rgba(16, 185, 129, 0.04);
+    }
+
+.hf-studio-bank-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hf-studio-company-pill {
+    font-size: 0.75rem;
+    background: var(--accent-blue);
+    color: #ffffff;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    margin-right: 0.4rem;
+}
+
+.hf-studio-topic-pill {
+    font-size: 0.75rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    margin-right: 0.4rem;
+}
+
+.hf-studio-diff-pill {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 700;
+}
+
+    .hf-studio-diff-pill.easy {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    .hf-studio-diff-pill.medium {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+    }
+
+    .hf-studio-diff-pill.hard {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+.hf-studio-master-btn {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.785rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.35rem;
+    cursor: pointer;
+}
+
+    .hf-studio-master-btn.active {
+        background: var(--accent-green);
+        border-color: var(--accent-green);
+        color: #ffffff;
+    }
+
+.hf-studio-bank-question {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.hf-studio-bank-tips {
+    margin: 0;
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.hf-studio-bank-note textarea {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.35rem;
+    color: var(--text-primary);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.825rem;
+    box-sizing: border-box;
+}
+
+/* Tab 4: Elevator Pitch */
+.hf-studio-pitch-intro h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.hf-studio-pitch-intro p {
+    margin: 0.25rem 0 1.25rem 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.hf-studio-pitch-widget {
+    background: var(--card-soft);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.hf-studio-pitch-timer-bar {
+    width: 100%;
+    max-width: 400px;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.hf-studio-pitch-timer-fill {
+    height: 100%;
+    background: #ef4444;
+    transition: width 1s linear;
+}
+
+.hf-studio-pitch-clock {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.hf-studio-pitch-record-btn {
+    background: #ef4444;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.75rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+}
+
+.hf-studio-pitch-stop-btn {
+    background: var(--border-color);
+    color: var(--text-primary);
+    border: none;
+    padding: 0.75rem 1.75rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.hf-studio-video-player {
+    max-width: 480px;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+.hf-studio-pitch-saved-badge {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--accent-green);
+    font-weight: 600;
+}

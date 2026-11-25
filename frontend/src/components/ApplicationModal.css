@@ -30,11 +30,11 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-gutter: stable;
     padding: 42px 40px 36px;
-    border: 1px solid var(--border, #302f47);
+    border: 1px solid var(--hf-border, var(--border, #302f47));
     border-radius: 26px;
-    background: var(--surface, #191927);
-    color: var(--text, #f4f3ff);
-    box-shadow: 0 30px 100px rgba(0, 0, 0, .48);
+    background: var(--hf-surface, var(--surface, #191927));
+    color: var(--hf-text, var(--text, #f4f3ff));
+    box-shadow: var(--hf-shadow-lg, 0 30px 100px rgba(0, 0, 0, .48));
     scroll-behavior: smooth;
 }
 
@@ -154,13 +154,13 @@
         display: block;
         width: 100%;
         min-width: 0;
-        min-height: 64px;
+        min-height: 58px;
         margin: 0;
-        padding: 17px 18px;
-        border: 1px solid var(--border, #333247);
-        border-radius: 12px;
-        background: var(--surface-soft, #151522);
-        color: var(--text, #f4f3ff);
+        padding: 16px 18px;
+        border: 1px solid var(--hf-border, var(--border, #333247));
+        border-radius: 13px;
+        background: var(--hf-surface-soft, var(--surface-soft, #151522));
+        color: var(--hf-text, var(--text, #f4f3ff));
         font: 500 15px/1.5 'DM Sans', sans-serif;
         box-shadow: none;
         transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;

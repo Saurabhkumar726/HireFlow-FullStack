@@ -1,0 +1,144 @@
+/* ============================================================
+   HireFlow Live Toast Notifications
+   ============================================================ */
+
+.hf-toast-container {
+    position: fixed;
+    top: 76px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 380px;
+    width: calc(100% - 48px);
+    pointer-events: none;
+}
+
+.hf-toast {
+    pointer-events: auto;
+    background: #ffffff;
+    color: #0f172a;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: hfToastSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+@keyframes hfToastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(36px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.hf-toast-icon {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.hf-toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.hf-toast-title {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 750;
+    color: #0f172a;
+    margin-bottom: 2px;
+}
+
+.hf-toast-msg {
+    font-size: 12.5px;
+    color: #475569;
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.hf-toast-dismiss {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s ease;
+    flex-shrink: 0;
+}
+
+    .hf-toast-dismiss:hover {
+        color: #0f172a;
+        background: #f1f5f9;
+    }
+
+/* Toast Type Accents */
+.hf-toast-offeraccepted {
+    border-left: 4px solid #10b981;
+}
+
+.hf-toast-offerdeclined {
+    border-left: 4px solid #ef4444;
+}
+
+.hf-toast-offerissued {
+    border-left: 4px solid #6366f1;
+}
+
+.hf-toast-applicationreceived {
+    border-left: 4px solid #3b82f6;
+}
+
+.hf-toast-scorecardsaved {
+    border-left: 4px solid #f59e0b;
+}
+
+/* Dark Mode Overrides */
+:root[data-theme='dark'] .hf-toast,
+html[data-theme='dark'] .hf-toast {
+    background: #191929;
+    color: #f8fafc;
+    border-color: #2e2e46;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme='dark'] .hf-toast-title,
+html[data-theme='dark'] .hf-toast-title {
+    color: #ffffff;
+}
+
+:root[data-theme='dark'] .hf-toast-msg,
+html[data-theme='dark'] .hf-toast-msg {
+    color: #94a3b8;
+}
+
+:root[data-theme='dark'] .hf-toast-dismiss:hover,
+html[data-theme='dark'] .hf-toast-dismiss:hover {
+    color: #ffffff;
+    background: #252538;
+}
+
+@media (max-width: 480px) {
+    .hf-toast-container {
+        top: 68px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-width: none;
+    }
+}

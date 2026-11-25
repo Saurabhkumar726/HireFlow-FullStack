@@ -62,7 +62,13 @@ export default function HRScreeningQuestions() {
         return () => { active = false }
     }, [loadJobs])
 
-    useEffect(() => { void loadQuestions() }, [loadQuestions])
+    useEffect(() => {
+        let active = true
+        Promise.resolve().then(async () => {
+            if (active) await loadQuestions()
+        })
+        return () => { active = false }
+    }, [loadQuestions])
 
     function editQuestion(question) {
         setEditingId(question.id)

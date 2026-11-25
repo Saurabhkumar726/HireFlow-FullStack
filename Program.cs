@@ -1,3 +1,4 @@
+using System.ClientModel;
 using System.Text;
 using HireFlow.Api.Authentication;
 using HireFlow.Api.Data;
@@ -5,9 +6,17 @@ using HireFlow.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using OpenAI;
+
+if (args.Contains("--test"))
+{
+    var exitCode = HireFlow.Api.Services.HireFlowTestSuite.RunAllTests();
+    Environment.Exit(exitCode);
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -118,6 +127,42 @@ builder.Services
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+builder.Services.AddSingleton<ILiveEventsService, LiveEventsService>();
+
+// AI Agent client registration (Microsoft.Extensions.AI)
+var aiApiKey = builder.Configuration["AiAgent:ApiKey"];
+var aiModel = builder.Configuration["AiAgent:Model"] ?? "gpt-4o-mini";
+var aiEndpoint = builder.Configuration["AiAgent:Endpoint"];
+
+builder.Services.AddSingleton<IChatClient>(sp =>
+{
+    var hasValidKey = !string.IsNullOrWhiteSpace(aiApiKey) &&
+                      !aiApiKey.Contains("YOUR_OPENAI_API_KEY", StringComparison.OrdinalIgnoreCase) &&
+                      !aiApiKey.Contains("placeholder", StringComparison.OrdinalIgnoreCase) &&
+                      !aiApiKey.Contains("your-", StringComparison.OrdinalIgnoreCase);
+
+    if (hasValidKey)
+    {
+        try
+        {
+            var openAiOptions = new OpenAIClientOptions();
+            if (!string.IsNullOrWhiteSpace(aiEndpoint) && Uri.TryCreate(aiEndpoint, UriKind.Absolute, out var endpointUri))
+            {
+                openAiOptions.Endpoint = endpointUri;
+            }
+
+            var openAiClient = new OpenAIClient(new ApiKeyCredential(aiApiKey!), openAiOptions);
+            return openAiClient.GetChatClient(aiModel).AsIChatClient();
+        }
+        catch (Exception ex)
+        {
+            var logger = sp.GetRequiredService<ILogger<Program>>();
+            logger.LogWarning(ex, "Failed to initialize OpenAI chat client. Using local fallback chat client.");
+        }
+    }
+
+    return new FallbackChatClient();
+});
 
 // City/state location autocomplete. The source is synchronized by an Admin; searches use SQL Server.
 builder.Services.AddHttpClient<CityLocationSyncService>(client =>

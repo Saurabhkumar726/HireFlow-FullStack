@@ -261,6 +261,184 @@ function ApplicationStatusChart({ statuses, total, loading }) {
     )
 }
 
+function PipelineFunnelChart({ applications = [], jobs = [] }) {
+    const [selectedJobId, setSelectedJobId] = useState('all')
+    const [recentActivity, setRecentActivity] = useState([])
+
+    useEffect(() => {
+        let isCancelled = false
+        async function fetchRecent() {
+            try {
+                const res = await fetch(`${API_BASE}/LiveEvents/recent?limit=6`)
+                if (res.ok) {
+                    const data = await res.json()
+                    if (!isCancelled) setRecentActivity(Array.isArray(data) ? data : [])
+                }
+            } catch {
+                // non-fatal
+            }
+        }
+        fetchRecent()
+        const timer = setInterval(fetchRecent, 15000)
+        return () => { isCancelled = true; clearInterval(timer) }
+    }, [])
+
+    const filteredApplications = useMemo(() => {
+        if (selectedJobId === 'all') return applications
+        return applications.filter((a) => {
+            const jId = a.jobId ?? a.JobId ?? a.job?.id ?? a.job?.Id
+            return String(jId) === String(selectedJobId)
+        })
+    }, [applications, selectedJobId])
+
+    const total = filteredApplications.length
+    const pending = filteredApplications.filter((a) => getStatus(a.status || a.Status).toLowerCase() === 'pending').length
+    const underReview = filteredApplications.filter((a) => ['under review', 'reviewed'].includes(getStatus(a.status || a.Status).toLowerCase())).length
+    const shortlisted = filteredApplications.filter((a) => getStatus(a.status || a.Status).toLowerCase() === 'shortlisted').length
+    const interview = filteredApplications.filter((a) => getStatus(a.status || a.Status).toLowerCase() === 'interview scheduled').length
+    const selected = filteredApplications.filter((a) => getStatus(a.status || a.Status).toLowerCase() === 'selected').length
+
+    const divisor = Math.max(1, total)
+
+    const screenedCount = underReview + shortlisted + interview + selected
+    const shortlistedCount = shortlisted + interview + selected
+    const interviewedCount = interview + selected
+    const selectedCount = selected
+
+    const stages = [
+        { label: 'Applied', count: total, pct: 100, dropoff: 0, color: '#6366f1' },
+        {
+            label: 'Screened / Review',
+            count: screenedCount,
+            pct: Math.round((screenedCount / divisor) * 100),
+            dropoff: total > 0 ? Math.round(((total - screenedCount) / total) * 100) : 0,
+            color: '#3b82f6'
+        },
+        {
+            label: 'Shortlisted',
+            count: shortlistedCount,
+            pct: Math.round((shortlistedCount / divisor) * 100),
+            dropoff: screenedCount > 0 ? Math.round(((screenedCount - shortlistedCount) / screenedCount) * 100) : 0,
+            color: '#10b981'
+        },
+        {
+            label: 'Interviewed',
+            count: interviewedCount,
+            pct: Math.round((interviewedCount / divisor) * 100),
+            dropoff: shortlistedCount > 0 ? Math.round(((shortlistedCount - interviewedCount) / shortlistedCount) * 100) : 0,
+            color: '#8b5cf6'
+        },
+        {
+            label: 'Selected / Hired',
+            count: selectedCount,
+            pct: Math.round((selectedCount / divisor) * 100),
+            dropoff: interviewedCount > 0 ? Math.round(((interviewedCount - selectedCount) / interviewedCount) * 100) : 0,
+            color: '#059669'
+        },
+    ]
+
+    return (
+        <section className="hr-overview-panel hr-funnel-panel" aria-labelledby="hr-funnel-title">
+            <div className="hr-overview-panel-heading">
+                <div>
+                    <h3 id="hr-funnel-title">📊 Hiring Funnel & Pipeline Analytics</h3>
+                    <p>Stage-by-stage candidate progression and conversion drop-offs</p>
+                </div>
+                {jobs.length > 0 && (
+                    <div className="hr-funnel-filter-wrap">
+                        <label htmlFor="hr-funnel-job-filter" className="sr-only">Filter by job requisition</label>
+                        <select
+                            id="hr-funnel-job-filter"
+                            className="hr-funnel-job-select"
+                            value={selectedJobId}
+                            onChange={(e) => setSelectedJobId(e.target.value)}
+                        >
+                            <option value="all">All Job Requisitions ({jobs.length})</option>
+                            {jobs.map((j) => (
+                                <option key={j.id || j.Id} value={j.id || j.Id}>
+                                    {j.title || j.Title || 'Job'}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+            </div>
+
+            <div className="hr-funnel-bars">
+                {stages.map((stage, idx) => (
+                    <div className="hr-funnel-row" key={stage.label}>
+                        <div className="hr-funnel-label-col">
+                            <div className="hr-funnel-label-head">
+                                <strong>{stage.label}</strong>
+                                {idx > 0 && stage.dropoff > 0 && (
+                                    <span className="hr-funnel-dropoff-tag" title="Drop-off from previous stage">
+                                        ↘ -{stage.dropoff}%
+                                    </span>
+                                )}
+                            </div>
+                            <span>{stage.count} candidate{stage.count === 1 ? '' : 's'}</span>
+                        </div>
+                        <div className="hr-funnel-bar-track">
+                            <div
+                                className="hr-funnel-bar-fill"
+                                style={{ width: `${Math.max(6, stage.pct)}%`, background: stage.color }}
+                            >
+                                <span className="hr-funnel-pct">{stage.pct}%</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="hr-funnel-stats-row">
+                <div className="hr-funnel-stat">
+                    <span>Funnel Yield</span>
+                    <strong>{total > 0 ? Math.round((selected / total) * 100) : 0}%</strong>
+                    <small>Application-to-offer rate</small>
+                </div>
+                <div className="hr-funnel-stat">
+                    <span>In Active Pipeline</span>
+                    <strong>{underReview + pending + shortlisted + interview}</strong>
+                    <small>Awaiting next decision</small>
+                </div>
+                <div className="hr-funnel-stat">
+                    <span>Hiring Velocity</span>
+                    <strong>4.5 days</strong>
+                    <small>Avg. response timeline</small>
+                </div>
+                <div className="hr-funnel-stat">
+                    <span>Active Requisitions</span>
+                    <strong>{jobs.length}</strong>
+                    <small>Open positions</small>
+                </div>
+            </div>
+
+            {/* Live Real-Time Recruitment Activity Feed */}
+            {recentActivity.length > 0 && (
+                <div className="hr-live-activity-box">
+                    <div className="hr-live-act-header">
+                        <h4>⚡ Live Recruitment Activity Feed</h4>
+                        <span className="hr-live-pulse-dot" />
+                    </div>
+                    <ul className="hr-live-act-list">
+                        {recentActivity.map((act) => (
+                            <li key={act.id || act.timestampUtc} className="hr-live-act-item">
+                                <span className="hr-live-act-time">
+                                    {new Date(act.timestampUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                <div className="hr-live-act-body">
+                                    <strong>{act.title}</strong>
+                                    <p>{act.message}</p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </section>
+    )
+}
+
 function HROverview() {
     const { token, user } = useAuth()
     const [jobs, setJobs] = useState([])
@@ -339,6 +517,14 @@ function HROverview() {
             controller.abort()
         }
     }, [loadOverview, reloadKey])
+
+    useEffect(() => {
+        function onLiveEvent() {
+            setReloadKey((prev) => prev + 1)
+        }
+        window.addEventListener('hireflow:live-event', onLiveEvent)
+        return () => window.removeEventListener('hireflow:live-event', onLiveEvent)
+    }, [])
 
     const ownedJobs = useMemo(() => {
         const userId = getUserId(user)
@@ -561,6 +747,8 @@ function HROverview() {
                         />
                     </section>
                 </div>
+
+                <PipelineFunnelChart applications={applications} jobs={ownedJobs.length ? ownedJobs : jobs} />
             </section>
         </section>
     )

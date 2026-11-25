@@ -49,12 +49,12 @@ const pageTitles = [
         description: 'Manage the jobs you have posted.',
     },
     {
-        match: /^\/hr\/applicants\/[^/]+\/?$/,
+        match: /^\/hr\/applicants\/\d+\/?$/i,
         title: 'Applicant Details',
         description: 'Review a candidate application.',
     },
     {
-        match: /^\/hr\/applicants\/?$/,
+        match: /^\/hr\/applicants/i,
         title: 'Applicants',
         description: 'Review applications for your jobs.',
     },
@@ -151,18 +151,18 @@ function HRLayout() {
             return <NotificationsPage />
         }
 
-        // Applicant list
-        if (normalizedPath === '/hr/applicants') {
-            return <HRApplicants />
-        }
-
-        // Individual applicant details
+        // Individual applicant details (only valid positive numeric ID)
         const applicantMatch = normalizedPath.match(
-            /^\/hr\/applicants\/([^/]+)$/
+            /^\/hr\/applicants\/([^/?#]+)$/i
         )
 
-        if (applicantMatch) {
-            return <HRApplicantDetails key={applicantMatch[1]} />
+        if (applicantMatch && /^\d+$/.test(applicantMatch[1]) && Number(applicantMatch[1]) > 0) {
+            return <HRApplicantDetails key={applicantMatch[1]} id={applicantMatch[1]} />
+        }
+
+        // Applicant list (catches /hr/applicants, /hr/applicants/, /hr/applicants/undefined, etc.)
+        if (normalizedPath.toLowerCase().startsWith('/hr/applicants')) {
+            return <HRApplicants />
         }
 
         // Applicants for a specific job

@@ -328,9 +328,47 @@
 
 .candidate-interview-actions {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
-    margin-top: 18px
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
 }
+
+.candidate-interview-calendar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid #d9dcec;
+    background: #ffffff;
+    color: #252641;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+    .candidate-interview-calendar-btn:hover {
+        background: #f4f5fc;
+        border-color: #7665ee;
+        color: #7665ee;
+    }
+
+html[data-theme='dark'] .candidate-interview-calendar-btn {
+    background: #1e1f32;
+    border-color: #353652;
+    color: #e2e4f6;
+}
+
+    html[data-theme='dark'] .candidate-interview-calendar-btn:hover {
+        background: #282a44;
+        border-color: #9d91ff;
+        color: #ffffff;
+    }
 
 .candidate-interview-join, .candidate-interview-link {
     display: inline-flex;

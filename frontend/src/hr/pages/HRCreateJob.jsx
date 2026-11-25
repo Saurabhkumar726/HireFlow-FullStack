@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import CityLocationAutocomplete from '../../components/CityLocationAutocomplete'
 import './HRCreateJob.css'
@@ -46,6 +46,7 @@ function getErrorMessage(data, fallback) {
 
 function HRCreateJob({ mode = 'create', jobId }) {
     const navigate = useNavigate()
+    const location = useLocation()
     const { token } = useAuth()
 
     const isEditMode = mode === 'edit'
@@ -63,7 +64,22 @@ function HRCreateJob({ mode = 'create', jobId }) {
 
         async function loadJob() {
             if (!isExistingJobMode) {
-                setForm(EMPTY_FORM)
+                const prefill = location.state?.prefillJob || location.state
+                if (prefill && (prefill.title || prefill.description)) {
+                    setForm({
+                        title: prefill.title || '',
+                        company: prefill.company || '',
+                        location: prefill.location || '',
+                        jobType: prefill.jobType || 'Full-time',
+                        salary: prefill.salary ? String(prefill.salary) : '',
+                        description: prefill.description
+                            ? `${prefill.description}${prefill.requirements ? `\n\nRequirements:\n${prefill.requirements}` : ''}${prefill.responsibilities ? `\n\nKey Responsibilities:\n${prefill.responsibilities}` : ''}`
+                            : '',
+                        requireResume: Boolean(prefill.requireResume),
+                    })
+                } else {
+                    setForm(EMPTY_FORM)
+                }
                 setError('')
                 setLoading(false)
                 return
@@ -145,7 +161,7 @@ function HRCreateJob({ mode = 'create', jobId }) {
         return () => {
             cancelled = true
         }
-    }, [isExistingJobMode, jobId, token])
+    }, [isExistingJobMode, jobId, token, location.state])
 
     function handleChange(event) {
         const { name, value, type, checked } = event.target

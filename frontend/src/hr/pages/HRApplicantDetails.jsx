@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import './HRApplicantDetails.css'
 import SkeletonLoader from '../../components/SkeletonLoader.jsx'
+import { downloadInterviewIcs } from '../../utils/calendarExport.js'
+import OfferLetterModal from '../../components/OfferLetterModal.jsx'
+import EmailPreviewModal from '../../components/EmailPreviewModal.jsx'
+import InterviewScorecardModal from '../../components/InterviewScorecardModal.jsx'
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116/api').replace(/\/$/, '')
 const EDITABLE_STATUSES = ['Pending', 'Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected', 'Rejected']
@@ -33,8 +37,11 @@ function normalizeStatus(value) {
     return String(value || 'Pending').toLowerCase() === 'reviewed' ? 'Under Review' : (value || 'Pending')
 }
 
-function HRApplicantDetails() {
-    const { id } = useParams()
+function HRApplicantDetails({ id: propId }) {
+    const params = useParams()
+    const location = useLocation()
+    const pathMatch = location.pathname.match(/\/hr\/applicants\/([^/?#]+)/)
+    const id = propId ?? params?.id ?? pathMatch?.[1] ?? (typeof window !== 'undefined' ? window.location.pathname.match(/\/hr\/applicants\/([^/?#]+)/)?.[1] : null)
     const navigate = useNavigate()
     const [application, setApplication] = useState(null)
     const [status, setStatus] = useState('Pending')
@@ -46,13 +53,28 @@ function HRApplicantDetails() {
     const [error, setError] = useState('')
     const [notice, setNotice] = useState('')
     const [reloadKey, setReloadKey] = useState(0)
+    const [showOfferModal, setShowOfferModal] = useState(false)
+    const [showEmailModal, setShowEmailModal] = useState(false)
+    const [showScorecardModal, setShowScorecardModal] = useState(false)
+    const [scorecardSummary, setScorecardSummary] = useState(null)
+
+    useEffect(() => {
+        const cleanId = String(id || '').trim()
+        if (!cleanId || cleanId === 'undefined' || cleanId === 'null' || !/^\d+$/.test(cleanId) || Number(cleanId) <= 0) {
+            navigate('/hr/applicants', { replace: true })
+        }
+    }, [id, navigate])
 
     const loadApplication = useCallback(async (signal) => {
         try {
-            if (!/^\d+$/.test(String(id || '')) || Number(id) <= 0) throw new Error('Invalid application ID in the URL.')
+            const cleanId = String(id || '').trim()
+            if (!/^\d+$/.test(cleanId) || Number(cleanId) <= 0) {
+                setError('Application ID is missing. Redirecting to pipeline…')
+                return
+            }
             const token = localStorage.getItem('hireflow-token')
             if (!token) throw new Error('Your session has expired. Please sign in again.')
-            const response = await fetch(`${API_BASE}/JobApplications/${encodeURIComponent(id)}`, {
+            const response = await fetch(`${API_BASE}/JobApplications/${encodeURIComponent(cleanId)}`, {
                 headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
                 signal,
             })
@@ -63,6 +85,14 @@ function HRApplicantDetails() {
                 setStatus(normalizeStatus(getField(data, 'status', 'Status')))
                 setRejectionReason(getField(data, 'rejectionReason', 'RejectionReason') || '')
                 setRecruiterNotes(getField(data, 'recruiterNotes', 'RecruiterNotes') || '')
+
+                // Fetch scorecard evaluation summary
+                fetch(`${API_BASE}/InterviewFeedback/application/${encodeURIComponent(cleanId)}`, {
+                    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+                    signal
+                }).then(res => res.ok ? res.json() : null)
+                    .then(sc => { if (!signal.aborted && sc) setScorecardSummary(sc) })
+                    .catch(() => { })
             }
         } catch (err) {
             if (err.name !== 'AbortError' && !signal.aborted) {
@@ -142,7 +172,19 @@ function HRApplicantDetails() {
     const selectedIsFinal = currentStatus === 'Selected' || currentStatus === 'Withdrawn'
 
     if (loading) return <section className="hr-applicant-details"><SkeletonLoader variant="profile" /></section>
-    if (error && !application) return <section className="hr-applicant-details"><button type="button" className="hr-applicant-back" onClick={() => navigate('/hr/applicants')}>← Back to Applicants</button><div className="hr-applicant-details-alert hr-applicant-details-error" role="alert">{error}<button type="button" onClick={() => setReloadKey(value => value + 1)}>Try again</button></div></section>
+    if (error && !application) {
+        return (
+            <section className="hr-applicant-details">
+                <button type="button" className="hr-applicant-back" onClick={() => navigate('/hr/applicants')}>
+                    ← Back to Applicants
+                </button>
+                <div className="hr-applicant-details-alert hr-applicant-details-error" role="alert">
+                    <span>{error}</span>
+                    <button type="button" onClick={() => navigate('/hr/applicants')}>Back to Pipeline</button>
+                </div>
+            </section>
+        )
+    }
     if (!application) return null
 
     return (
@@ -155,7 +197,30 @@ function HRApplicantDetails() {
                     <h2>{applicantName}</h2>
                     <p>{applicantEmail}</p>
                 </div>
-                <span className={`hr-applicant-status hr-status-${currentStatus.toLowerCase().replace(/\s+/g, '-')}`}>{currentStatus}</span>
+                <div className="hr-applicant-heading-actions">
+                    <button
+                        type="button"
+                        className="hr-quick-action-btn offer-btn"
+                        onClick={() => setShowOfferModal(true)}
+                    >
+                        {application.offer ? '📄 View / Edit Offer Letter' : '📄 Generate Offer Letter'}
+                    </button>
+                    <button
+                        type="button"
+                        className="hr-quick-action-btn email-btn"
+                        onClick={() => setShowEmailModal(true)}
+                    >
+                        📧 Preview Email
+                    </button>
+                    <button
+                        type="button"
+                        className="hr-quick-action-btn scorecard-btn"
+                        onClick={() => setShowScorecardModal(true)}
+                    >
+                        ⭐ {scorecardSummary?.totalReviews > 0 ? `Scorecard (${scorecardSummary.averageOverall}★)` : 'Evaluate / Scorecard'}
+                    </button>
+                    <span className={`hr-applicant-status hr-status-${currentStatus.toLowerCase().replace(/\s+/g, '-')}`}>{currentStatus}</span>
+                </div>
             </div>
 
             {error && <div className="hr-applicant-details-alert hr-applicant-details-error" role="alert">{error}</div>}
@@ -167,6 +232,28 @@ function HRApplicantDetails() {
                     <div className="hr-applicant-detail-row"><span>Job title</span><strong>{jobTitle}</strong></div>
                     <div className="hr-applicant-detail-row"><span>Company</span><strong>{getField(job, 'company', 'Company') || '—'}</strong></div>
                     <div className="hr-applicant-detail-row"><span>Application status</span><strong>{currentStatus}</strong></div>
+                    {scorecardSummary?.totalReviews > 0 && (
+                        <div className="hr-applicant-detail-row hf-row-highlight">
+                            <span>Interview Scorecard</span>
+                            <strong className="hf-scorecard-tag" style={{ color: '#f59e0b', fontWeight: 800 }}>
+                                ★ {scorecardSummary.averageOverall} / 5.0 · {scorecardSummary.consensusRecommendation}
+                            </strong>
+                        </div>
+                    )}
+                    {application.assessment && (
+                        <div className="hr-applicant-detail-row hf-row-highlight">
+                            <span>Technical Skill Assessment</span>
+                            <strong className="hf-assessment-score-badge">🎯 {application.assessment.score}% ({application.assessment.tier})</strong>
+                        </div>
+                    )}
+                    {application.offer && (
+                        <div className="hr-applicant-detail-row hf-row-highlight">
+                            <span>Job Offer Letter</span>
+                            <strong className={`hf-offer-status-badge status-${(application.offer.candidateDecision || 'pending').toLowerCase()}`}>
+                                {application.offer.candidateDecision ? `Offer ${application.offer.candidateDecision}` : 'Offer Issued (Pending Decision)'}
+                            </strong>
+                        </div>
+                    )}
                     <div className="hr-applicant-detail-row"><span>Applied on</span><strong>{formatDate(appliedAt)}</strong></div>
                     <div className="hr-applicant-detail-row"><span>Application ID</span><strong>{application.id}</strong></div>
                     <div className="hr-applicant-detail-row"><span>Phone</span><strong>{getField(application, 'applicantPhoneNumber', 'ApplicantPhoneNumber') || 'Not provided'}</strong></div>
@@ -226,19 +313,93 @@ function HRApplicantDetails() {
                     <h3>Interview schedule</h3>
                     {interviews.length ? interviews.map((interview) => (
                         <div className="hr-applicant-interview-entry" key={interview.id || interview.Id}>
-                            <strong>{formatDate(interview.scheduledAt || interview.ScheduledAt)}</strong>
-                            <span>{interview.interviewType || interview.InterviewType} · {interview.status || interview.Status}</span>
-                            {(interview.meetingLink || interview.MeetingLink) && <a href={interview.meetingLink || interview.MeetingLink} target="_blank" rel="noreferrer">Open meeting link ↗</a>}
+                            <div className="hr-applicant-interview-info">
+                                <strong>{formatDate(interview.scheduledAt || interview.ScheduledAt)}</strong>
+                                <span>{interview.interviewType || interview.InterviewType} · {interview.status || interview.Status}</span>
+                            </div>
+                            <div className="hr-applicant-interview-actions">
+                                {(interview.meetingLink || interview.MeetingLink) && (
+                                    <a href={interview.meetingLink || interview.MeetingLink} target="_blank" rel="noreferrer">Open meeting link ↗</a>
+                                )}
+                                <button
+                                    type="button"
+                                    className="hr-interview-ics-btn"
+                                    onClick={() => downloadInterviewIcs({
+                                        id: interview.id || interview.Id,
+                                        title: jobTitle,
+                                        company: job?.company || 'Your Organization',
+                                        scheduledAt: interview.scheduledAt || interview.ScheduledAt,
+                                        meetingLink: interview.meetingLink || interview.MeetingLink,
+                                        interviewType: interview.interviewType || interview.InterviewType
+                                    })}
+                                    title="Add to Google / Outlook / Apple Calendar"
+                                >
+                                    📅 Calendar (.ics)
+                                </button>
+                            </div>
                         </div>
                     )) : <p className="hr-applicant-panel-description">No interview has been scheduled for this application yet.</p>}
                 </article>
 
                 <article className="hr-applicant-details-panel hr-applicant-cover-letter">
                     <h3>Application history</h3>
-                    {history.length ? <ol className="hr-application-history">{history.map((item) => <li key={item.id}><strong>{normalizeStatus(item.newStatus || item.NewStatus)}</strong><time>{formatDate(item.changedAtUtc || item.ChangedAtUtc)}</time>{(item.reason || item.Reason) && <p>{item.reason || item.Reason}</p>}</li>)}</ol> : <p className="hr-applicant-panel-description">No status updates have been recorded yet.</p>}
+                    {history.length ? (
+                        <ol className="hr-applicant-history hr-application-history">
+                            {history.map((item) => (
+                                <li key={item.id || item.Id}>
+                                    <div className="hr-history-item-header">
+                                        <strong className="hr-history-status">{normalizeStatus(item.newStatus || item.NewStatus)}</strong>
+                                        <time className="hr-history-time">{formatDate(item.changedAtUtc || item.ChangedAtUtc)}</time>
+                                    </div>
+                                    {(item.reason || item.Reason) && (
+                                        <p className="hr-history-reason">{item.reason || item.Reason}</p>
+                                    )}
+                                </li>
+                            ))}
+                        </ol>
+                    ) : (
+                        <p className="hr-applicant-panel-description">No status updates have been recorded yet.</p>
+                    )}
                     {application.revisionNumber > 0 && <p className="hr-applicant-panel-description">Candidate has updated their application {application.revisionNumber} time(s) while it was new.</p>}
                 </article>
             </div>
+
+            {showOfferModal && (
+                <OfferLetterModal
+                    application={application}
+                    initialOffer={application.offer}
+                    isHr={true}
+                    onClose={() => setShowOfferModal(false)}
+                    onOfferIssued={(updatedOffer) => {
+                        setApplication((prev) => ({ ...prev, offer: updatedOffer, status: 'Selected' }))
+                        setStatus('Selected')
+                        setNotice('Official job offer letter successfully generated and sent to candidate!')
+                    }}
+                />
+            )}
+
+            {showEmailModal && (
+                <EmailPreviewModal
+                    application={application}
+                    onClose={() => setShowEmailModal(false)}
+                />
+            )}
+
+            {showScorecardModal && (
+                <InterviewScorecardModal
+                    application={application}
+                    onClose={() => setShowScorecardModal(false)}
+                    onSaved={(savedSc) => {
+                        setScorecardSummary((prev) => ({
+                            ...prev,
+                            totalReviews: (prev?.totalReviews || 0) + 1,
+                            averageOverall: savedSc.overallRating,
+                            consensusRecommendation: savedSc.recommendation
+                        }))
+                        setNotice('Candidate evaluation scorecard successfully recorded!')
+                    }}
+                />
+            )}
         </section>
     )
 }

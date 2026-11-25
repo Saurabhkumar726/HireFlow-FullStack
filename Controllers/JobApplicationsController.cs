@@ -29,13 +29,16 @@ namespace HireFlow.Api.Controllers
 
         private readonly HireFlowDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILiveEventsService _liveEvents;
 
         public JobApplicationsController(
             HireFlowDbContext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            ILiveEventsService liveEvents)
         {
             _context = context;
             _userManager = userManager;
+            _liveEvents = liveEvents;
         }
 
         private string? CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -287,6 +290,16 @@ namespace HireFlow.Api.Controllers
 
             await _context.SaveChangesAsync(cancellationToken);
             await _context.Entry(application).Reference(item => item.Job).LoadAsync(cancellationToken);
+
+            _liveEvents.Publish(new LiveEventDto
+            {
+                Type = "ApplicationReceived",
+                Title = "New Candidate Application 📄",
+                Message = $"{application.ApplicantName} applied for {job.Title} at {job.Company}.",
+                TargetRole = "HR",
+                TargetUserId = job.CreatedByUserId,
+                Payload = new { applicationId = application.Id, jobTitle = job.Title, applicantName = application.ApplicantName }
+            });
 
             return CreatedAtAction(
                 nameof(GetApplication),
@@ -549,12 +562,166 @@ namespace HireFlow.Api.Controllers
             return Ok(new { message = "Application status updated.", status = normalizedStatus });
         }
 
+        // GET: api/JobApplications/{id}/offer
+        [HttpGet("{id:int}/offer")]
+        public async Task<IActionResult> GetOffer(int id, CancellationToken cancellationToken)
+        {
+            var userId = CurrentUserId;
+            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+            var application = await _context.JobApplications
+                .AsNoTracking()
+                .Include(item => item.Job)
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            if (application == null || application.Job == null) return NotFound();
+
+            var isOwnerHr = User.IsInRole("HR") && application.Job.CreatedByUserId == userId;
+            var isOwnerStudent = User.IsInRole("Student") && application.UserId == userId;
+
+            if (!isOwnerHr && !isOwnerStudent) return Forbid();
+
+            if (string.IsNullOrWhiteSpace(application.RecruiterNotes) || !application.RecruiterNotes.TrimStart().StartsWith("{"))
+                return NotFound(new { message = "No offer letter found for this application." });
+
+            try
+            {
+                using var doc = JsonDocument.Parse(application.RecruiterNotes);
+                if (doc.RootElement.TryGetProperty("offer", out var offerProp) && offerProp.ValueKind == JsonValueKind.Object)
+                {
+                    var offer = JsonSerializer.Deserialize<OfferDetailsDto>(offerProp.GetRawText());
+                    return Ok(offer);
+                }
+            }
+            catch { }
+
+            return NotFound(new { message = "No offer letter found for this application." });
+        }
+
+        // POST: api/JobApplications/{id}/respond-offer
+        [HttpPost("{id:int}/respond-offer")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> RespondOffer(
+            int id,
+            [FromBody] RespondOfferRequest request,
+            CancellationToken cancellationToken)
+        {
+            var userId = CurrentUserId;
+            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+            var application = await _context.JobApplications
+                .Include(item => item.Job)
+                .FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+            if (application == null || application.Job == null) return NotFound();
+            if (application.UserId != userId) return Forbid();
+
+            if (string.IsNullOrWhiteSpace(application.RecruiterNotes) || !application.RecruiterNotes.TrimStart().StartsWith("{"))
+                return BadRequest(new { message = "There is no pending offer letter to respond to." });
+
+            Dictionary<string, object>? metadata = null;
+            OfferDetailsDto? offer = null;
+            try
+            {
+                metadata = JsonSerializer.Deserialize<Dictionary<string, object>>(application.RecruiterNotes);
+                if (metadata != null && metadata.TryGetValue("offer", out var offerObj))
+                {
+                    offer = JsonSerializer.Deserialize<OfferDetailsDto>(offerObj.ToString()!);
+                }
+            }
+            catch { }
+
+            if (offer == null) return BadRequest(new { message = "Offer details could not be found." });
+
+            var now = DateTime.UtcNow;
+            var isAccept = string.Equals(request.Decision?.Trim(), "Accept", StringComparison.OrdinalIgnoreCase);
+
+            offer.RespondedAtUtc = now;
+            offer.CandidateDecision = isAccept ? "Accepted" : "Declined";
+            offer.CandidateNote = request.CandidateNote?.Trim();
+            offer.Status = isAccept ? "Accepted" : "Declined";
+
+            metadata!["offer"] = offer;
+            application.RecruiterNotes = JsonSerializer.Serialize(metadata);
+
+            var previousStatus = application.Status;
+            var nextStatus = isAccept ? "Selected" : "Rejected";
+            application.Status = nextStatus;
+            application.LastUpdatedAtUtc = now;
+
+            _context.JobApplicationStatusHistory.Add(new JobApplicationStatusHistory
+            {
+                JobApplicationId = application.Id,
+                PreviousStatus = previousStatus,
+                NewStatus = nextStatus,
+                Reason = isAccept
+                    ? "Candidate accepted formal job offer letter."
+                    : $"Candidate declined offer: {request.CandidateNote?.Trim() ?? "No reason specified"}",
+                ChangedByUserId = userId,
+                ChangedByRole = "Student",
+                ChangedAtUtc = now
+            });
+
+            if (!string.IsNullOrWhiteSpace(application.Job.CreatedByUserId))
+            {
+                await NotificationWriter.AddInAppAsync(
+                    _context,
+                    application.Job.CreatedByUserId,
+                    "OfferResponseReceived",
+                    isAccept ? "Offer Accepted! 🎊" : "Offer Response: Declined",
+                    $"{application.ApplicantName} has {(isAccept ? "accepted" : "declined")} the job offer for {application.Job.Title}.",
+                    $"/hr/applicants/{application.Id}",
+                    "Application",
+                    application.Id,
+                    cancellationToken);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _liveEvents.Publish(new LiveEventDto
+            {
+                Type = isAccept ? "OfferAccepted" : "OfferDeclined",
+                Title = isAccept ? "Offer Accepted! 🎊" : "Offer Response: Declined",
+                Message = $"{application.ApplicantName} has {(isAccept ? "accepted" : "declined")} the job offer for {application.Job.Title}.",
+                TargetRole = "HR",
+                TargetUserId = application.Job.CreatedByUserId,
+                Payload = new { applicationId = application.Id, decision = isAccept ? "Accepted" : "Declined", applicantName = application.ApplicantName, jobTitle = application.Job.Title }
+            });
+
+            return Ok(new { message = isAccept ? "Offer successfully accepted!" : "Offer decline recorded.", offer });
+        }
+
         private static object ToResponse(
             JobApplication application,
             bool includeRecruiterNotes,
             bool includeRevisionHistory = false)
         {
             var job = application.Job;
+            object? offerObj = null;
+            object? assessmentObj = null;
+            string? displayNotes = application.RecruiterNotes;
+
+            if (!string.IsNullOrWhiteSpace(application.RecruiterNotes) && application.RecruiterNotes.TrimStart().StartsWith("{"))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(application.RecruiterNotes);
+                    if (doc.RootElement.TryGetProperty("offer", out var offerProp) && offerProp.ValueKind == JsonValueKind.Object)
+                    {
+                        offerObj = JsonSerializer.Deserialize<object>(offerProp.GetRawText());
+                    }
+                    if (doc.RootElement.TryGetProperty("assessment", out var assessProp) && assessProp.ValueKind == JsonValueKind.Object)
+                    {
+                        assessmentObj = JsonSerializer.Deserialize<object>(assessProp.GetRawText());
+                    }
+                    if (doc.RootElement.TryGetProperty("notes", out var notesProp) && notesProp.ValueKind == JsonValueKind.String)
+                    {
+                        displayNotes = notesProp.GetString();
+                    }
+                }
+                catch { /* Fallback to raw recruiter notes */ }
+            }
+
             return new
             {
                 application.Id,
@@ -575,7 +742,9 @@ namespace HireFlow.Api.Controllers
                 application.AppliedAt,
                 application.LastUpdatedAtUtc,
                 application.WithdrawnAtUtc,
-                recruiterNotes = includeRecruiterNotes ? application.RecruiterNotes : null,
+                recruiterNotes = includeRecruiterNotes ? displayNotes : null,
+                offer = offerObj,
+                assessment = assessmentObj,
                 job = job == null ? null : new
                 {
                     job.Id,

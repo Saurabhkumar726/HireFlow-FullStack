@@ -51,7 +51,13 @@ export default function InterviewFeedbackPanel({ interview }) {
         finally { setLoading(false) }
     }, [interviewId, isCompleted, userId])
 
-    useEffect(() => { void loadFeedback() }, [loadFeedback])
+    useEffect(() => {
+        let active = true
+        Promise.resolve().then(async () => {
+            if (active) await loadFeedback()
+        })
+        return () => { active = false }
+    }, [loadFeedback])
 
     async function saveFeedback(event) {
         event.preventDefault()

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import './CandidateInterviews.css'
 import SkeletonLoader from './SkeletonLoader.jsx'
+import { downloadInterviewIcs } from '../utils/calendarExport.js'
 
 const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116/api').replace(/\/$/, '')
 
@@ -140,7 +141,7 @@ function CandidateInterviews() {
                 return
             }
             const parsed = new Date(value)
-            if (Number.isNaN(parsed.getTime()) || parsed.getTime() <= Date.now()) {
+            if (Number.isNaN(parsed.getTime()) || parsed.getTime() <= currentTime) {
                 setError('Choose a date and time in the future.')
                 return
             }
@@ -169,10 +170,10 @@ function CandidateInterviews() {
         }
     }
 
-    function localDateTimeMinimum() {
-        const date = new Date(Date.now() + 60 * 60 * 1000)
+    const minDateTime = useMemo(() => {
+        const date = new Date(currentTime + 60 * 60 * 1000)
         return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
-    }
+    }, [currentTime])
 
     const filteredInterviews = useMemo(() => {
         if (activeFilter === 'All') return interviews
@@ -349,7 +350,7 @@ function CandidateInterviews() {
                                                 </div>
                                                 {rescheduleOpenId === Number(interview.id) && (
                                                     <div className="candidate-interview-reschedule-form">
-                                                        <label>Proposed date and time<input type="datetime-local" min={localDateTimeMinimum()} value={proposedTimes[interview.id] || ''} onChange={event => setProposedTimes(current => ({ ...current, [interview.id]: event.target.value }))} /></label>
+                                                        <label>Proposed date and time<input type="datetime-local" min={minDateTime} value={proposedTimes[interview.id] || ''} onChange={event => setProposedTimes(current => ({ ...current, [interview.id]: event.target.value }))} /></label>
                                                         <label>Message to HR (optional)<textarea rows={2} maxLength={1000} value={responseNotes[interview.id] || ''} onChange={event => setResponseNotes(current => ({ ...current, [interview.id]: event.target.value }))} placeholder="Share a suitable time or a short note." /></label>
                                                         <div><button type="button" className="is-primary" disabled={respondingId === Number(interview.id)} onClick={() => sendCandidateResponse(interview, 'RequestReschedule')}>{respondingId === Number(interview.id) ? 'Sending…' : 'Send request'}</button><button type="button" onClick={() => setRescheduleOpenId(null)}>Cancel</button></div>
                                                     </div>
@@ -366,10 +367,25 @@ function CandidateInterviews() {
                                         </div>
                                     )}
 
-                                    {interview.meetingLink &&
-                                        String(interview.interviewType || '').toLowerCase() === 'online' &&
-                                        status !== 'cancelled' && (
-                                            <div className="candidate-interview-actions">
+                                    <div className="candidate-interview-actions">
+                                        <button
+                                            type="button"
+                                            className="candidate-interview-calendar-btn"
+                                            onClick={() => downloadInterviewIcs({
+                                                id: interview.id,
+                                                title: interview.jobTitle,
+                                                company: interview.company,
+                                                scheduledAt: interview.scheduledAt,
+                                                meetingLink: interview.meetingLink,
+                                                interviewType: interview.interviewType
+                                            })}
+                                        >
+                                            📅 Add to Calendar (.ics)
+                                        </button>
+
+                                        {interview.meetingLink &&
+                                            String(interview.interviewType || '').toLowerCase() === 'online' &&
+                                            status !== 'cancelled' && (
                                                 <a
                                                     className={isUpcoming ? 'candidate-interview-join' : 'candidate-interview-link'}
                                                     href={interview.meetingLink}
@@ -378,8 +394,8 @@ function CandidateInterviews() {
                                                 >
                                                     {isUpcoming ? 'Join interview' : 'Open meeting link'} <span aria-hidden="true">↗</span>
                                                 </a>
-                                            </div>
-                                        )}
+                                            )}
+                                    </div>
 
                                     {status === 'cancelled' && (
                                         <p className="candidate-interview-cancelled-note">
